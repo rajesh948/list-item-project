@@ -31,6 +31,9 @@
         <v-btn icon @click="onGoto('/')">
           <v-icon>mdi-home</v-icon>
         </v-btn>
+        <v-btn icon @click="clearLocalStorage">
+          <v-icon>mdi-database-remove</v-icon>
+        </v-btn>
       </v-app-bar>
       <v-navigation-drawer v-model="isShowLeftSlider" temporary>
         <!-- <v-list-item
@@ -65,6 +68,10 @@ export default {
     const onSelectCategory = (categoryId) => {
       navigateTo(`/list-item/${categoryId}`);
     };
+    const clearLocalStorage = () => {
+      localStorage.clear();
+      onGoto("/");
+    };
     const onGoto = (path) => navigateTo(path);
     return {
       isShowLeftSlider,
@@ -72,6 +79,7 @@ export default {
       data,
       onSelectCategory,
       onGoto,
+      clearLocalStorage,
     };
   },
 };
