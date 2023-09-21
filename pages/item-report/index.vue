@@ -51,6 +51,7 @@ export default {
         };
 
         html2pdf().from(content).set(pdfOptions).toPdf().save("myfile.pdf");
+        localStorage.clear();
       }
     };
 
