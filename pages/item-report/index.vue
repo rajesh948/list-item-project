@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-5">
+  <div class="mt-5" v-if="selectedDataFromStorage?.length">
     <v-sheet border id="pdfSection">
       <v-container>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
@@ -27,6 +27,14 @@
       ></v-btn>
     </div>
   </div>
+  <v-chip
+    @click="onGotoHome"
+    v-else
+    class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black"
+    variant="plain"
+  >
+    Please Add Items
+  </v-chip>
 </template>
 <script>
 export default {
@@ -50,12 +58,15 @@ export default {
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         };
 
-        html2pdf().from(content).set(pdfOptions).toPdf().save("myfile.pdf");
+        html2pdf().from(content).set(pdfOptions).toPdf().save("itemList.pdf");
         localStorage.clear();
+        navigateTo("/");
       }
     };
 
-    return { selectedDataFromStorage, getPDF };
+    const onGotoHome = () => navigateTo("/");
+
+    return { selectedDataFromStorage, getPDF, onGotoHome };
   },
 };
 </script>
