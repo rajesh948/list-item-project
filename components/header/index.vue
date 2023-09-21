@@ -20,7 +20,7 @@
           <v-app-bar-nav-icon @click="toggleLeftSlider"></v-app-bar-nav-icon>
         </template>
 
-        <v-app-bar-title>Title</v-app-bar-title>
+        <v-app-bar-title></v-app-bar-title>
 
         <v-spacer></v-spacer>
 
@@ -49,7 +49,7 @@
             :key="category.id"
             prepend-icon="mdi-view-dashboard"
             :title="category.name"
-            value="home"
+            :value="category.name"
             @click="onSelectCategory(category.id)"
           ></v-list-item>
         </v-list>
@@ -67,6 +67,7 @@ export default {
     const { data } = useData();
     const onSelectCategory = (categoryId) => {
       navigateTo(`/list-item/${categoryId}`);
+      toggleLeftSlider();
     };
     const clearLocalStorage = () => {
       localStorage.clear();
