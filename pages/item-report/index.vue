@@ -4,7 +4,7 @@
       <v-container>
         <v-sheet
           border
-          class="pa-2 mb-3 border-opacity-75 text-sm-h6 font-weight-bold"
+          class="pa-2 mb-3 border-opacity-50 text-sm-h6 font-weight-medium"
         >
           <div class="px-sm-10">
             <v-row align="center">
@@ -31,7 +31,7 @@
               </v-chip>
             </v-sheet>
           </v-row>
-          <v-divider class="border-opacity-75 my-2" :thickness="1"></v-divider>
+          <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
         </div>
       </v-container>
     </v-sheet>
@@ -129,11 +129,20 @@
       </v-card-actions>
     </div>
   </Dialog>
+  <v-dialog persistent width="auto" v-model="isLoading">
+    <v-progress-circular
+      color="green"
+      indeterminate
+      :size="76"
+      :width="6"
+    ></v-progress-circular>
+  </v-dialog>
 </template>
 <script>
 export default {
   setup() {
     const errorMessage = ref(null);
+    const isLoading = ref(false);
     const selectedDataFromStorage = ref(null);
     const isChipClosable = ref(true);
     const isShowDialog = ref(false);
@@ -150,6 +159,10 @@ export default {
         userData.value = JSON.parse(localStorage.getItem("userData"));
     });
     const getPDF = async () => {
+      if (!Object.values(userData.value).every((value) => value)) {
+        return onToggleDialog();
+      }
+      isLoading.value = true;
       isChipClosable.value = false;
       if (process.client) {
         const html2pdf = (await import("html2pdf.js")).default;
@@ -164,9 +177,14 @@ export default {
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         };
 
-        html2pdf().from(content).set(pdfOptions).toPdf().save("itemList.pdf");
+        const pdfResponse = await html2pdf()
+          .from(content)
+          .set(pdfOptions)
+          .toPdf()
+          .save(`${userData.value.name}-${userData.value.date}.pdf`);
         localStorage.clear();
         navigateTo("/");
+        isLoading.value = false;
       }
     };
 
@@ -218,6 +236,7 @@ export default {
       onToggleDialog,
       errorMessage,
       onAddUser,
+      isLoading,
     };
   },
 };

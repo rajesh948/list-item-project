@@ -2,7 +2,7 @@
   <v-card :color="setColor" class="ma-5" theme="dark">
     <div class="d-flex flex-no-wrap justify-space-around">
       <v-avatar class="ma-1" size="125" rounded="0">
-        <v-img :src="item.image"></v-img>
+        <v-img :src="item.image" />
       </v-avatar>
 
       <div>
@@ -54,3 +54,11 @@ export default {
   },
 };
 </script>
+<style scoped>
+img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
