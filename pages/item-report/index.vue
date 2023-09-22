@@ -2,21 +2,17 @@
   <div class="mt-5" v-if="selectedDataFromStorage?.length">
     <v-sheet border id="pdfSection">
       <v-container>
-        <v-sheet border class="pa-2 text-h6">
-          <v-row align="center">
-            <v-col class="text-left pa-1" cols="6">
-              Name: {{ userData.name }}
-            </v-col>
-            <v-col class="text-left pa-1" cols="6">
-              Phone: {{ userData.phone }}
-            </v-col>
-            <v-col class="text-left pa-1" cols="6">
-              People No: {{ userData.noOfPeople }}
-            </v-col>
-            <v-col class="text-left pa-1" cols="6">
-              Date: {{ userData.date }}
-            </v-col>
-          </v-row>
+        <v-sheet border class="pa-2 text-sm-h6 font-weight-bold">
+          <div class="px-sm-10">
+            <v-row align="center">
+              <v-col class="pa-1" cols="6"> Name: {{ userData.name }} </v-col>
+              <v-col class="pa-1" cols="6"> Phone: {{ userData.phone }} </v-col>
+              <v-col class="pa-1" cols="6">
+                People No: {{ userData.noOfPeople }}
+              </v-col>
+              <v-col class="pa-1" cols="6"> Date: {{ userData.date }} </v-col>
+            </v-row>
+          </div>
         </v-sheet>
         <v-divider :thickness="2" class="my-2"></v-divider>
         <div v-for="category in selectedDataFromStorage" :key="category.name">

@@ -2,7 +2,7 @@
   <v-card
     style="z-index: 1"
     max-width="448"
-    class="mx-auto mb-10"
+    class="mx-auto mb-16"
     color="grey-lighten-3"
   >
     <v-layout>
