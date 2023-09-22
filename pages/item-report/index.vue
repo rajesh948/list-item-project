@@ -2,6 +2,23 @@
   <div class="mt-5" v-if="selectedDataFromStorage?.length">
     <v-sheet border id="pdfSection">
       <v-container>
+        <v-sheet border class="pa-2 text-h6">
+          <v-row align="center">
+            <v-col class="text-left pa-1" cols="6">
+              Name: {{ userData.name }}
+            </v-col>
+            <v-col class="text-left pa-1" cols="6">
+              Phone: {{ userData.phone }}
+            </v-col>
+            <v-col class="text-left pa-1" cols="6">
+              People No: {{ userData.noOfPeople }}
+            </v-col>
+            <v-col class="text-left pa-1" cols="6">
+              Date: {{ userData.date }}
+            </v-col>
+          </v-row>
+        </v-sheet>
+        <v-divider :thickness="2" class="my-2"></v-divider>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
           <h4>{{ category.name }}</h4>
           <v-row align="center" no-gutters>
@@ -14,7 +31,6 @@
               </v-chip>
             </v-sheet>
           </v-row>
-          <v-divider :thickness="2" class="my-3"></v-divider>
         </div>
       </v-container>
     </v-sheet>
@@ -40,9 +56,11 @@
 export default {
   setup() {
     const selectedDataFromStorage = ref(null);
+    const userData = ref(null);
     onMounted(() => {
       selectedDataFromStorage.value =
         JSON.parse(localStorage.getItem("selectedData")) || [];
+      userData.value = JSON.parse(localStorage.getItem("userData"));
     });
     const getPDF = async () => {
       if (process.client) {
@@ -66,7 +84,7 @@ export default {
 
     const onGotoHome = () => navigateTo("/");
 
-    return { selectedDataFromStorage, getPDF, onGotoHome };
+    return { selectedDataFromStorage, getPDF, onGotoHome, userData };
   },
 };
 </script>
