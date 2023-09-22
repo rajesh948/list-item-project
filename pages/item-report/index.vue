@@ -2,7 +2,10 @@
   <div class="mt-5" v-if="selectedDataFromStorage?.length">
     <v-sheet border id="pdfSection">
       <v-container>
-        <v-sheet border class="pa-2 text-sm-h6 font-weight-bold">
+        <v-sheet
+          border
+          class="pa-2 mb-3 border-opacity-75 text-sm-h6 font-weight-bold"
+        >
           <div class="px-sm-10">
             <v-row align="center">
               <v-col class="pa-1" cols="6"> Name: {{ userData.name }} </v-col>
@@ -14,29 +17,43 @@
             </v-row>
           </div>
         </v-sheet>
-        <v-divider :thickness="2" class="my-2"></v-divider>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
           <h4>{{ category.name }}</h4>
           <v-row align="center" no-gutters>
             <v-sheet v-for="item in category.items" :key="item.name">
-              <!-- <v-sheet border rounded class="text-center rounded pa-1 ma-2">
-                {{ item.name }}
-              </v-sheet> -->
-              <v-chip class="ma-1" label>
+              <v-chip
+                :closable="isChipClosable"
+                @click:close="removeItem(item.id, category.id)"
+                class="ma-1 text-subtitle-1"
+                label
+              >
                 {{ item.name }}
               </v-chip>
             </v-sheet>
           </v-row>
+          <v-divider class="border-opacity-75 my-2" :thickness="1"></v-divider>
         </div>
       </v-container>
     </v-sheet>
     <div class="text-center my-3">
       <v-btn
-        class="pa-3"
-        icon="mdi-file-download-outline"
+        class="pa-3 ma-3"
+        variant="tonal"
+        color="blue"
+        append-icon="mdi-file-edit-outline"
+        size="extra-large"
+        @click="onToggleDialog"
+        >EDIT</v-btn
+      >
+      <v-btn
+        class="pa-3 ma-3"
+        color="green"
+        variant="tonal"
+        append-icon="mdi-file-download-outline"
         size="extra-large"
         @click="getPDF"
-      ></v-btn>
+        >PDF</v-btn
+      >
     </div>
   </div>
   <v-chip
@@ -47,18 +64,93 @@
   >
     Please Add Items
   </v-chip>
+  <Dialog :display="isShowDialog">
+    <div>
+      <v-card-title>
+        <span class="text-h5">User Profile</span>
+      </v-card-title>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Enter name*"
+                v-model="userData.name"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Phone Number*"
+                v-model="userData.phone"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Number of People*"
+                v-model="userData.noOfPeople"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="date*"
+                v-model="userData.date"
+                type="date"
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
+
+          <v-chip
+            v-if="errorMessage"
+            class="ma-2 px-10"
+            color="red"
+            label
+            text-color="white"
+          >
+            *{{ errorMessage }}
+          </v-chip>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue-darken-1" variant="text" @click="onToggleDialog">
+          Close
+        </v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="onAddUser">
+          Save
+        </v-btn>
+      </v-card-actions>
+    </div>
+  </Dialog>
 </template>
 <script>
 export default {
   setup() {
+    const errorMessage = ref(null);
     const selectedDataFromStorage = ref(null);
-    const userData = ref(null);
+    const isChipClosable = ref(true);
+    const isShowDialog = ref(false);
+    const userData = ref({
+      name: null,
+      phone: null,
+      noOfPeople: null,
+      date: null,
+    });
     onMounted(() => {
       selectedDataFromStorage.value =
         JSON.parse(localStorage.getItem("selectedData")) || [];
-      userData.value = JSON.parse(localStorage.getItem("userData"));
+      if (JSON.parse(localStorage.getItem("userData")))
+        userData.value = JSON.parse(localStorage.getItem("userData"));
     });
     const getPDF = async () => {
+      isChipClosable.value = false;
       if (process.client) {
         const html2pdf = (await import("html2pdf.js")).default;
         console.log("html2pdf", html2pdf);
@@ -80,7 +172,53 @@ export default {
 
     const onGotoHome = () => navigateTo("/");
 
-    return { selectedDataFromStorage, getPDF, onGotoHome, userData };
+    const removeItem = (itemId, categoryId) => {
+      const categoryIndex = selectedDataFromStorage.value.findIndex(
+        (item) => item.id === categoryId
+      );
+      if (categoryIndex != -1) {
+        const itemIndex = selectedDataFromStorage.value[
+          categoryIndex
+        ].items.findIndex((item) => item.id === itemId);
+        if (itemIndex != -1) {
+          if (selectedDataFromStorage.value[categoryIndex].items.length === 1) {
+            selectedDataFromStorage.value.splice(categoryIndex, 1);
+          } else {
+            selectedDataFromStorage.value[categoryIndex].items.splice(
+              itemIndex,
+              1
+            );
+          }
+          localStorage.setItem(
+            "selectedData",
+            JSON.stringify(selectedDataFromStorage.value)
+          );
+        }
+      }
+    };
+    const onAddUser = () => {
+      if (!Object.values(userData.value).every((value) => value)) {
+        return (errorMessage.value = "Please Fill All Field !");
+      }
+      localStorage.setItem("userData", JSON.stringify(userData.value));
+      onToggleDialog();
+    };
+
+    const onToggleDialog = () => {
+      isShowDialog.value = !isShowDialog.value;
+    };
+    return {
+      selectedDataFromStorage,
+      getPDF,
+      onGotoHome,
+      userData,
+      removeItem,
+      isChipClosable,
+      isShowDialog,
+      onToggleDialog,
+      errorMessage,
+      onAddUser,
+    };
   },
 };
 </script>

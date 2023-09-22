@@ -28,17 +28,21 @@ export default {
     const onAddItem = (itemData) => {
       const selectedData =
         JSON.parse(localStorage.getItem("selectedData")) || [];
-      const index = selectedData.findIndex(
+      const categoryIndex = selectedData.findIndex(
         (item) => item.id === selectedCategoryData.value.id
       );
-      if (index != -1) {
-        const itemIndex = selectedData[index].items.findIndex(
+      if (categoryIndex != -1) {
+        const itemIndex = selectedData[categoryIndex].items.findIndex(
           (item) => item.id === itemData.id
         );
         if (itemIndex === -1) {
-          selectedData[index].items.push(itemData);
+          selectedData[categoryIndex].items.push(itemData);
         } else {
-          selectedData[index].items.splice(itemIndex, 1);
+          if (selectedData[categoryIndex].items.length === 1) {
+            selectedData.splice(categoryIndex, 1);
+          } else {
+            selectedData[categoryIndex].items.splice(itemIndex, 1);
+          }
         }
       } else {
         selectedData.push({
@@ -48,7 +52,6 @@ export default {
         });
       }
       localStorage.setItem("selectedData", JSON.stringify(selectedData));
-      console.log(isItemSelected(itemData.id));
       selectedDataFromStorage.value = selectedData;
     };
     onMounted(() => {
