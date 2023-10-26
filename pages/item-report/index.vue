@@ -9,11 +9,17 @@
           <div class="px-sm-10">
             <v-row align="center">
               <v-col class="pa-1" cols="6"> Name: {{ userData.name }} </v-col>
+              <v-col class="pa-1" cols="6"> Date: {{ userData.date }} </v-col>
               <v-col class="pa-1" cols="6"> Phone: {{ userData.phone }} </v-col>
+
               <v-col class="pa-1" cols="6">
+                Address: {{ userData.address }}
+              </v-col>
+              <v-col class="pa-1" cols="4">
                 People No: {{ userData.noOfPeople }}
               </v-col>
-              <v-col class="pa-1" cols="6"> Date: {{ userData.date }} </v-col>
+              <v-col class="pa-1" cols="4"> Price: {{ userData.price }} </v-col>
+              <v-col class="pa-1" cols="4"> Shift: {{ userData.shift }} </v-col>
             </v-row>
           </div>
         </v-sheet>
@@ -105,6 +111,30 @@
                 required
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Address*"
+                v-model="userData.address"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Price*"
+                v-model="userData.price"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                variant="underlined"
+                label="Shift*"
+                v-model="userData.shift"
+                required
+              ></v-text-field>
+            </v-col>
           </v-row>
 
           <v-chip
@@ -151,6 +181,9 @@ export default {
       phone: null,
       noOfPeople: null,
       date: null,
+      address: null,
+      price: null,
+      shift: null,
     });
     onMounted(() => {
       selectedDataFromStorage.value =
