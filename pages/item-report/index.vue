@@ -128,12 +128,13 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
+              <v-select
                 variant="underlined"
-                label="Shift*"
+                label="Select Shift*"
+                :items="['Morning', 'Afternoon', 'Night']"
                 v-model="userData.shift"
                 required
-              ></v-text-field>
+              ></v-select>
             </v-col>
           </v-row>
 
