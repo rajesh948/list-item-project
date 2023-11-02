@@ -2,6 +2,6 @@
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
-  modules: ["@invictus.codes/nuxt-vuetify", "@sidebase/nuxt-pdf"],
+  modules: ["@invictus.codes/nuxt-vuetify", "@sidebase/nuxt-pdf","nuxt-swiper"],
   // ssr: false,
 });

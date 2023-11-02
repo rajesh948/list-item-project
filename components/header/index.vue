@@ -24,6 +24,9 @@
 
         <v-spacer></v-spacer>
 
+        <v-btn icon @click="onGoto('/decoration-table')">
+          <v-icon>mdi-border-all</v-icon>
+        </v-btn>
         <v-btn icon @click="onGoto('/item-report')">
           <v-icon>mdi-file-document</v-icon>
         </v-btn>

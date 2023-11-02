@@ -23,6 +23,22 @@
             </v-row>
           </div>
         </v-sheet>
+        <div v-if="selectedTableFromStorage">
+          <h4>Dish Table Decoration</h4>
+          <v-row align="center" no-gutters>
+            <v-sheet>
+              <v-chip
+                :closable="isChipClosable"
+                @click:close="removeTable"
+                class="ma-1 text-subtitle-1"
+                label
+              >
+                {{ selectedTableFromStorage.name }}
+              </v-chip>
+            </v-sheet>
+          </v-row>
+          <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
+        </div>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
           <h4>{{ category.name }}</h4>
           <v-row align="center" no-gutters>
@@ -175,6 +191,7 @@ export default {
     const errorMessage = ref(null);
     const isLoading = ref(false);
     const selectedDataFromStorage = ref(null);
+    const selectedTableFromStorage = ref(null);
     const isChipClosable = ref(true);
     const isShowDialog = ref(false);
     const userData = ref({
@@ -189,6 +206,8 @@ export default {
     onMounted(() => {
       selectedDataFromStorage.value =
         JSON.parse(localStorage.getItem("selectedData")) || [];
+        selectedTableFromStorage.value =
+        JSON.parse(localStorage.getItem("selectedTable")) || null;
       if (JSON.parse(localStorage.getItem("userData")))
         userData.value = JSON.parse(localStorage.getItem("userData"));
     });
@@ -200,7 +219,7 @@ export default {
       isChipClosable.value = false;
       if (process.client) {
         const html2pdf = (await import("html2pdf.js")).default;
-        console.log("html2pdf", html2pdf);
+        // console.log("html2pdf", html2pdf);
         const content = document.getElementById("pdfSection");
 
         const pdfOptions = {
@@ -259,12 +278,18 @@ export default {
     const onToggleDialog = () => {
       isShowDialog.value = !isShowDialog.value;
     };
+    const removeTable = () => {
+      localStorage.removeItem("selectedTable");
+      selectedTableFromStorage.value = null
+    };
     return {
       selectedDataFromStorage,
+      selectedTableFromStorage,
       getPDF,
       onGotoHome,
       userData,
       removeItem,
+      removeTable,
       isChipClosable,
       isShowDialog,
       onToggleDialog,
