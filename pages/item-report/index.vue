@@ -4,9 +4,10 @@
       <v-container>
         <v-sheet
           border
-          class="pa-2 mb-3 border-opacity-50 text-sm-h6 font-weight-medium"
+          class="pa-2 mb-3 border-opacity-50 text-sm-h6 font-weight-medium "
         >
-          <div class="px-sm-10">
+        <div class="px-sm-10">
+          <div class="text-center">Hello Welcome  ph. 98789 98767 / ph. 67876 78786</div>
             <v-row align="center">
               <v-col class="pa-1" cols="6"> Name: {{ userData.name }} </v-col>
               <v-col class="pa-1" cols="6"> Date: {{ userData.date }} </v-col>
