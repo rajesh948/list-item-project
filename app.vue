@@ -1,4 +1,5 @@
 <template>
+  <VitePwaManifest />
   <Header />
   <v-container fluid>
     <NuxtLayout>

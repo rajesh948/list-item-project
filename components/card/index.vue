@@ -17,13 +17,13 @@
             />
           </v-avatar> -->
           <v-btn
-            class="ms-2"
-            variant="outlined"
-            size="small"
+            class="pa-3 ma-3"
+            variant="tonal"
+            :color="selected ? 'red' : 'blue'"
+            size="extra-large"
             @click="$emit('addItem', item)"
+            >{{ selected ? "Remove" : "Add" }}</v-btn
           >
-            {{ selected ? "Remove" : "Add" }}
-          </v-btn>
         </v-card-actions>
       </div>
     </div>

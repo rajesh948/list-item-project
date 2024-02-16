@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@vite-pwa/nuxt": "^0.5.0",
     "nuxt": "^3.7.3"
   },
   "dependencies": {
