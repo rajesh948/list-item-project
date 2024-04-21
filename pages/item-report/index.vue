@@ -2,25 +2,21 @@
   <div class="mt-5" v-if="selectedDataFromStorage?.length">
     <v-sheet border id="pdfSection">
       <v-container>
-        <v-sheet
-          border
-          class="pa-2 mb-3 border-opacity-50 text-sm-h6 font-weight-medium "
-        >
-        <div class="px-sm-10">
-          <div class="text-center">Hello Welcome  ph. 98789 98767 / ph. 67876 78786</div>
-            <v-row align="center">
-              <v-col class="pa-1" cols="6"> Name: {{ userData.name }} </v-col>
-              <v-col class="pa-1" cols="6"> Date: {{ userData.date }} </v-col>
-              <v-col class="pa-1" cols="6"> Phone: {{ userData.phone }} </v-col>
-
-              <v-col class="pa-1" cols="6">
-                Address: {{ userData.address }}
-              </v-col>
-              <v-col class="pa-1" cols="4">
-                People No: {{ userData.noOfPeople }}
-              </v-col>
-              <v-col class="pa-1" cols="4"> Price: {{ userData.price }} </v-col>
-              <v-col class="pa-1" cols="4"> Shift: {{ userData.shift }} </v-col>
+        <v-sheet border class="pa-2 mb-3 border-opacity-50 text-sm-h6 font-weight-medium ">
+          <div class="px-sm-10">
+            <div class="text-center mb-1">
+              <div class="text-h4 font-weight-bold">મહાકાળી કેટરર્સ</div>
+              <div class="font-weight-bold">Phone No: 97274 73918 , 98253 52718</div>
+            </div>
+            <v-row>
+              <v-col class="pa-0" cols="8"><span class="font-weight-bold">Name: </span> {{ userData.name }} </v-col>
+              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Date: </span>{{ userData.date }} </v-col>
+              <v-col class="pa-0" cols="8"><span class="font-weight-bold">Address: </span>{{ userData.address }}</v-col>
+              <v-col class="pa-0" cols="4"><span class="font-weight-bold">People No: </span>{{ userData.noOfPeople
+              }}</v-col>
+              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Phone: </span>{{ userData.phone }} </v-col>
+              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Shift: </span>{{ userData.shift }} </v-col>
+              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Price: </span>{{ userData.price }}</v-col>
             </v-row>
           </div>
         </v-sheet>
@@ -28,12 +24,7 @@
           <h4>Dish Table Decoration</h4>
           <v-row align="center" no-gutters>
             <v-sheet>
-              <v-chip
-                :closable="isChipClosable"
-                @click:close="removeTable"
-                class="ma-1 text-subtitle-1"
-                label
-              >
+              <v-chip :closable="isChipClosable" @click:close="removeTable" class="ma-1 text-subtitle-1" label>
                 {{ selectedTableFromStorage.name }}
               </v-chip>
             </v-sheet>
@@ -41,15 +32,14 @@
           <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
         </div>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
+          <v-chip class="ma-2" color="success" variant="outlined">
+      <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
           <h4>{{ category.name }}</h4>
+    </v-chip>
           <v-row align="center" no-gutters>
             <v-sheet v-for="item in category.items" :key="item.name">
-              <v-chip
-                :closable="isChipClosable"
-                @click:close="removeItem(item.id, category.id)"
-                class="ma-1 text-subtitle-1"
-                label
-              >
+              <v-chip :closable="isChipClosable" @click:close="removeItem(item.id, category.id)"
+                class="ma-1 text-subtitle-1 font-weight-bold" label>
                 {{ item.name }}
               </v-chip>
             </v-sheet>
@@ -59,32 +49,13 @@
       </v-container>
     </v-sheet>
     <div class="text-center my-3">
-      <v-btn
-        class="pa-3 ma-3"
-        variant="tonal"
-        color="blue"
-        append-icon="mdi-file-edit-outline"
-        size="extra-large"
-        @click="onToggleDialog"
-        >EDIT</v-btn
-      >
-      <v-btn
-        class="pa-3 ma-3"
-        color="green"
-        variant="tonal"
-        append-icon="mdi-file-download-outline"
-        size="extra-large"
-        @click="getPDF"
-        >PDF</v-btn
-      >
+      <v-btn class="pa-3 ma-3" variant="tonal" color="blue" append-icon="mdi-file-edit-outline" size="extra-large"
+        @click="onToggleDialog">EDIT</v-btn>
+      <v-btn class="pa-3 ma-3" color="green" variant="tonal" append-icon="mdi-file-download-outline" size="extra-large"
+        @click="getPDF">PDF</v-btn>
     </div>
   </div>
-  <v-chip
-    @click="onGotoHome"
-    v-else
-    class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black"
-    variant="plain"
-  >
+  <v-chip @click="onGotoHome" v-else class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black" variant="plain">
     Please Add Items
   </v-chip>
   <Dialog :display="isShowDialog">
@@ -96,72 +67,34 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="Enter name*"
-                v-model="userData.name"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="Enter name*" v-model="userFormData.name" required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="Phone Number*"
-                v-model="userData.phone"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="Phone Number*" v-model="userFormData.phone" type="number"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="Number of People*"
-                v-model="userData.noOfPeople"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="Number of People*" v-model="userFormData.noOfPeople" type="number"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="date*"
-                v-model="userData.date"
-                type="date"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="date*" v-model="userFormData.date" type="date"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="Address*"
-                v-model="userData.address"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="Address*" v-model="userFormData.address" required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field
-                variant="underlined"
-                label="Price*"
-                v-model="userData.price"
-                required
-              ></v-text-field>
+              <v-text-field variant="underlined" label="Price*" v-model="userFormData.price" type="number"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-select
-                variant="underlined"
-                label="Select Shift*"
-                :items="['Morning', 'Afternoon', 'Night']"
-                v-model="userData.shift"
-                required
-              ></v-select>
+              <v-select variant="underlined" label="Select Shift*" :items="['Morning', 'Afternoon', 'Night']"
+                v-model="userFormData.shift" required></v-select>
             </v-col>
           </v-row>
 
-          <v-chip
-            v-if="errorMessage"
-            class="ma-2 px-10"
-            color="red"
-            label
-            text-color="white"
-          >
+          <v-chip v-if="errorMessage" class="ma-2 px-10" color="red" label text-color="white">
             *{{ errorMessage }}
           </v-chip>
         </v-container>
@@ -178,12 +111,7 @@
     </div>
   </Dialog>
   <v-dialog persistent width="auto" v-model="isLoading">
-    <v-progress-circular
-      color="green"
-      indeterminate
-      :size="76"
-      :width="6"
-    ></v-progress-circular>
+    <v-progress-circular color="green" indeterminate :size="76" :width="6"></v-progress-circular>
   </v-dialog>
 </template>
 <script>
@@ -204,41 +132,57 @@ export default {
       price: null,
       shift: null,
     });
+    const userFormData = ref({
+      name: null,
+      phone: null,
+      noOfPeople: null,
+      date: null,
+      address: null,
+      price: null,
+      shift: null,
+    });
     onMounted(() => {
       selectedDataFromStorage.value =
         JSON.parse(localStorage.getItem("selectedData")) || [];
-        selectedTableFromStorage.value =
+      selectedTableFromStorage.value =
         JSON.parse(localStorage.getItem("selectedTable")) || null;
       if (JSON.parse(localStorage.getItem("userData")))
         userData.value = JSON.parse(localStorage.getItem("userData"));
+      userFormData.value = { ...userFormData.value, ...userData.value }
     });
     const getPDF = async () => {
-      if (!Object.values(userData.value).every((value) => value)) {
-        return onToggleDialog();
-      }
-      isLoading.value = true;
-      isChipClosable.value = false;
-      if (process.client) {
-        const html2pdf = (await import("html2pdf.js")).default;
-        // console.log("html2pdf", html2pdf);
-        const content = document.getElementById("pdfSection");
+      try {
 
-        const pdfOptions = {
-          margin: [10, 10],
-          filename: "generated-pdf.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        };
 
-        const pdfResponse = await html2pdf()
-          .from(content)
-          .set(pdfOptions)
-          .toPdf()
-          .save(`${userData.value.name}-${userData.value.date}.pdf`);
-        localStorage.clear();
-        navigateTo("/");
-        isLoading.value = false;
+        if (!Object.values(userData.value).every((value) => value)) {
+          return onToggleDialog();
+        }
+        isLoading.value = true;
+        isChipClosable.value = false;
+        if (process.client) {
+          const html2pdf = (await import("html2pdf.js")).default;
+          // console.log("html2pdf", html2pdf);
+          const content = document.getElementById("pdfSection");
+
+          const pdfOptions = {
+            margin: [2, 2],
+            filename: "generated-pdf.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          };
+
+          const pdfResponse = await html2pdf()
+            .from(content)
+            .set(pdfOptions)
+            .toPdf()
+            .save(`${userData.value.name}-${userData.value.date}.pdf`);
+          // localStorage.clear();
+          navigateTo("/");
+          isLoading.value = false;
+        }
+      } catch (error) {
+        console.log("pdf genrate error:", error)
       }
     };
 
@@ -269,15 +213,17 @@ export default {
       }
     };
     const onAddUser = () => {
-      if (!Object.values(userData.value).every((value) => value)) {
+      if (!Object.values(userFormData.value).every((value) => value)) {
         return (errorMessage.value = "Please Fill All Field !");
       }
-      localStorage.setItem("userData", JSON.stringify(userData.value));
+      localStorage.setItem("userData", JSON.stringify(userFormData.value));
+      userData.value = { ...userFormData.value }
       onToggleDialog();
     };
 
     const onToggleDialog = () => {
       isShowDialog.value = !isShowDialog.value;
+      userFormData.value = { ...userFormData.value, ...userData.value }
     };
     const removeTable = () => {
       localStorage.removeItem("selectedTable");
@@ -297,6 +243,7 @@ export default {
       errorMessage,
       onAddUser,
       isLoading,
+      userFormData
     };
   },
 };

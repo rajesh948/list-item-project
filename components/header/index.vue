@@ -48,12 +48,13 @@
 
         <v-list density="compact" nav>
           <v-list-item
-            v-for="category in data"
+          v-for="category in data"
             :key="category.id"
             prepend-icon="mdi-view-dashboard"
             :title="category.name"
             :value="category.name"
             @click="onSelectCategory(category.id)"
+            :active="selectedCategoryId == category.id"
           ></v-list-item>
         </v-list>
       </v-navigation-drawer>
@@ -89,7 +90,8 @@ export default {
     const isShowLeftSlider = ref(false);
     const isShowDialog = ref(false);
     const { data } = useData();
-
+const route = useRoute()
+const selectedCategoryId = computed(()=>route.params?.id)
     const toggleLeftSlider = () => {
       isShowLeftSlider.value = !isShowLeftSlider.value;
     };
@@ -121,7 +123,15 @@ export default {
       onToggleDialog,
       isShowDialog,
       resetDataBase,
+      selectedCategoryId 
     };
   },
 };
 </script>
+<style>
+.v-list-item-title{
+  font-weight:bold !important;
+  font-size:medium !important;
+  padding: 10px;
+}
+</style>

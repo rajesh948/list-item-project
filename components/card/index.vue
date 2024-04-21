@@ -1,31 +1,27 @@
 <template>
-  <v-card :color="setColor" class="ma-5" theme="dark">
-    <div class="d-flex flex-no-wrap justify-space-around">
-      <v-avatar class="ma-1" size="125" rounded="0">
+  <v-card :color="setColor" class="ma-2" theme="dark" >
+    <div class="d-flex flex-no-wrap justify-start">
+      <v-avatar class="ma-1" size="125" rounded="0" v-if="item.image">
         <v-img :src="item.image" />
       </v-avatar>
+      
 
-      <div>
-        <v-card-title class="text-h5"> {{ item.name }} </v-card-title>
+        <div class="d-flex align-center justify-space-between w-100">
+          <v-card-title class="text-subtitle-2 font-weight-bold"> {{ item.name }} </v-card-title>
 
-        <v-card-subtitle>{{ categoryName }}</v-card-subtitle>
-        <v-card-actions>
-          <!-- <v-avatar v-if="selected">
-            <v-chip
-              color="green"
-              prepend-icon="mdi-checkbox-marked-circle-plus-outline"
-            />
-          </v-avatar> -->
-          <v-btn
-            class="pa-3 ma-3"
-            variant="tonal"
-            :color="selected ? 'red' : 'blue'"
-            size="extra-large"
-            @click="$emit('addItem', item)"
-            >{{ selected ? "Remove" : "Add" }}</v-btn
-          >
-        </v-card-actions>
-      </div>
+          <!-- <v-card-subtitle>{{ categoryName }}</v-card-subtitle> -->
+          <!-- <v-card-actions> -->
+            <!-- <v-avatar v-if="selected">
+        <v-chip
+        color="green"
+        prepend-icon="mdi-checkbox-marked-circle-plus-outline"
+        />
+      </v-avatar> -->
+            <v-btn class="pa-2 ma-1 text-caption " variant="tonal" :color="selected ? 'red' : 'blue'"
+              @click="$emit('addItem', item)">{{ selected ? "Remove" : "Add" }}</v-btn>
+          <!-- </v-card-actions> -->
+        </div>
+      
     </div>
   </v-card>
 </template>
