@@ -33,16 +33,23 @@
         </div>
         <div v-for="category in selectedDataFromStorage" :key="category.name">
           <v-chip class="ma-2" color="success" variant="outlined">
-      <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
-          <h4>{{ category.name }}</h4>
-    </v-chip>
+            <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
+            <h4>{{ category.name }}</h4>
+          </v-chip>
           <v-row align="center" no-gutters>
-            <v-sheet v-for="item in category.items" :key="item.name">
-              <v-chip :closable="isChipClosable" @click:close="removeItem(item.id, category.id)"
-                class="ma-1 text-subtitle-1 font-weight-bold" label>
-                {{ item.name }}
-              </v-chip>
-            </v-sheet>
+            <v-col class="display-fex-row-only" :cols="isChipClosable ? 11 : 12">
+              <v-sheet v-for="item in category.items" :key="item.name">
+                <v-chip :closable="isChipClosable" @click:close="removeItem(item.id, category.id)"
+                  class="ma-1 text-subtitle-1 font-weight-bold" label>
+                  {{ item.name }}
+                </v-chip>
+              </v-sheet>
+            </v-col>
+            <v-col v-if="isChipClosable" cols="1">
+              <v-btn color="green-darken-1" icon @click="editCategoryItems(category)">
+                <v-icon>mdi-square-edit-outline</v-icon>
+              </v-btn>
+            </v-col>
           </v-row>
           <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
         </div>
@@ -53,6 +60,8 @@
         @click="onToggleDialog">EDIT</v-btn>
       <v-btn class="pa-3 ma-3" color="green" variant="tonal" append-icon="mdi-file-download-outline" size="extra-large"
         @click="getPDF">PDF</v-btn>
+      <v-btn class="pa-3 ma-3" color="green" variant="tonal" append-icon="mdi-file-download-outline" size="extra-large"
+        @click="toggleAddItemDialog">Add New Item</v-btn>
     </div>
   </div>
   <v-chip @click="onGotoHome" v-else class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black" variant="plain">
@@ -107,18 +116,73 @@
         <v-btn color="blue-darken-1" variant="text" @click="onAddUser">
           Save
         </v-btn>
+
       </v-card-actions>
     </div>
   </Dialog>
   <v-dialog persistent width="auto" v-model="isLoading">
     <v-progress-circular color="green" indeterminate :size="76" :width="6"></v-progress-circular>
   </v-dialog>
+  <Dialog :display="isShowAddItemDialog">
+    <div class="new-item-form-container">
+      <v-card-title>
+        <span class="text-h5">Add New Item</span>
+      </v-card-title>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col v-for="(category, mainIdex) of newItemFormData" :key="category.id" cols="12">
+
+              <div class="display-fex-row">
+                <span>{{ mainIdex + 1 }}</span>
+                <v-text-field :disabled="isEditMode" variant="underlined" label="Enter main category name"
+                  v-model="category.name" required></v-text-field>
+              </div>
+              <v-row class="sub-category-wrap">
+                <v-col v-if="category?.items?.length" cols="8">
+                  <v-row class="display-fex-row" v-for="(subItem, index) of category.items" :key="subItem.id">
+                    <span>{{ index + 1 }}</span>
+                    <v-text-field variant="underlined" :disabled="subItem?.disable" label="Enter sub item name"
+                      v-model="subItem.name" required></v-text-field>
+                  </v-row>
+                </v-col>
+                <v-col class="display-flex" cols="4">
+                  <v-btn color="green-darken-1" append-icon="mdi-plus-circle" variant="tonal"
+                    @click="onAddNewItem('subItem', category.items)">
+                    sub
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-btn v-if="!isEditMode" color="green-darken-1" append-icon="mdi-plus-circle" variant="tonal"
+              @click="onAddNewItem('category')">
+              item
+            </v-btn>
+          </v-row>
+        </v-container>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green-darken-1" variant="text" @click="toggleAddItemDialog">
+          cancel
+        </v-btn>
+        <v-btn color="green-darken-1" variant="text" @click="onSaveData">
+          Save
+        </v-btn>
+      </v-card-actions>
+    </div>
+  </Dialog>
 </template>
 <script>
+import { uuid } from 'vue-uuid';
+
 export default {
   setup() {
+    const NAMESPACE = "65f9af5d-f23f-4065-ac85-da725569fdcd";
     const errorMessage = ref(null);
     const isLoading = ref(false);
+    const isShowAddItemDialog = ref(false);
     const selectedDataFromStorage = ref(null);
     const selectedTableFromStorage = ref(null);
     const isChipClosable = ref(true);
@@ -229,6 +293,49 @@ export default {
       localStorage.removeItem("selectedTable");
       selectedTableFromStorage.value = null
     };
+    const toggleAddItemDialog = () => {
+      isShowAddItemDialog.value = !isShowAddItemDialog.value
+      isEditMode.value = false
+      if (!isShowAddItemDialog.value)
+        newItemFormData.value = [{ id: uuid.v4(), name: null, items: [] }]
+    }
+    const newItemFormData = ref([{ id: uuid.v4(), name: null, items: [] }])
+    const onSaveData = () => {
+      if (isEditMode.value) {
+        selectedDataFromStorage.value.forEach((item) => {
+          if (newItemFormData.value.length && item.id === newItemFormData.value[0].id) {
+            item.items = newItemFormData.value[0].items
+          }
+        })
+      } else {
+        selectedDataFromStorage.value = [...selectedDataFromStorage.value, ...newItemFormData.value.filter((category) => category.items.length)]
+      }
+
+      localStorage.setItem("selectedData", JSON.stringify(selectedDataFromStorage.value));
+      newItemFormData.value = [{ id: uuid.v4(), name: null, items: [] }]
+      toggleAddItemDialog();
+      isEditMode.value = false
+    }
+    const onAddNewItem = (type, item) => {
+      if (type === 'subItem') {
+        item.push({ id: uuid.v4(), name: null })
+      } else if (type === "category") {
+        newItemFormData.value.push({ id: uuid.v4(), name: null, items: [] })
+      }
+    }
+    const isEditMode = ref(false)
+    const editCategoryItems = (category) => {
+      if (category?.items?.length) {
+        category.items.forEach((item) => {
+          item['disable'] = true
+        })
+      }
+      newItemFormData.value = JSON.parse(JSON.stringify([category]))
+      toggleAddItemDialog()
+      isEditMode.value = true
+    }
+
+
     return {
       selectedDataFromStorage,
       selectedTableFromStorage,
@@ -243,8 +350,56 @@ export default {
       errorMessage,
       onAddUser,
       isLoading,
-      userFormData
+      userFormData,
+      onAddNewItem,
+      isShowAddItemDialog,
+      toggleAddItemDialog,
+      newItemFormData,
+      onSaveData,
+      editCategoryItems,
+      isEditMode
+
     };
   },
 };
 </script>
+<style scoped>
+.new-item-form-container {
+  width: 350px;
+}
+
+
+
+.sub-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.display-fex-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+}
+.display-fex-row-only {
+  display: flex;
+  flex-direction: row;
+
+
+}
+
+.display-flex {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.sub-category-wrap {
+  margin-left: 10px;
+}
+
+.display-fex-row span {
+  font-size: large;
+}
+</style>
