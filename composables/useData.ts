@@ -70,7 +70,7 @@ export const useData = () => {
         { id: 9, name: "વાલનું શાક", image: null },
         { id: 10, name: "મઠ", image: null }
       ]
-    }, ,
+    }, 
     {
       id: 6,
       name: "કાઠિયાવાડી",
@@ -508,7 +508,7 @@ export const useData = () => {
       id: 27,
       name: "કપલ",
       items: [
-        { id: 2, name: "વિવીઆઈપી", image: null },
+        { id: 1, name: "વિવીઆઈપી", image: null },
         { id: 2, name: "વીઆઈપી", image: null },
         { id: 3, name: "નોર્મલ", image: null },
         { id: 4, name: "લોકલ", image: null },
@@ -561,7 +561,7 @@ export const useData = () => {
     },
     {
       "id": 29,
-      "name": "સ્પે. લીકવીડ પ્લાઝા ફ્લેવર",
+      "name": "સ્પે.લીકવીડ પ્લાઝા ફ્લેવર",
       "items": [
         { "id": 1, "name": "ડ્રા. કલકતી પ્લાઝા", "image": null },
         { "id": 2, "name": "ડ્રા. બટર પ્લાઝા", "image": null },
@@ -763,11 +763,11 @@ export const useData = () => {
       "name": "સ્પે. કેન્ડી ફલેવર",
       "items": [
         { "id": 1, "name": "માવા કેન્ડી", "image": null },
-        { "id": 1, "name": " રેડ વેલવેટ કેન્ડી", "image": null },
-        { "id": 1, "name": "સ્પે. કાજુ કેન્ડી", "image": null },
-        { "id": 1, "name": "સ્પે. રોઝ કેન્ડી", "image": null },
-        { "id": 1, "name": "કાજુ ચોકો નટી", "image": null },
-        { "id": 2, "name": "ફોર્ચયુન ૪×૪", "image": null }
+        { "id": 2, "name": " રેડ વેલવેટ કેન્ડી", "image": null },
+        { "id": 3, "name": "સ્પે. કાજુ કેન્ડી", "image": null },
+        { "id": 4, "name": "સ્પે. રોઝ કેન્ડી", "image": null },
+        { "id": 5, "name": "કાજુ ચોકો નટી", "image": null },
+        { "id": 6, "name": "ફોર્ચયુન ૪×૪", "image": null }
       ]
     },
     {
@@ -798,7 +798,205 @@ export const useData = () => {
         { "id": 22, "name": "કાજુ મૈસુબ", "image": null },
         { "id": 23, "name": "કેશર પીસ્તા અડદીયા", "image": null }
       ]
+    },
+    {
+      "id": 41,
+      "name": "ગરમ ડ્રાયફ્રુટ હલવા",
+      "items": [
+        { "id": 1, "name": "ડ્રા. દુધીનો હલવો", "image": null },
+        { "id": 2, "name": "ડ્રા. ગાજરનો હલવો", "image": null },
+        { "id": 3, "name": "બટર સ્કોચ હલવો", "image": null },
+        { "id": 4, "name": "લીલા નાળીયેર હલવો", "image": null },
+        { "id": 5, "name": "પાઇનેપલ ચીલી હલવો", "image": null },
+        { "id": 6, "name": "કાજુ ગુલકંદ હલવો", "image": null },
+        { "id": 7, "name": "પંચરત્ન હલવો", "image": null },
+        { "id": 8, "name": "કાલા જાંબુ હલવો", "image": null },
+        { "id": 9, "name": "અંજીર કસ્તુરી હલવો", "image": null },
+        { "id": 10, "name": "મીકસ સ્લાઇઝ હલવો", "image": null },
+        { "id": 11, "name": "ઓસ્ટ્રેલીયન હલવો", "image": null },
+        { "id": 12, "name": "ડ્રા. કીવી શાહી હલવો", "image": null },
+        { "id": 13, "name": "ડ્રા. અંજીર હલવો", "image": null },
+        { "id": 14, "name": "રોસ્ટેડ અંજીર બદામ હલવો", "image": null },
+        { "id": 15, "name": "ડ્રા. થાબડી હલવો", "image": null },
+        { "id": 16, "name": "બ્રાઉની હલવો", "image": null },
+        { "id": 17, "name": "કચ્ચા આમ હલવો", "image": null },
+        { "id": 18, "name": "રોઝ પેટલ લચકો", "image": null },
+        { "id": 19, "name": "પાન કિંગ લચકો", "image": null },
+        { "id": 20, "name": "સ્ટ્રોબેરી લીચી હલવો", "image": null },
+        { "id": 21, "name": "S.S. મહારાજા હલવો", "image": null },
+        { "id": 22, "name": "અમેરીકન હલવો", "image": null },
+        { "id": 23, "name": "ડ્રા. અખરોટ હલવો", "image": null },
+        { "id": 24, "name": "કેસર કચુરી હલવો", "image": null },
+        { "id": 25, "name": "ડ્રા. કલકતી તવા સ્વીટ", "image": null },
+        { "id": 26, "name": "કયુરી પંચરત્ન", "image": null },
+        { "id": 27, "name": "ડ્રા. અડદીયા લચકો", "image": null },
+        { "id": 28, "name": "મગનો શીરો", "image": null }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "શીખંડ માં ફલેવર",
+      "items": [
+        { "id": 1, "name": "સફેદ શીખંડ", "image": null },
+        { "id": 2, "name": "ડા. સ્લાઇઝ મહાબળ", "image": null },
+        { "id": 3, "name": "બટર સ્નેપ શીખડ", "image": null },
+        { "id": 4, "name": "ફ્રુટ શીખંડ", "image": null },
+        { "id": 5, "name": "પાઇનેપલ ચીલી શીખડ", "image": null },
+        { "id": 6, "name": "સ્ટોબી લીચી શીખડ", "image": null },
+        { "id": 7, "name": "ડા. વીલા શીખંડ", "image": null },
+        { "id": 8, "name": "કેશર શીખંડ", "image": null },
+        { "id": 9, "name": "ચોકો ચીપ્સ શીખડ", "image": null },
+        { "id": 10, "name": "મેંગો શીખંડ", "image": null },
+        { "id": 11, "name": "રેડવલ્વેટ શીખંડ", "image": null },
+        { "id": 12, "name": "ક્રિમ કોકોનટ શીખંડ", "image": null },
+        { "id": 13, "name": "કેશર ડા. શીખડ", "image": null },
+        { "id": 14, "name": "ર્ડો. રાજભોગ શીખડ", "image": null },
+        { "id": 15, "name": "કેશર મલાઇ અજી કસ્તરી", "image": null },
+        { "id": 16, "name": "અમરકન ડાયમંડ ફ્રુટ", "image": null },
+        { "id": 17, "name": "તાજમહલ ખજાના", "image": null }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "સ્પે. સંદેશ માં ફલ",
+      "items": [
+        { "id": 1, "name": "કેક સંદેશ", "image": null },
+        { "id": 2, "name": "રોઝ સંદેશ", "image": null },
+        { "id": 3, "name": "બટર સંદેશ", "image": null },
+        { "id": 4, "name": "વેલકમ સંદેશ", "image": null },
+        { "id": 5, "name": "કેશર સંદેશ", "image": null },
+        { "id": 6, "name": "મિક્ષ ફ્રુટ સંદેશ", "image": null },
+        { "id": 7, "name": "સ્ટ્રોબેરી બોલ સંદેશ", "image": null },
+        { "id": 8, "name": "લીચી સંદેશ", "image": null },
+        { "id": 9, "name": "કીવી સંદેશ", "image": null },
+        { "id": 10, "name": "કોકો રાઉન્ડ સંદેશ", "image": null },
+        { "id": 11, "name": "પાઇનેપલ સંદેશ", "image": null },
+        { "id": 12, "name": "રાજભોગ સંદેશ", "image": null },
+        { "id": 13, "name": "પીસ્તા સંદેશ", "image": null }
+      ]
+    },    
+    {
+      "id": 44,
+      "name": "મઠ્ઠા માં ફલેવર",
+      "items": [
+        { "id": 1, "name": "મેંગો મઠ્ઠો", "image": null },
+        { "id": 1, "name": "પાઈનેપલ મઠ્ઠો", "image": null },
+        { "id": 1, "name": "કુકીઝ & ક્રીમ મઠ્ઠો", "image": null },
+        { "id": 1, "name": "ડ્રાયફ્રુટ મઠ્ઠો", "image": null },
+      ]
+    },
+    {
+      "id": 45,
+      "name": "કાજુ બદામ પીસ્તામાં ફલેવર",
+      "items": [
+        { "id": 1, "name": "વ્હાઈટ કાજુ કત્રી", "image": null },
+        { "id": 2, "name": "ડ્રા.ઓરેંજ પાત્રા", "image": null },
+        { "id": 3, "name": "ચોકો કાજુ કત્રી", "image": null },
+        { "id": 4, "name": "કૂંચી બાસ્કેટ", "image": null },
+        { "id": 5, "name": "ડ્રાયફ્રુટ બોલ", "image": null },
+        { "id": 6, "name": "કાજુ ચોકો રોલ", "image": null },
+        { "id": 7, "name": "કેશર કાજુ કત્રી", "image": null },
+        { "id": 8, "name": "કાજુ કળશ", "image": null },
+        { "id": 9, "name": "કાજુ ડોનટ", "image": null },
+        { "id": 10, "name": "ડ્રા.ચોકો બોલ", "image": null },
+        { "id": 11, "name": "કાજુ ક્રિસ્પી", "image": null },
+        { "id": 12, "name": "કાજુ કુલ", "image": null },
+        { "id": 13, "name": "પીસ્તા રોલ", "image": null },
+        { "id": 14, "name": "કાજુ અંજીર બાસ્કેટ", "image": null },
+        { "id": 15, "name": "ડ્રાયફ્રુટ શાહી", "image": null },
+        { "id": 16, "name": "કાજુ રોઝ બોલ", "image": null },
+        { "id": 17, "name": "કાજુ બાસ્કેટ", "image": null },
+        { "id": 18, "name": "પીસ્તા હની બોલ", "image": null },
+        { "id": 19, "name": "કૂંચી રોલ", "image": null },
+        { "id": 20, "name": "કાજુ અંજીર હની", "image": null },
+        { "id": 21, "name": "કાજુ કીંગ રોલ", "image": null },
+        { "id": 22, "name": "રોઝ ચોકો પીઝા", "image": null },
+        { "id": 23, "name": "રોચક લાડુ", "image": null },
+        { "id": 24, "name": "આલ્ફ્રેડ સ્ટફ", "image": null },
+        { "id": 25, "name": "કાજુ એરીસ્ટ્રોકેટ", "image": null },
+        { "id": 26, "name": "ડાયમંડ ચોકો બાસ્કેટ", "image": null },
+        { "id": 27, "name": "કાજુ ચોકો પીઝા", "image": null },
+        { "id": 28, "name": "પીસ્તા ડામંડ ટચ", "image": null },
+        { "id": 29, "name": "લોટસ પંચ", "image": null },
+        { "id": 30, "name": "ડ્રા.ચંદ્રમાલી", "image": null },
+        { "id": 31, "name": "KGF - 3", "image": null },
+        { "id": 32, "name": "પીસ્તા કાજુ પુરી", "image": null },
+        { "id": 33, "name": "સોન રોલ", "image": null },
+        { "id": 34, "name": "ચોકો હની બોલ", "image": null },
+        { "id": 35, "name": "કાજુ ચોકો બોલ", "image": null },
+        { "id": 36, "name": "અંજીર ખજાના", "image": null },
+        { "id": 37, "name": "ડ્રા.ચોકો એકઝોટીકા", "image": null },
+        { "id": 38, "name": "અંજીર ચોકો રોલ", "image": null },
+        { "id": 39, "name": "કીવી એકઝોટીકા", "image": null },
+        { "id": 40, "name": "ડ્રા.પીસ્તા લાડુ", "image": null },
+        { "id": 41, "name": "કાજુ ગુલશન", "image": null },
+        { "id": 42, "name": "ડ્રા.ઓરેંજ ખજાના", "image": null },
+        { "id": 43, "name": "કાજુ આલમંડ", "image": null },
+        { "id": 44, "name": "ડ્રા.અંજીર પુરી", "image": null },
+        { "id": 45, "name": "એકઝોટીકા", "image": null },
+        { "id": 46, "name": "આલ્ફ્રેડ રોલ", "image": null },
+        { "id": 47, "name": "રૂપ મસ્તાની", "image": null },
+        { "id": 48, "name": "કાજુ બાઈટ", "image": null },
+        { "id": 49, "name": "કાજુ કટોરી", "image": null },
+        { "id": 50, "name": "પીસોરી કલી કત્રી", "image": null }
+      ]
+    },
+    {
+      "id": 46,
+      "name":"મટકા માં ફલેવર",
+      "items": [
+        { "id": 1, "name": "રોઝ કરંટ મટકા", "image": null },
+        { "id": 2, "name": "રજવાડી મટકા", "image": null },
+        { "id": 3, "name": "માવા મલાઇ મટકા", "image": null },
+        { "id": 4, "name": "કૂંચી મટકા", "image": null },
+        { "id": 5, "name": "રસમલાઈ મટકા", "image": null },
+        { "id": 6, "name": "રેડવેલવેટ હાંડી", "image": null },
+        { "id": 7, "name": "રોઝ રજવાડી હાંડી", "image": null },
+        { "id": 8, "name": "બટર બોનાન્ઝા મટકા", "image": null },
+        { "id": 9, "name": "સ્ટ્રોબેરી મટકા", "image": null },
+        { "id": 10, "name": "ક્રીમ કોકોનટ મટકા", "image": null },
+        { "id": 11, "name": "રોઝબેરી હાંડી", "image": null },
+        { "id": 12, "name": "મેંગોં મટકા", "image": null },
+        { "id": 13, "name": "પંચામૃત હાંડી", "image": null },
+        { "id": 14, "name": "મલાઈ મિશ્રી હાંડી", "image": null },
+        { "id": 15, "name": "રાજભોગ મટકા", "image": null },
+        { "id": 16, "name": "મેંગોં હાંડી", "image": null },
+        { "id": 17, "name": "મહારાજા પીસ્તા મટકા", "image": null },
+        { "id": 18, "name": "કિવી બોનાન્ઝા", "image": null },
+        { "id": 19, "name": "કેનબેરી મટકા", "image": null },
+        { "id": 20, "name": "S.S. પાઈના મટકા", "image": null },
+        { "id": 21, "name": "કિવી પાઈના મટકા", "image": null },
+        { "id": 22, "name": "સજાવટ મટકા", "image": null },
+        { "id": 23, "name": "ઓરેંજ માલટા", "image": null },
+        { "id": 24, "name": "એપલ બોનાન્ઝા", "image": null }
+      ]
+    },
+    {
+      "id": 47,
+      "name":"કપ માં ફલેવર",
+      "items": [
+        { "id": 1, "name": "રોઝ ગોલ્ડ કપ", "image": null },
+        { "id": 2, "name": "મેંગો ગોલ્ડ", "image": null },
+        { "id": 3, "name": "પાઈના રોઝીના", "image": null },
+        { "id": 4, "name": "મેંગો રોઝીના", "image": null },
+        { "id": 5, "name": "મેંગો આઇસ કપ", "image": null },
+        { "id": 6, "name": "મખ્ખનસંત્રા", "image": null },
+        { "id": 7, "name": "લીચીસંત્રા", "image": null },
+        { "id": 8, "name": "લીચી રોઝીના","image": null },
+      ]
+    },
+    {
+      "id": 48,
+      "name":"સુગર ફ્રી મીઠાઈઓ",
+      "items": [
+        { "id": 1, "name": "શીખંડ માં સચ ફ્રી", "image": null },
+        { "id": 2, "name": "લીકવીડ માં સરા ફ્રી", "image": null },
+        { "id": 3, "name": "મીલ્ક પીસ માં સગફ્રી", "image": null },
+        { "id": 4, "name": "કાજુ બદામ માં ગફ્રી", "image": null }
+      ]
     }
+    
+    
 
 
   ];
