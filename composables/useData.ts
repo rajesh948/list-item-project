@@ -994,11 +994,73 @@ export const useData = () => {
         { "id": 3, "name": "મીલ્ક પીસ માં સગફ્રી", "image": null },
         { "id": 4, "name": "કાજુ બદામ માં ગફ્રી", "image": null }
       ]
+    },    
+    {
+      "id": 49,
+      "name":"મખ્ખન ફલેવર",
+      "items": [
+        { "id": 1, "name": "મખ્ખન કલીંગર", "image": null },
+        { "id": 2, "name": "કિવી ચોકો સેન્ડવીચ", "image": null },
+        { "id": 3, "name": "ઓરેંજ મખ્ખનસંત્રા", "image": null },
+        { "id": 4, "name": "બ્રાઉની મખ્ખન રોલ", "image": null },
+        { "id": 5, "name": "મખ્ખન મહારાજા મલાઈ", "image": null },
+        { "id": 6, "name": "મખ્ખન પેઠા જામ", "image": null },
+        { "id": 7, "name": "ત્રીવેણી સંગમ", "image": null },
+        { "id": 8, "name": "મખ્ખન બદામ", "image": null },
+        { "id": 9, "name": "કાજુ ત્રીવેણી સંગમ", "image": null }
+      ]
+    },
+    {
+      "id": 50,
+      "name":"સ્પે. બંગાળી ફલેવર",
+      "items": [
+        { "id": 1, "name": "રસગુલ્લા", "image": null },
+        { "id": 2, "name": "લીચી બાટી", "image": null },
+        { "id": 3, "name": "ચોકો બાટી", "image": null },
+        { "id": 4, "name": "ચમચમ", "image": null },
+        { "id": 5, "name": "રસમલાઇ", "image": null },
+        { "id": 6, "name": "બટરબાટી", "image": null },
+        { "id": 7, "name": "રાજાશાહી", "image": null },
+        { "id": 8, "name": "આલ્ફ્રેડ સ્લાઈઝ", "image": null },
+        { "id": 9, "name": "મધુમીલન", "image": null },
+        { "id": 10, "name": "કિવી સેન્ડવીચ", "image": null },
+        { "id": 11, "name": "રાતરાણી", "image": null },
+        { "id": 12, "name": "ક્રીમ પાઇના બાટી", "image": null },
+        { "id": 13, "name": "કેથોકર બાટી", "image": null },
+        { "id": 14, "name": "રોઝ ગુલકંદ બાટી", "image": null },
+        { "id": 15, "name": "ઓરેંજ અનાર બાટી", "image": null },
+        { "id": 16, "name": "SS સ્પેશીલ", "image": null },
+        { "id": 17, "name": "મલાઈ ક્રીમ રોલ", "image": null },
+        { "id": 18, "name": "પુષ્પરાજ", "image": null },
+        { "id": 19, "name": "છેના ટોસ્ટ", "image": null },
+        { "id": 20, "name": "કેશર ચંદ્રાવલ", "image": null },
+        { "id": 21, "name": "ફ઼િમ ચમચમ", "image": null },
+        { "id": 22, "name": "માવા ચમચમ", "image": null },
+        { "id": 23, "name": "કેશર કુમકુમ", "image": null },
+        { "id": 24, "name": "રાજભોગ", "image": null },
+        { "id": 25, "name": "કેશર ક્રીમ રોલ", "image": null },
+        { "id": 26, "name": "વેલવેટ રોલ", "image": null },
+        { "id": 27, "name": "લીચી ગ્લોરી", "image": null },
+        { "id": 28, "name": "રફેલો બોલ", "image": null }
+      ]
+    },    
+    {
+      "id": 51,
+      "name":"પેઠા માં ફલેવર",
+      "items": [
+        { "id": 1, "name": "રાજમોતી પેઠા", "image": null },
+        { "id": 2, "name": "પેઠા પાન", "image": null },
+        { "id": 3, "name": "આમંડ પેઠા રોલ", "image": null },
+        { "id": 4, "name": "ચોકો ડીપ પાન", "image": null },
+        { "id": 5, "name": "કિવી પેઠા પાન", "image": null },
+        { "id": 6, "name": "રોઝ પાન", "image": null },
+        { "id": 7, "name": "લીચી ફીંગર", "image": null },
+        { "id": 8, "name": "મેંગો ફીંગર", "image": null },
+        { "id": 9, "name": "કીવી ફીંગર", "image": null },
+        { "id": 10, "name": "ચોકો પીસ્તા પાન", "image": null },
+        { "id": 11, "name": "પાઇનેપલ ફીંગર", "image": null }
+      ]
     }
-    
-    
-
-
   ];
 
 

@@ -36,7 +36,7 @@
             <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
             <h4>{{ category.name }}</h4>
           </v-chip>
-          <v-row align="center" no-gutters>
+          <v-row align="center" class="display-fex-row-only" o-gutters>
             <v-col class="display-fex-row-only" :cols="isChipClosable ? 11 : 12">
               <v-sheet v-for="item in category.items" :key="item.name">
                 <v-chip :closable="isChipClosable" @click:close="removeItem(item.id, category.id)"
@@ -386,7 +386,7 @@ export default {
 .display-fex-row-only {
   display: flex;
   flex-direction: row;
-
+  flex-wrap: wrap;
 
 }
 
