@@ -9,15 +9,15 @@
               <div class="font-weight-bold">Phone No: 97274 73918 , 98253 52718</div>
             </div>
             <v-row class="display-fex-row-onlys" >
-              <v-col class="pa-0" cols="8"><span class="font-weight-bold">Name: </span> {{ userData.name }} </v-col>
-              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Date: </span>{{ userData.date }} </v-col>
-              <v-col class="pa-0" cols="8"><span class="font-weight-bold">Address: </span>{{ userData.address }}</v-col>
-              <v-col class="pa-0" cols="4"><span class="font-weight-bold">People No: </span>{{ userData.noOfPeople
+            <v-col class="pa-0" cols="8"><span class="font-weight-bold">Name: </span> {{ userData.name }} </v-col>
+            <v-col class="pa-0" cols="4"><span class="font-weight-bold">Date: </span>{{ userData.date }} </v-col>
+            <v-col class="pa-0" cols="8"><span class="font-weight-bold">Address: </span>{{ userData.address }}</v-col>
+            <v-col class="pa-0" cols="4"><span class="font-weight-bold">People No: </span>{{ userData.noOfPeople
               }}</v-col>
-              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Phone: </span>{{ userData.phone }} </v-col>
-              <v-col class="pa-0" cols="4"><span class="font-weight-bold">Shift: </span>{{ userData.shift }} </v-col>
+            <v-col class="pa-0" cols="4"><span class="font-weight-bold">Phone: </span>{{ userData.phone }} </v-col>
+            <v-col class="pa-0" cols="4"><span class="font-weight-bold">Shift: </span>{{ userData.shift }} </v-col>
               <v-col class="pa-0" cols="4"><span class="font-weight-bold">Price: </span>{{ userData.price }}</v-col>
-            </v-row>
+          </v-row>
           </div>
         </v-sheet>
         <div v-if="selectedTableFromStorage">
@@ -31,7 +31,7 @@
           </v-row>
           <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
         </div>
-        <div v-for="category in selectedDataFromStorage" :key="category.name"  class="no-page-break">
+        <div v-for="category in selectedDataFromStorage" :key="category.name" class="no-page-break">
           <v-chip class="ma-2" color="success" variant="outlined">
             <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
             <h4>{{ category.name }}</h4>
@@ -64,7 +64,8 @@
         @click="toggleAddItemDialog">Add New Item</v-btn>
     </div>
   </div>
-  <v-chip @click="onGotoHome" v-else class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black" variant="plain">
+  <v-chip @click="onGotoHome" v-else class="d-flex justify-center text-h4 my-16 pa-16 font-weight-black"
+    variant="plain">
     Please Add Items
   </v-chip>
   <Dialog :display="isShowDialog">
@@ -76,22 +77,24 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-text-field variant="underlined" label="Enter name*" v-model="userFormData.name" required></v-text-field>
+              <v-text-field variant="underlined" label="Enter name*" v-model="userFormData.name"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field variant="underlined" label="Phone Number*" v-model="userFormData.phone" type="number"
                 required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field variant="underlined" label="Number of People*" v-model="userFormData.noOfPeople" type="number"
-                required></v-text-field>
+              <v-text-field variant="underlined" label="Number of People*" v-model="userFormData.noOfPeople"
+                type="number" required></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field variant="underlined" label="date*" v-model="userFormData.date" type="date"
                 required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-text-field variant="underlined" label="Address*" v-model="userFormData.address" required></v-text-field>
+              <v-text-field variant="underlined" label="Address*" v-model="userFormData.address"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field variant="underlined" label="Price*" v-model="userFormData.price" type="number"
@@ -383,6 +386,7 @@ export default {
   gap: 8px;
 
 }
+
 .display-fex-row-only {
   display: flex;
   flex-direction: row;
@@ -404,6 +408,30 @@ export default {
 }
 
 .no-page-break {
-    page-break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.header {
+  position: relative;
+  text-align: center;
+}
+
+.logo-left {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  width: 120px;
+  height: auto;
+  filter: grayscale(100%) brightness(0) saturate(100%) invert(0%);
+  transition: filter 0.3s;
+}
+
+.logo-right {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  filter: grayscale(100%) brightness(0) saturate(100%) invert(0%);
+  width:120px;
+  height: auto;
 }
 </style>
