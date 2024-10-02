@@ -8,7 +8,7 @@
               <div class="text-h4 font-weight-bold">મહાકાળી કેટરર્સ</div>
               <div class="font-weight-bold">Phone No: 97274 73918 , 98253 52718</div>
             </div>
-            <v-row>
+            <v-row class="display-fex-row-onlys" >
               <v-col class="pa-0" cols="8"><span class="font-weight-bold">Name: </span> {{ userData.name }} </v-col>
               <v-col class="pa-0" cols="4"><span class="font-weight-bold">Date: </span>{{ userData.date }} </v-col>
               <v-col class="pa-0" cols="8"><span class="font-weight-bold">Address: </span>{{ userData.address }}</v-col>
@@ -31,7 +31,7 @@
           </v-row>
           <v-divider class="border-opacity-50 my-2" :thickness="1"></v-divider>
         </div>
-        <div v-for="category in selectedDataFromStorage" :key="category.name">
+        <div v-for="category in selectedDataFromStorage" :key="category.name"  class="no-page-break">
           <v-chip class="ma-2" color="success" variant="outlined">
             <!-- <v-icon icon="mdi-arrow-right-bold" start></v-icon> -->
             <h4>{{ category.name }}</h4>
@@ -233,7 +233,7 @@ export default {
             filename: "generated-pdf.pdf",
             image: { type: "jpeg", quality: 0.98 },
             html2canvas: { scale: 2 },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait", autoPaging: true },
           };
 
           const pdfResponse = await html2pdf()
@@ -401,5 +401,9 @@ export default {
 
 .display-fex-row span {
   font-size: large;
+}
+
+.no-page-break {
+    page-break-inside: avoid;
 }
 </style>
