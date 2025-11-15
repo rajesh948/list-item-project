@@ -2,10 +2,10 @@ export const useData = () => {
   const data = [
     {
       id: 1,
-      name: "બાઇટિંગ",
+      name: "બાઈટિંગ",
       items: [
         { id: 1, name: "લોલીપોપ", image: null },
-        { id: 2, name: "ચીઝબોલ", image: null },
+        { id: 2, name: "ચીઝ બોલ", image: null },
         { id: 3, name: "સ્પ્રિંગ રોલ", image: null },
         { id: 4, name: "ફ્રૂટ ડિશ", image: null },
         { id: 5, name: "ડ્રાયફ્રૂટ ડબ્બી", image: null },
@@ -28,7 +28,7 @@ export const useData = () => {
       items: [
         { id: 1, name: "ડ્રેગન પોટેટો", image: null },
         { id: 2, name: "મન્ચુરિયન", image: null },
-        { id: 3, name: "બેબીકોન ચિલી", image: null },
+        { id: 3, name: "બેબીકોર્ન ચિલી", image: null },
         { id: 4, name: "ફિંગર ચિપ્સ", image: null },
         { id: 5, name: "મશરૂમ ચિલી", image: null },
         { id: 6, name: "પનીર ચિલી ડ્રાય", image: null },
@@ -79,16 +79,16 @@ export const useData = () => {
         { id: 2, name: "વઘારેલો રોટલો", image: null },
         { id: 3, name: "મસાલા રોટલો", image: null },
         { id: 4, name: "લસાણીયા બટાકા", image: null },
-        { id: 5, name: "કોબીટ્ચ મસાલા", image: null },
+        { id: 5, name: "કોબી મસાલા", image: null },
         { id: 6, name: "ડુંગળી મસાલા", image: null },
         { id: 7, name: "મિક્સ ભાજી", image: null },
-        { id: 8, name: "બેગણ ભરેલા", image: null },
-        { id: 9, name: "બેગણ ભરતા", image: null },
-        { id: 10, name: "બેગણ મસાલા", image: null },
+        { id: 8, name: "રીંગણ ભરેલા", image: null },
+        { id: 9, name: "રીંગણ ભરતા", image: null },
+        { id: 10, name: "રીંગણ મસાલા", image: null },
         { id: 11, name: "ગીરનારી ખીચડી", image: null },
         { id: 12, name: "ભીંડા મસાલા", image: null },
         { id: 13, name: "સેવ ડુંગળી", image: null },
-        { id: 14, name: "આલુ બેગણ રસાવાલા", image: null },
+        { id: 14, name: "આલુ રીંગણ રસાવાલા", image: null },
         { id: 15, name: "દહી ભીંડા", image: null },
         { id: 16, name: "કઢી પકોડા", image: null },
         { id: 17, name: "આલુ પાલક", image: null },
@@ -98,7 +98,7 @@ export const useData = () => {
         { id: 21, name: "બટાકા રસવાલા", image: null },
         { id: 22, name: "ઢોકરી", image: null },
         { id: 23, name: "પ્લેન પાલક", image: null },
-        { id: 24, name: "સૂકીભાજી", image: null },
+        { id: 24, name: "સૂકી ભાજી", image: null },
         { id: 25, name: "આલુ મટર", image: null },
         { id: 26, name: "ટમેટો ડુંગળી", image: null },
         { id: 27, name: "મસાલા ખીચડી", image: null },
@@ -107,17 +107,17 @@ export const useData = () => {
         { id: 30, name: "ભીંડા ફ્રાય", image: null },
         { id: 31, name: "પ્લેન ખીચડી", image: null },
         { id: 32, name: "ઉંધિયુ", image: null },
-        { id: 33, name: "રિંગણ બટેકા ભરેલું", image: null },
+        { id: 33, name: "રીંગણ બટાકા ભરેલું", image: null },
         { id: 34, name: "ઢોકળી", image: null },
-        { id: 35, name: "ગવાર બટેકા", image: null },
+        { id: 35, name: "ગવાર બટાકા", image: null },
         { id: 36, name: "ભીંડા નું શાક", image: null },
         { id: 37, name: "ટામેટાનું શાક", image: null },
-        { id: 38, name: "ડુંગરી બટેકા", image: null },
-        { id: 39, name: "કોબી બટેકા", image: null },
-        { id: 40, name: "ફ્લાવર બટેકા", image: null },
-        { id: 41, name: "ચોરી બેટકા", image: null },
+        { id: 38, name: "ડુંગળી બટાકા", image: null },
+        { id: 39, name: "કોબી બટાકા", image: null },
+        { id: 40, name: "ફ્લાવર બટાકા", image: null },
+        { id: 41, name: "ચોળી બટાકા", image: null },
         { id: 42, name: "મીઠી ભાજી", image: null },
-        { id: 43, name: "પાવભાજી", image: null },
+        { id: 43, name: "પાવ ભાજી", image: null },
 
       ]
     },
@@ -145,13 +145,13 @@ export const useData = () => {
         { id: 18, name: "વેજીટેબલ હંગામા", image: null },
         { id: 19, name: "વેજીટેબલ અંગારા", image: null },
         { id: 20, name: "વેજીટેબલ તિરંગા", image: null },
-        { id: 21, name: "ટમેટો કોન ભર્તું", image: null },
-        { id: 22, name: "પાલક કોન કૅપ્સિકમ", image: null },
+        { id: 21, name: "ટમેટો કોર્ન ભર્તું", image: null },
+        { id: 22, name: "પાલક કોર્ન કૅપ્સિકમ", image: null },
         { id: 23, name: "મટર કૅપ્સિકમ", image: null },
         { id: 24, name: "વેજીટેબલ દિવાની", image: null },
         { id: 25, name: "શાહી વેજ.", image: null },
         { id: 26, name: "કૅપ્સિકમ ટમેટો", image: null },
-        { id: 27, name: "કોન ભર્તું", image: null },
+        { id: 27, name: "કોર્ન ભર્તું", image: null },
         { id: 28, name: "આલુ કૅપ્સિકમ", image: null },
         { id: 29, name: "મટર પાલક", image: null },
         { id: 30, name: "મિક્સ વેજિટેબલ", image: null }
@@ -199,8 +199,8 @@ export const useData = () => {
         { id: 36, name: "પનીર તિરંગા", image: null },
         { id: 37, name: "જીરા આલુ", image: null },
         { id: 38, name: "દામ આલુ", image: null },
-        { id: 39, name: "ટમેટો કોન ભર્તા", image: null },
-        { id: 40, name: "બેબી કોન બટર મસાલા", image: null },
+        { id: 39, name: "ટમેટો કોર્ન ભર્તા", image: null },
+        { id: 40, name: "બેબીકોર્ન બટર મસાલા", image: null },
         { id: 41, name: "ચણા મસાલા", image: null },
         { id: 42, name: "કાજુ કરી મસાલા", image: null },
         { id: 43, name: "કાજુ બટર મસાલા", image: null },
@@ -231,7 +231,7 @@ export const useData = () => {
         { id: 15, name: "ખસ્તા રોટી", image: null },
         { id: 16, name: "મિક્સી રોટી", image: null },
         { id: 17, name: "જીરા રોટી", image: null },
-        { id: 18, name: "ફુદીના રોટી", image: null },
+        { id: 18, name: "પુદીનાની રોટી", image: null },
         { id: 19, name: "લચ્છા પરાઠા", image: null }
       ]
     },
@@ -240,8 +240,8 @@ export const useData = () => {
       name: "રોટલી",
       items: [
         { id: 1, name: "સ્વામી રોટલી", image: null },
-        { id: 2, name: "ફૂલકા રોટલી", image: null },
-        { id: 3, name: "પુડલા", image: null },
+        { id: 2, name: "ફુલકા રોટલી", image: null },
+        { id: 3, name: "પૂડલા", image: null },
         { id: 4, name: "પરોઠા", image: null },
         { id: 5, name: "થેપલા", image: null },
         { id: 6, name: "પાવ (દાબેલી)", image: null },
@@ -272,7 +272,7 @@ export const useData = () => {
         { id: 14, name: "વેજીટેબલ મંચુરિયન ગ્રેવી", image: null },
         { id: 15, name: "પનીર 65 ડ્રાય", image: null },
         { id: 16, name: "પનીર મંચુરિયન ડ્રાય", image: null },
-        { id: 17, name: "માસરૂમ ચિલી ડ્રાય", image: null },
+        { id: 17, name: "મશરૂમ ચિલી ડ્રાય", image: null },
         { id: 18, name: "સ્પ્રિંગ રોલ", image: null },
         { id: 19, name: "પોટેટો ચિલી ડ્રાય", image: null },
         { id: 20, name: "ડ્રેગન પોટેટો", image: null },
@@ -288,18 +288,17 @@ export const useData = () => {
         { id: 2, name: "ફેન્સી ડોસા", image: null },
         { id: 3, name: "વાઈબ્રન્ટ ગુજરાત", image: null },
         { id: 4, name: "મસાલા ડોસા", image: null },
-        { id: 5, name: "મસાલા ડોસા", image: null },
-        { id: 6, name: "મેસુર મસાલા ડોસા", image: null },
-        { id: 7, name: "મેસુર સાદા ડોસા", image: null },
-        { id: 8, name: "ચીઝ મસાલા ડોસા", image: null },
-        { id: 9, name: "સ્વીટ કોર્ન ડોસા", image: null },
-        { id: 10, name: "મિની રોલ ડોસા", image: null },
-        { id: 11, name: "મિની રોલ મસાલા ડોસા", image: null },
-        { id: 12, name: "ગોટલા ડોસા", image: null },
-        { id: 13, name: "મિની ટિર્વેલ મસાલા ડોસા", image: null },
-        { id: 14, name: "મિની ટિર્વેલ સાદા ડોસા", image: null },
-        { id: 15, name: "જમ્બો મસાલા ડોસા", image: null },
-        { id: 16, name: "જમ્બો સાદા ડોસા", image: null },
+        { id: 5, name: "મેસુર મસાલા ડોસા", image: null },
+        { id: 6, name: "મેસુર સાદા ડોસા", image: null },
+        { id: 7, name: "ચીઝ મસાલા ડોસા", image: null },
+        { id: 8, name: "સ્વીટ કોર્ન ડોસા", image: null },
+        { id: 9, name: "મિની રોલ ડોસા", image: null },
+        { id: 10, name: "મિની રોલ મસાલા ડોસા", image: null },
+        { id: 11, name: "ગોટલા ડોસા", image: null },
+        { id: 12, name: "મિની ટ્રાયવેલ મસાલા ડોસા", image: null },
+        { id: 13, name: "મિની ટ્રાયવેલ સાદા ડોસા", image: null },
+        { id: 14, name: "જમ્બો મસાલા ડોસા", image: null },
+        { id: 15, name: "જમ્બો સાદા ડોસા", image: null },
         { id: 17, name: "પિઝા મસાલા ડોસા", image: null },
         { id: 18, name: "ચીઝ રોલ મસાલા ડોસા", image: null },
         { id: 19, name: "ચીઝ રોલ સાદા ડોસા", image: null },
@@ -326,11 +325,11 @@ export const useData = () => {
         { id: 4, name: "ઢોકળા", image: null },
         { id: 5, name: "સમોસા", image: null },
         { id: 6, name: "ઘૂઘરા", image: null },
-        { id: 7, name: "ભુંગડા બટેકા", image: null },
+        { id: 7, name: "ભુંગળા બટાકા", image: null },
         { id: 8, name: "કચોરી", image: null },
-        { id: 9, name: "ફ્રાઇમસ", image: null },
+        { id: 9, name: "ફ્રેન્ચ ફ્રાઈસ", image: null },
         { id: 10, name: "શિંગ પાપડ", image: null },
-        { id: 11, name: "બ્રેડ બટેકા", image: null },
+        { id: 11, name: "બ્રેડ બટાકા", image: null },
         { id: 12, name: "દાબેલી", image: null },
         { id: 13, name: "વડા પાઉ", image: null }
       ]
@@ -376,7 +375,7 @@ export const useData = () => {
       id: 16,
       name: "રાયતા",
       items: [
-        { id: 1, name: "પાઇનએપલ રાયતા", image: null },
+        { id: 1, name: "પાઈનેપલ રાયતા", image: null },
         { id: 2, name: "દહી રાયતા", image: null },
         { id: 3, name: "વેજ. રાયતા", image: null },
         { id: 4, name: "ડુંગળી રાયતા", image: null },
@@ -389,7 +388,7 @@ export const useData = () => {
       name: "દાળ",
       items: [
         { id: 1, name: "ગુજરાતી દાળ", image: null },
-        { id: 2, name: "દાળફ્રાય", image: null },
+        { id: 2, name: "દાળ ફ્રાય", image: null },
         { id: 3, name: "દાળ મખાની", image: null },
         { id: 4, name: "તડકા દાળ", image: null }
       ]
@@ -412,7 +411,7 @@ export const useData = () => {
       name: "સલાડ",
       items: [
         { id: 1, name: "લીલું સલાડ", image: null },
-        { id: 2, name: "ડુંગરી", image: null },
+        { id: 2, name: "ડુંગળી", image: null },
         { id: 3, name: "ટામેટા", image: null },
         { id: 4, name: "રાયતા મરચા", image: null },
         { id: 5, name: "મરચા", image: null },
@@ -427,7 +426,7 @@ export const useData = () => {
         { id: 2, name: "લીલી ચટણી", image: null },
         { id: 3, name: "લસણ ચટણી", image: null },
         { id: 4, name: "કેરી ચટણી", image: null },
-        { id: 5, name: "ફુદીના ચટણી", image: null }
+        { id: 5, name: "પુદીનાની ચટણી", image: null }
       ]
     },
     {
@@ -436,8 +435,8 @@ export const useData = () => {
       items: [
         { id: 1, name: "ચોખાના પાપડ", image: null },
         { id: 2, name: "આલાદ પાપડ", image: null },
-        { id: 3, name: "ફ્રાઇમસ પાપડ", image: null },
-        { id: 4, name: "ભુંગડા", image: null }
+        { id: 3, name: "ફ્રેન્ચ ફ્રાઈસ પાપડ", image: null },
+        { id: 4, name: "ભુંગળા", image: null }
       ]
     },
     {
@@ -453,10 +452,10 @@ export const useData = () => {
       id: 23,
       name: "જ્યૂસ",
       items: [
-        { id: 1, name: "પાઇનએપલ", image: null },
-        { id: 2, name: "જામફડ", image: null },
+        { id: 1, name: "પાઈનેપલ", image: null },
+        { id: 2, name: "જામફળ", image: null },
         { id: 3, name: "સફરજન", image: null },
-        { id: 4, name: "તરુભચ", image: null },
+        { id: 4, name: "તરબૂચ", image: null },
         { id: 5, name: "લીલી દ્રાક્ષ", image: null },
         { id: 6, name: "કાળી દ્રાક્ષ", image: null },
         { id: 7, name: "શંકર તેટે", image: null },
@@ -470,7 +469,7 @@ export const useData = () => {
       items: [
         { id: 1, name: "લીંબૂ શરબત", image: null },
         { id: 2, name: "ઠંડુ", image: null },
-        { id: 3, name: "ફુદીના શરબત", image: null },
+        { id: 3, name: "પુદીનો શરબત", image: null },
         { id: 4, name: "મેંગો શરબત", image: null },
         { id: 5, name: "કાચી કેરી શરબત", image: null },
         { id: 6, name: "પાઇનેપલ શરબત", image: null },
@@ -484,7 +483,7 @@ export const useData = () => {
       name: 'પાણી',
       items: [
         { id: 1, name: "મિનરલ", image: null },
-        { id: 2, name: "સાદુ", image: null },
+        { id: 2, name: "સાદું", image: null },
         { id: 3, name: "મિની બોટલ", image: null },
         { id: 4, name: "નેમ બોટલ", image: null },
 
@@ -518,18 +517,18 @@ export const useData = () => {
 
     {
       "id": 28,
-      "name": "સ્પે. લીકવીડ ફ્લેવર",
+      "name": "સ્પે. લિક્વિડ ફ્લેવર",
       "items": [
         { "id": 1, "name": "વ્હા. બાસુંદી", "image": null },
         { "id": 2, "name": "વ્હાઈટ ડ્રા. બાસુંદી", "image": null },
         { "id": 3, "name": "કેસર ડ્રા. બાસુંદી", "image": null },
         { "id": 4, "name": "વ્હાઈટ ડ્રા. રસમાધુરી", "image": null },
-        { "id": 5, "name": "ક્રીમ પાઇના ચીકી", "image": null },
+        { "id": 5, "name": "ક્રીમ પાઈનેપલ ચીકી", "image": null },
         { "id": 6, "name": "કેશર ડ્રા. રસમાધુરી ", "image": null },
         { "id": 7, "name": "ડ્રા. ક્રીમ સલાડ", "image": null },
         { "id": 8, "name": "ડ્રા. વેનીલા શાહી", "image": null },
         { "id": 9, "name": "ડ્રા. બટર લચ્છા રબડી", "image": null },
-        { "id": 10, "name": "પાઈના કોકોનટ રબડી", "image": null },
+        { "id": 10, "name": "પાઈનેપલ કોકોનટ રબડી", "image": null },
         { "id": 11, "name": "કીંગ્સ & હની લચ્છા રબડી", "image": null },
         { "id": 12, "name": "કેશર લચ્છા રબડી ", "image": null },
         { "id": 13, "name": "ડ્રા. સીતાફળ બાસુંદી", "image": null },
@@ -552,7 +551,7 @@ export const useData = () => {
         { "id": 30, "name": "કાજુ કરોલી", "image": null },
         { "id": 31, "name": "એક્ઝોટીકા રબડી", "image": null },
         { "id": 32, "name": "રોઝ રજવાડી", "image": null },
-        { "id": 33, "name": "ડ્રેફન ફુટ ખજાના", "image": null },
+        { "id": 33, "name": "ડ્રેગન ફ્રૂટ ખજાના", "image": null },
         { "id": 34, "name": "કિવી બોનાન્ઝા રબડી", "image": null },
         { "id": 35, "name": "ઘેવર કાજુ રબડી", "image": null },
         { "id": 36, "name": "રજવાડી પીસ્તા રબડી", "image": null },
@@ -561,7 +560,7 @@ export const useData = () => {
     },
     {
       "id": 29,
-      "name": "સ્પે.લીકવીડ પ્લાઝા ફ્લેવર",
+      "name": "સ્પે.લિક્વિડ પ્લાઝા ફ્લેવર",
       "items": [
         { "id": 1, "name": "ડ્રા. કલકતી પ્લાઝા", "image": null },
         { "id": 2, "name": "ડ્રા. બટર પ્લાઝા", "image": null },
@@ -585,9 +584,9 @@ export const useData = () => {
         { "id": 2, "name": "મલાઈ બટર લાડુ", "image": null },
         { "id": 3, "name": "વેલકમ કેક", "image": null },
         { "id": 4, "name": "ઓરેંજ લાડુ", "image": null },
-        { "id": 5, "name": "પાઇના ચીંગ", "image": null },
-        { "id": 6, "name": "પાઇનેપલ ચીલી લાડુ", "image": null },
-        { "id": 7, "name": "પાઈનપલ સંગમ", "image": null },
+        { "id": 5, "name": "પાઈનેપલ ચીંગ", "image": null },
+        { "id": 6, "name": "પાઈનેપલ ચીકી લાડુ", "image": null },
+        { "id": 7, "name": "પાઈનેપલ સંગમ", "image": null },
         { "id": 8, "name": "ચોકલેટ કસાટા", "image": null },
         { "id": 9, "name": "બ્રીજ લાડુ", "image": null },
         { "id": 10, "name": "ચોકો બોલ", "image": null },
@@ -669,12 +668,12 @@ export const useData = () => {
     },
     {
       "id": 33,
-      "name": "જાંબુમાં ફલેવર",
+      "name": "જાંબુમાં ફ્લેવર",
       "items": [
         { "id": 1, "name": "ગુલાબ જાંબુ", "image": null },
         { "id": 2, "name": "કાલાજામ", "image": null },
         { "id": 3, "name": "મેંગો કાલાજામ", "image": null },
-        { "id": 4, "name": "પાઈનપલ કાલાજામ", "image": null },
+        { "id": 4, "name": "પાઈનેપલ કાલાજામ", "image": null },
         { "id": 5, "name": "સ્ટ્રોબેરી જામ", "image": null },
         { "id": 6, "name": "કેસર જામ", "image": null },
         { "id": 7, "name": "રાજભોગ કાલાજામ", "image": null },
@@ -690,7 +689,7 @@ export const useData = () => {
         { "id": 3, "name": "થાબડી પેડા", "image": null },
         { "id": 4, "name": "વ્હા. મલાઈ પુરી", "image": null },
         { "id": 5, "name": "સ્પે. રજવાડી પેડા", "image": null },
-        { "id": 6, "name": "પાઈનપલ મલાઈ પુરી", "image": null },
+        { "id": 6, "name": "પાઈનેપલ મલાઈ પુરી", "image": null },
         { "id": 7, "name": "કોકો મલાઈ પુરી", "image": null },
         { "id": 8, "name": "મથુરા પેડા", "image": null },
         { "id": 9, "name": "કેસર રજવાડી પેડા", "image": null },
@@ -714,7 +713,7 @@ export const useData = () => {
     },
     {
       "id": 36,
-      "name": "આઇસ્ક્રીમ ફલેવર",
+      "name": "આઈસ્ક્રીમ ફ્લેવર",
       "items": [
         { "id": 1, "name": "વેનીલા", "image": null },
         { "id": 2, "name": "બ્રાઉની બ્રેક કુકીઝ & ક્રીમ", "image": null },
@@ -760,7 +759,7 @@ export const useData = () => {
     },
     {
       "id": 39,
-      "name": "સ્પે. કેન્ડી ફલેવર",
+      "name": "સ્પે. કેન્ડી ફ્લેવર",
       "items": [
         { "id": 1, "name": "માવા કેન્ડી", "image": null },
         { "id": 2, "name": " રેડ વેલવેટ કેન્ડી", "image": null },
@@ -772,7 +771,7 @@ export const useData = () => {
     },
     {
       "id": 40,
-      "name": "શુધ્ધ ઘીમાં ફલેવર",
+      "name": "શુદ્ધ ઘીમાં ફ્લેવર",
       "items": [
         { "id": 1, "name": "ડ્રાયફ્રુટ ગુંદી", "image": null },
         { "id": 2, "name": "ગુંદી લાડુ", "image": null },
@@ -807,7 +806,7 @@ export const useData = () => {
         { "id": 2, "name": "ડ્રા. ગાજરનો હલવો", "image": null },
         { "id": 3, "name": "બટર સ્કોચ હલવો", "image": null },
         { "id": 4, "name": "લીલા નાળીયેર હલવો", "image": null },
-        { "id": 5, "name": "પાઇનેપલ ચીલી હલવો", "image": null },
+        { "id": 5, "name": "પાઈનેપલ ચીકી હલવો", "image": null },
         { "id": 6, "name": "કાજુ ગુલકંદ હલવો", "image": null },
         { "id": 7, "name": "પંચરત્ન હલવો", "image": null },
         { "id": 8, "name": "કાલા જાંબુ હલવો", "image": null },
@@ -835,13 +834,13 @@ export const useData = () => {
     },
     {
       "id": 42,
-      "name": "શીખંડ માં ફલેવર",
+      "name": "શીખંડ માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "સફેદ શીખંડ", "image": null },
         { "id": 2, "name": "ડા. સ્લાઇઝ મહાબળ", "image": null },
         { "id": 3, "name": "બટર સ્નેપ શીખડ", "image": null },
         { "id": 4, "name": "ફ્રુટ શીખંડ", "image": null },
-        { "id": 5, "name": "પાઇનેપલ ચીલી શીખડ", "image": null },
+        { "id": 5, "name": "પાઈનેપલ ચીકી શીખડ", "image": null },
         { "id": 6, "name": "સ્ટોબી લીચી શીખડ", "image": null },
         { "id": 7, "name": "ડા. વીલા શીખંડ", "image": null },
         { "id": 8, "name": "કેશર શીખંડ", "image": null },
@@ -858,7 +857,7 @@ export const useData = () => {
     },
     {
       "id": 43,
-      "name": "સ્પે. સંદેશ માં ફલ",
+      "name": "સ્પે. સંદેશ માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "કેક સંદેશ", "image": null },
         { "id": 2, "name": "રોઝ સંદેશ", "image": null },
@@ -870,24 +869,24 @@ export const useData = () => {
         { "id": 8, "name": "લીચી સંદેશ", "image": null },
         { "id": 9, "name": "કીવી સંદેશ", "image": null },
         { "id": 10, "name": "કોકો રાઉન્ડ સંદેશ", "image": null },
-        { "id": 11, "name": "પાઇનેપલ સંદેશ", "image": null },
+        { "id": 11, "name": "પાઈનેપલ સંદેશ", "image": null },
         { "id": 12, "name": "રાજભોગ સંદેશ", "image": null },
         { "id": 13, "name": "પીસ્તા સંદેશ", "image": null }
       ]
     },    
     {
       "id": 44,
-      "name": "મઠ્ઠા માં ફલેવર",
+      "name": "મઠ્ઠા માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "મેંગો મઠ્ઠો", "image": null },
-        { "id": 1, "name": "પાઈનેપલ મઠ્ઠો", "image": null },
-        { "id": 1, "name": "કુકીઝ & ક્રીમ મઠ્ઠો", "image": null },
-        { "id": 1, "name": "ડ્રાયફ્રુટ મઠ્ઠો", "image": null },
+        { "id": 2, "name": "પાઈનેપલ મઠ્ઠો", "image": null },
+        { "id": 3, "name": "કુકીઝ & ક્રીમ મઠ્ઠો", "image": null },
+        { "id": 4, "name": "ડ્રાયફ્રુટ મઠ્ઠો", "image": null },
       ]
     },
     {
       "id": 45,
-      "name": "કાજુ બદામ પીસ્તામાં ફલેવર",
+      "name": "કાજુ બદામ પીસ્તામાં ફ્લેવર",
       "items": [
         { "id": 1, "name": "વ્હાઈટ કાજુ કત્રી", "image": null },
         { "id": 2, "name": "ડ્રા.ઓરેંજ પાત્રા", "image": null },
@@ -943,7 +942,7 @@ export const useData = () => {
     },
     {
       "id": 46,
-      "name":"મટકા માં ફલેવર",
+      "name":"મટકા માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "રોઝ કરંટ મટકા", "image": null },
         { "id": 2, "name": "રજવાડી મટકા", "image": null },
@@ -964,8 +963,8 @@ export const useData = () => {
         { "id": 17, "name": "મહારાજા પીસ્તા મટકા", "image": null },
         { "id": 18, "name": "કિવી બોનાન્ઝા", "image": null },
         { "id": 19, "name": "કેનબેરી મટકા", "image": null },
-        { "id": 20, "name": "S.S. પાઈના મટકા", "image": null },
-        { "id": 21, "name": "કિવી પાઈના મટકા", "image": null },
+        { "id": 20, "name": "S.S. પાઈનેપલ મટકા", "image": null },
+        { "id": 21, "name": "કિવી પાઈનેપલ મટકા", "image": null },
         { "id": 22, "name": "સજાવટ મટકા", "image": null },
         { "id": 23, "name": "ઓરેંજ માલટા", "image": null },
         { "id": 24, "name": "એપલ બોનાન્ઝા", "image": null }
@@ -973,11 +972,11 @@ export const useData = () => {
     },
     {
       "id": 47,
-      "name":"કપ માં ફલેવર",
+      "name":"કપ માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "રોઝ ગોલ્ડ કપ", "image": null },
         { "id": 2, "name": "મેંગો ગોલ્ડ", "image": null },
-        { "id": 3, "name": "પાઈના રોઝીના", "image": null },
+        { "id": 3, "name": "પાઈનેપલ રોઝીના", "image": null },
         { "id": 4, "name": "મેંગો રોઝીના", "image": null },
         { "id": 5, "name": "મેંગો આઇસ કપ", "image": null },
         { "id": 6, "name": "મખ્ખનસંત્રા", "image": null },
@@ -989,15 +988,15 @@ export const useData = () => {
       "id": 48,
       "name":"સુગર ફ્રી મીઠાઈઓ",
       "items": [
-        { "id": 1, "name": "શીખંડ માં સચ ફ્રી", "image": null },
-        { "id": 2, "name": "લીકવીડ માં સરા ફ્રી", "image": null },
-        { "id": 3, "name": "મીલ્ક પીસ માં સગફ્રી", "image": null },
-        { "id": 4, "name": "કાજુ બદામ માં ગફ્રી", "image": null }
+        { "id": 1, "name": "શીખંડ માં સુગર ફ્રી", "image": null },
+        { "id": 2, "name": "લિક્વિડ માં સુગર ફ્રી", "image": null },
+        { "id": 3, "name": "મીલ્ક પીસ માં સુગર ફ્રી", "image": null },
+        { "id": 4, "name": "કાજુ બદામ માં સુગર ફ્રી", "image": null }
       ]
     },    
     {
       "id": 49,
-      "name":"મખ્ખન ફલેવર",
+      "name":"મખ્ખન ફ્લેવર",
       "items": [
         { "id": 1, "name": "મખ્ખન કલીંગર", "image": null },
         { "id": 2, "name": "કિવી ચોકો સેન્ડવીચ", "image": null },
@@ -1012,7 +1011,7 @@ export const useData = () => {
     },
     {
       "id": 50,
-      "name":"સ્પે. બંગાળી ફલેવર",
+      "name":"સ્પે. બંગાળી ફ્લેવર",
       "items": [
         { "id": 1, "name": "રસગુલ્લા", "image": null },
         { "id": 2, "name": "લીચી બાટી", "image": null },
@@ -1025,7 +1024,7 @@ export const useData = () => {
         { "id": 9, "name": "મધુમીલન", "image": null },
         { "id": 10, "name": "કિવી સેન્ડવીચ", "image": null },
         { "id": 11, "name": "રાતરાણી", "image": null },
-        { "id": 12, "name": "ક્રીમ પાઇના બાટી", "image": null },
+        { "id": 12, "name": "ક્રીમ પાઈનેપલ બાટી", "image": null },
         { "id": 13, "name": "કેથોકર બાટી", "image": null },
         { "id": 14, "name": "રોઝ ગુલકંદ બાટી", "image": null },
         { "id": 15, "name": "ઓરેંજ અનાર બાટી", "image": null },
@@ -1046,7 +1045,7 @@ export const useData = () => {
     },    
     {
       "id": 51,
-      "name":"પેઠા માં ફલેવર",
+      "name":"પેઠા માં ફ્લેવર",
       "items": [
         { "id": 1, "name": "રાજમોતી પેઠા", "image": null },
         { "id": 2, "name": "પેઠા પાન", "image": null },
@@ -1058,7 +1057,7 @@ export const useData = () => {
         { "id": 8, "name": "મેંગો ફીંગર", "image": null },
         { "id": 9, "name": "કીવી ફીંગર", "image": null },
         { "id": 10, "name": "ચોકો પીસ્તા પાન", "image": null },
-        { "id": 11, "name": "પાઇનેપલ ફીંગર", "image": null }
+        { "id": 11, "name": "પાઈનેપલ ફીંગર", "image": null }
       ]
     }
   ];

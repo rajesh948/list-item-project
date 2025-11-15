@@ -1,91 +1,92 @@
 <template>
-  <v-card :color="setColor" rounded="0" class="ma-5">
-    <swiper :pagination="{dynamicBullets: true}"  :modules="modules" class="mySwiper">
-      <swiper-slide  v-for="item in decorationItem.images" :key="`card-${item.id}`">  
-        <v-img :src="item.image" />
-        </swiper-slide>
+  <ion-card :class="{ 'card-selected': selected }" class="decoration-card">
+    <swiper
+      :pagination="{ dynamicBullets: true }"
+      :modules="modules"
+      class="decoration-swiper"
+    >
+      <swiper-slide
+        v-for="item in decorationItem.images"
+        :key="`card-${item.id}`"
+      >
+        <ion-img :src="item.image" :alt="decorationItem.name"></ion-img>
+      </swiper-slide>
     </swiper>
-    <div class="d-flex justify-center align-center">
-      <!-- <v-card-title class="text-h5"> {{ decorationItem.name }} </v-card-title> -->
-      <v-card-actions>
-        <v-btn
-          class="ms-3 px-8"
-          variant="outlined"
-          size="small"
-          @click="$emit('addItem', decorationItem)"
-        >
-          {{ selected ? "Remove" : "Select" }}
-        </v-btn>
-      </v-card-actions>
-    </div>
-  </v-card>
+    <ion-card-content class="decoration-actions">
+      <ion-button
+        expand="block"
+        :color="selected ? 'danger' : 'primary'"
+        @click="$emit('addItem', decorationItem)"
+      >
+        {{ selected ? "Remove" : "Select" }}
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 </template>
 
-<script>
-import { Pagination } from "swiper/modules";
-export default {
-  emits: ["addItem"],
-  props: {
-    decorationItem: {
-      type: Object,
-      required: true,
-    },
-    selected: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  setup(props) {
-    const setColor = computed(() =>
-      props.selected ? "green-lighten-3" : "lime-lighten-5"
-    );
-    return {
-      modules: [Pagination],
-      setColor,
-    };
-  },
-};
+<script setup lang="ts">
+import { IonCard, IonCardContent, IonButton, IonImg } from '@ionic/vue';
+import { Pagination } from 'swiper/modules';
+
+interface DecorationImage {
+  id: string;
+  image: string;
+}
+
+interface DecorationItem {
+  id: string;
+  name: string;
+  images: DecorationImage[];
+}
+
+defineProps<{
+  decorationItem: DecorationItem;
+  selected: boolean;
+}>();
+
+defineEmits<{
+  addItem: [item: DecorationItem];
+}>();
+
+const modules = [Pagination];
 </script>
 
 <style scoped>
-#app {
-  height: 100%;
-}
-html,
-body {
-  position: relative;
-  height: 100%;
+.decoration-card {
+  margin: 20px;
+  transition: all 0.3s ease;
 }
 
-body {
-  background: #eee;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  color: #000;
-  margin: 0;
-  padding: 0;
+.card-selected {
+  border: 2px solid var(--ion-color-success);
+  background-color: var(--ion-color-success-tint);
 }
 
-.swiper {
+.decoration-swiper {
   width: 100%;
-  height: 100%;
+  height: 300px;
 }
 
 .swiper-slide {
   text-align: center;
   font-size: 18px;
   background: #fff;
-
-  /* Center slide text vertically */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.swiper-slide img {
+.swiper-slide ion-img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.decoration-actions {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

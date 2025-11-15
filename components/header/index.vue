@@ -1,137 +1,283 @@
 <template>
-  <v-card
-    style="z-index: 1"
-    max-width="448"
-    class="mx-auto mb-16"
-    color="grey-lighten-3"
-  >
-    <v-layout>
-      <v-app-bar
-        color="teal-darken-4"
-        image="https://picsum.photos/1920/1080?random"
-      >
-        <template v-slot:image>
-          <v-img
-            gradient="to top right, rgba(19,84,122,.8), rgba(245,226,106,.8)"
-          ></v-img>
-        </template>
+  <div>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Catering App</ion-title>
+        <ion-buttons slot="end">
+          <!-- <ion-button @click="onGoto('/decoration-table')">
+            <ion-icon slot="icon-only" :icon="restaurantOutline"></ion-icon>
+          </ion-button> -->
+          <ion-button @click="onGoto('/item-report')">
+            <ion-icon slot="icon-only" :icon="documentTextOutline"></ion-icon>
+          </ion-button>
+          <ion-button @click="onGoto('/')">
+            <ion-icon slot="icon-only" :icon="homeOutline"></ion-icon>
+          </ion-button>
+          <ion-button @click="onToggleSettingsDialog">
+            <ion-icon slot="icon-only" :icon="settingsOutline"></ion-icon>
+          </ion-button>
+          <ion-button @click="onToggleDialog">
+            <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-        <template v-slot:prepend>
-          <v-app-bar-nav-icon @click="toggleLeftSlider"></v-app-bar-nav-icon>
-        </template>
-
-        <v-app-bar-title></v-app-bar-title>
-
-        <v-spacer></v-spacer>
-
-        <v-btn icon @click="onGoto('/decoration-table')">
-          <v-icon>mdi-silverware-fork-knife</v-icon>
-        </v-btn>
-        <v-btn icon @click="onGoto('/item-report')">
-          <v-icon>mdi-file-document</v-icon>
-        </v-btn>
-
-        <v-btn icon @click="onGoto('/')">
-          <v-icon>mdi-home</v-icon>
-        </v-btn>
-        <v-btn icon @click="onToggleDialog">
-          <v-icon>mdi-database-remove</v-icon>
-        </v-btn>
-      </v-app-bar>
-      <v-navigation-drawer v-model="isShowLeftSlider" temporary>
-        <!-- <v-list-item
-          prepend-avatar="https://randomuser.me/api/portraits/men/78.jpg"
-          title="John Leider"
-        ></v-list-item> -->
-
-        <!-- <v-divider></v-divider> -->
-
-        <v-list density="compact" nav>
-          <v-list-item
-          v-for="category in data"
+    <ion-menu content-id="main-content" type="overlay">
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Categories</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-item
+            v-for="category in data"
             :key="category.id"
-            prepend-icon="mdi-view-dashboard"
-            :title="category.name"
-            :value="category.name"
+            button
             @click="onSelectCategory(category.id)"
-            :active="selectedCategoryId == category.id"
-          ></v-list-item>
-        </v-list>
-      </v-navigation-drawer>
-    </v-layout>
-  </v-card>
-  <Dialog :display="isShowDialog">
-    <div>
-      <v-card-title class="text-h5">Hello ! </v-card-title>
-      <v-card-text>Are You Sure To Reset Selected Items.</v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="green-darken-1"
-          variant="text"
-          @click="resetDataBase(true)"
-        >
-          Yes
-        </v-btn>
-        <v-btn
-          color="green-darken-1"
-          variant="text"
-          @click="resetDataBase(false)"
-        >
-          No
-        </v-btn>
-      </v-card-actions>
-    </div>
-  </Dialog>
+            :class="{ 'ion-activated': selectedCategoryId == category.id }"
+          >
+            <ion-icon slot="start" :icon="gridOutline"></ion-icon>
+            <ion-label class="category-label">{{ category.name }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+
+    <!-- Settings Dialog -->
+    <ion-modal :is-open="isShowSettingsDialog" @didDismiss="onSettingsDialogDismiss">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Settings</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="closeSettingsDialog">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="settings-content">
+          <h2>Business Information</h2>
+          <p class="help-text">These details will appear on the PDF report</p>
+
+          <ion-item>
+            <ion-label position="stacked">Business Name</ion-label>
+            <ion-input
+              v-model="tempBusinessName"
+              placeholder="મહાકાળી કેટર્સ"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Phone Numbers</ion-label>
+            <ion-input
+              v-model="tempPhoneNumbers"
+              placeholder="Phone No: 97274 73918, 98263 52718"
+            ></ion-input>
+          </ion-item>
+
+          <div class="settings-actions">
+            <ion-button expand="block" @click="saveSettingsChanges">
+              Save Settings
+            </ion-button>
+            <ion-button expand="block" fill="outline" @click="resetToDefaults">
+              Reset to Defaults
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ion-modal>
+
+    <!-- Alert Dialog for Reset Confirmation -->
+    <ion-modal :is-open="isShowDialog" @didDismiss="onDialogDismiss">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Confirm Reset</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="closeDialog">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="dialog-content">
+          <h2>Hello!</h2>
+          <p>Are you sure you want to reset all selected items?</p>
+          <div class="dialog-actions">
+            <ion-button expand="block" color="danger" @click="resetDataBase(true)">
+              Yes, Reset All
+            </ion-button>
+            <ion-button expand="block" fill="outline" @click="closeDialog">
+              Cancel
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ion-modal>
+  </div>
 </template>
-<script>
-export default {
-  setup() {
-    const isShowLeftSlider = ref(false);
-    const isShowDialog = ref(false);
-    const { data } = useData();
-const route = useRoute()
-const selectedCategoryId = computed(()=>route.params?.id)
-    const toggleLeftSlider = () => {
-      isShowLeftSlider.value = !isShowLeftSlider.value;
-    };
 
-    const onSelectCategory = (categoryId) => {
-      navigateTo(`/list-item/${categoryId}`);
-      toggleLeftSlider();
-    };
+<script setup lang="ts">
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonMenuButton,
+  IonMenu,
+  IonContent,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonModal,
+  IonInput,
+  menuController,
+} from '@ionic/vue';
+import {
+  homeOutline,
+  documentTextOutline,
+  restaurantOutline,
+  trashOutline,
+  gridOutline,
+  settingsOutline,
+} from 'ionicons/icons';
 
-    const resetDataBase = (isResent) => {
-      if (isResent) {
-        localStorage.clear();
-        onGoto("/");
-      }
-      onToggleDialog();
-    };
+const isShowDialog = ref(false);
+const isShowSettingsDialog = ref(false);
+const { data } = useData();
+const route = useRoute();
+const selectedCategoryId = computed(() => route.params?.id);
 
-    const onToggleDialog = () => {
-      isShowDialog.value = !isShowDialog.value;
-    };
-    const onGoto = (path) => navigateTo(path);
+// Settings
+const { businessName, phoneNumbers, saveSettings, resetSettings } = useSettings();
+const tempBusinessName = ref('');
+const tempPhoneNumbers = ref('');
 
-    return {
-      isShowLeftSlider,
-      toggleLeftSlider,
-      data,
-      onSelectCategory,
-      onGoto,
-      onToggleDialog,
-      isShowDialog,
-      resetDataBase,
-      selectedCategoryId 
-    };
-  },
+const onSelectCategory = async (categoryId: string) => {
+  // Close the menu first
+  await menuController.close();
+  // Then navigate
+  navigateTo(`/list-item/${categoryId}`);
 };
+
+const resetDataBase = (isReset: boolean) => {
+  if (isReset) {
+    localStorage.clear();
+    onGoto('/');
+  }
+  closeDialog();
+};
+
+const onToggleDialog = () => {
+  isShowDialog.value = true;
+};
+
+const closeDialog = () => {
+  isShowDialog.value = false;
+};
+
+const onDialogDismiss = () => {
+  // Cleanup when modal is dismissed (if needed in future)
+};
+
+const onToggleSettingsDialog = () => {
+  tempBusinessName.value = businessName.value;
+  tempPhoneNumbers.value = phoneNumbers.value;
+  isShowSettingsDialog.value = true;
+};
+
+const closeSettingsDialog = () => {
+  isShowSettingsDialog.value = false;
+};
+
+const onSettingsDialogDismiss = () => {
+  // Cleanup when modal is dismissed
+};
+
+const saveSettingsChanges = () => {
+  saveSettings(tempBusinessName.value, tempPhoneNumbers.value);
+  closeSettingsDialog();
+};
+
+const resetToDefaults = () => {
+  resetSettings();
+  tempBusinessName.value = businessName.value;
+  tempPhoneNumbers.value = phoneNumbers.value;
+};
+
+const onGoto = (path: string) => navigateTo(path);
 </script>
-<style>
-.v-list-item-title{
-  font-weight:bold !important;
-  font-size:medium !important;
+
+<style scoped>
+.category-label {
+  font-weight: bold !important;
+  font-size: 1rem !important;
   padding: 10px;
+}
+
+/* Highlight selected category */
+ion-item.ion-activated {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+
+ion-item.ion-activated ion-icon {
+  color: var(--ion-color-primary-contrast);
+}
+
+ion-item.ion-activated .category-label {
+  color: var(--ion-color-primary-contrast);
+  font-weight: 900 !important;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dialog-content h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.dialog-content p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-content h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.settings-content .help-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 }
 </style>
