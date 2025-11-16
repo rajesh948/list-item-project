@@ -5,6 +5,15 @@
         <div class="page-header">
           <h1>Saved Reports</h1>
           <p>View and manage your saved reports</p>
+
+          <!-- Refresh Button -->
+          <div class="header-actions">
+            <ion-button fill="outline" color="medium" @click="handleRefresh" :disabled="isRefreshing">
+              <ion-spinner v-if="isRefreshing" name="crescent"></ion-spinner>
+              <ion-icon v-else slot="start" :icon="refreshOutline"></ion-icon>
+              <span v-if="!isRefreshing">Refresh</span>
+            </ion-button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -146,18 +155,21 @@ import {
   closeOutline,
   warningOutline,
   openOutline,
+  refreshOutline,
 } from 'ionicons/icons';
 import type { SavedReport } from '~/composables/useSavedReports';
 
 // Authentication is handled by global middleware (02-redirect-login.global.ts)
 
-const { fetchSavedReports, deleteReport } = useSavedReports();
+const { deleteReport } = useSavedReports();
 const { showToast } = useToast();
 const userStore = useUserStore();
 const reportStore = useReportStore();
+const savedReportsStore = useSavedReportsStore();
 
-const reports = ref<SavedReport[]>([]);
-const isLoading = ref(true);
+const reports = computed(() => savedReportsStore.allReports);
+const isLoading = computed(() => savedReportsStore.isLoading);
+const isRefreshing = ref(false);
 const isOperationLoading = ref(false);
 const operationMessage = ref('');
 const showDeleteModal = ref(false);
@@ -165,19 +177,27 @@ const reportToDelete = ref<SavedReport | null>(null);
 
 const loadReports = async () => {
   try {
-    isLoading.value = true;
-    console.log('Loading reports for user:', userStore.user?.uid);
-    if (userStore.user) {
-      reports.value = await fetchSavedReports(userStore.user.uid);
-      console.log('Loaded reports:', reports.value.length, reports.value);
-    } else {
-      console.log('No user found');
+    if (!userStore.user) {
+      return;
     }
+
+    await savedReportsStore.fetchReports(userStore.user.uid);
   } catch (error) {
-    console.error('Error loading reports:', error);
     showToast('Failed to load reports', 'error', 2000);
+  }
+};
+
+const handleRefresh = async () => {
+  if (!userStore.user) return;
+
+  try {
+    isRefreshing.value = true;
+    await savedReportsStore.refreshReports(userStore.user.uid);
+    showToast('Reports refreshed successfully', 'success', 2000);
+  } catch (error) {
+    showToast('Failed to refresh reports', 'error', 2000);
   } finally {
-    isLoading.value = false;
+    isRefreshing.value = false;
   }
 };
 
@@ -239,7 +259,7 @@ const closeDeleteModal = () => {
 };
 
 const handleDelete = async () => {
-  if (!reportToDelete.value?.id) return;
+  if (!reportToDelete.value?.id || !userStore.user) return;
 
   try {
     isOperationLoading.value = true;
@@ -249,12 +269,13 @@ const handleDelete = async () => {
 
     if (result.success) {
       showToast('Report deleted successfully', 'success', 2000);
-      await loadReports();
+
+      // Refresh the store to update the cached reports
+      await savedReportsStore.refreshReports(userStore.user.uid);
     } else {
       showToast(result.error || 'Failed to delete report', 'error', 2000);
     }
   } catch (error) {
-    console.error('Error deleting report:', error);
     showToast('Failed to delete report', 'error', 2000);
   } finally {
     isOperationLoading.value = false;
@@ -285,6 +306,14 @@ const handleDelete = async () => {
 .page-header p {
   color: #666;
   font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .loading-state {
@@ -449,7 +478,12 @@ const handleDelete = async () => {
 
   .report-actions ion-button {
     font-size: 0.75rem;
-    min-width: 70px;
+    min-width: auto;
+    flex: 1;
+  }
+
+  .report-actions ion-button span {
+    display: none;
   }
 }
 </style>

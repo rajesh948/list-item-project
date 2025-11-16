@@ -201,7 +201,6 @@ const saveCategory = async () => {
     await categoriesStore.refreshCategories();
     closeModal();
   } catch (error) {
-    console.error('Error saving category:', error);
     errorMessage.value = 'Failed to save category';
   }
 };
@@ -227,7 +226,6 @@ const deleteCategory = async () => {
     await categoriesStore.refreshCategories();
     closeDeleteModal();
   } catch (error) {
-    console.error('Error deleting category:', error);
     showToast('Failed to delete category', 'error', 2000);
   }
 };

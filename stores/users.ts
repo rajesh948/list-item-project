@@ -96,7 +96,6 @@ export const useUsersStore = defineStore('users', {
       if (!force && this.users.length > 0 && this.lastFetched) {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         if (this.lastFetched > fiveMinutesAgo) {
-          console.log('📦 Using cached users');
           return this.users;
         }
       }
@@ -104,7 +103,6 @@ export const useUsersStore = defineStore('users', {
       this.isLoading = true;
 
       try {
-        console.log('🔄 Fetching users from Firebase...');
         const usersSnapshot = await getDocs(collection(db, 'users'));
 
         const fetchedUsers: UserData[] = [];
@@ -123,11 +121,8 @@ export const useUsersStore = defineStore('users', {
         this.users = fetchedUsers;
         this.lastFetched = new Date();
 
-        console.log(`✅ Loaded ${fetchedUsers.length} users from Firebase`);
-
         return this.users;
       } catch (error) {
-        console.error('❌ Error fetching users:', error);
         throw error;
       } finally {
         this.isLoading = false;
@@ -143,7 +138,6 @@ export const useUsersStore = defineStore('users', {
       if (!force && this.lastCountsFetched) {
         const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
         if (this.lastCountsFetched > twoMinutesAgo) {
-          console.log('📦 Using cached user sessions and reports');
           return;
         }
       }
@@ -151,7 +145,6 @@ export const useUsersStore = defineStore('users', {
       this.isLoadingCounts = true;
 
       try {
-        console.log('🔄 Fetching user sessions and reports...');
         const { getUserSessions } = useDeviceSessions();
         const { fetchSavedReports } = useSavedReports();
 
@@ -169,7 +162,6 @@ export const useUsersStore = defineStore('users', {
               userSessions[user.uid] = sessions;
               userReports[user.uid] = reports;
             } catch (error) {
-              console.error(`Error loading data for user ${user.uid}:`, error);
               userSessions[user.uid] = [];
               userReports[user.uid] = [];
             }
@@ -179,10 +171,8 @@ export const useUsersStore = defineStore('users', {
         this.userSessions = userSessions;
         this.userReports = userReports;
         this.lastCountsFetched = new Date();
-
-        console.log('✅ User sessions and reports loaded and cached');
       } catch (error) {
-        console.error('❌ Error fetching user sessions and reports:', error);
+        // Error handling
       } finally {
         this.isLoadingCounts = false;
       }
@@ -198,7 +188,7 @@ export const useUsersStore = defineStore('users', {
       try {
         this.userSessions[uid] = await getUserSessions(uid);
       } catch (error) {
-        console.error(`Error updating sessions for user ${uid}:`, error);
+        // Error handling
       }
     },
 
@@ -208,7 +198,7 @@ export const useUsersStore = defineStore('users', {
       try {
         this.userReports[uid] = await fetchSavedReports(uid);
       } catch (error) {
-        console.error(`Error updating reports for user ${uid}:`, error);
+        // Error handling
       }
     },
 

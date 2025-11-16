@@ -19,7 +19,6 @@ export const useUsers = () => {
         phoneNumber: doc.data().phoneNumber,
       } as UserData));
     } catch (error) {
-      console.error('Error fetching users:', error);
       return [];
     }
   };
@@ -89,11 +88,9 @@ export const useUsers = () => {
       // Re-login as admin using stored password
       const adminEmail = `${adminUsername}@catering.local`;
       await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-      console.log('✅ User created successfully. Admin re-authenticated.');
 
       return { success: true };
     } catch (error: any) {
-      console.error('Error creating user:', error);
 
       let errorMessage = 'Failed to create user';
       if (error.code === 'auth/email-already-in-use') {
@@ -138,7 +135,6 @@ export const useUsers = () => {
 
       return { success: true };
     } catch (error) {
-      console.error('Error updating user:', error);
       return { success: false, error: 'Failed to update user' };
     }
   };
@@ -161,7 +157,6 @@ export const useUsers = () => {
 
       return { success: true };
     } catch (error) {
-      console.error('Error deleting user:', error);
       return { success: false, error: 'Failed to delete user' };
     }
   };

@@ -86,7 +86,7 @@ export const useReportStore = defineStore('report', {
           this.userData = JSON.parse(savedUserData);
         }
       } catch (error) {
-        console.error('Error loading from localStorage:', error);
+        // Error handling
       }
     },
 
@@ -97,7 +97,7 @@ export const useReportStore = defineStore('report', {
         localStorage.setItem('selectedTable', JSON.stringify(this.selectedTable));
         localStorage.setItem('userData', JSON.stringify(this.userData));
       } catch (error) {
-        console.error('Error saving to localStorage:', error);
+        // Error handling
       }
     },
 

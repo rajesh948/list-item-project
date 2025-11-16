@@ -50,7 +50,6 @@ onMounted(async () => {
   // Timeout after 5 seconds
   setTimeout(() => {
     if (showLoading.value) {
-      console.warn('⚠️ Loading timeout reached');
       showLoading.value = false;
       clearInterval(checkAuth);
     }

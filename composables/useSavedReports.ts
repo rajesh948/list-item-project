@@ -34,7 +34,6 @@ export interface SavedReport {
 export const useSavedReports = () => {
   const fetchSavedReports = async (userId?: string): Promise<SavedReport[]> => {
     try {
-      console.log('Fetching reports from Firestore for userId:', userId);
       const reportsRef = collection(db, 'savedReports');
       let q;
 
@@ -45,13 +44,10 @@ export const useSavedReports = () => {
         q = query(reportsRef);
       }
 
-      console.log('Executing Firestore query...');
       const querySnapshot = await getDocs(q);
-      console.log('Query returned', querySnapshot.size, 'documents');
 
       const reports = querySnapshot.docs.map(doc => {
         const data = doc.data();
-        console.log('Processing document:', doc.id, data);
         return {
           id: doc.id,
           userId: data.userId,
@@ -67,10 +63,8 @@ export const useSavedReports = () => {
       // Sort manually by createdAt descending
       reports.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-      console.log('Returning', reports.length, 'processed reports');
       return reports;
     } catch (error) {
-      console.error('Error fetching saved reports:', error);
       return [];
     }
   };
@@ -96,7 +90,6 @@ export const useSavedReports = () => {
         updatedAt: data.updatedAt?.toDate() || new Date(),
       } as SavedReport;
     } catch (error) {
-      console.error('Error getting saved report:', error);
       return null;
     }
   };
@@ -123,7 +116,6 @@ export const useSavedReports = () => {
 
       return { success: true, id: docRef.id };
     } catch (error: any) {
-      console.error('Error saving report:', error);
       return { success: false, error: error.message || 'Failed to save report' };
     }
   };
@@ -146,7 +138,6 @@ export const useSavedReports = () => {
 
       return { success: true };
     } catch (error: any) {
-      console.error('Error updating report:', error);
       return { success: false, error: error.message || 'Failed to update report' };
     }
   };
@@ -158,7 +149,6 @@ export const useSavedReports = () => {
 
       return { success: true };
     } catch (error: any) {
-      console.error('Error deleting report:', error);
       return { success: false, error: error.message || 'Failed to delete report' };
     }
   };
@@ -170,7 +160,6 @@ export const useSavedReports = () => {
       const querySnapshot = await getDocs(q);
       return querySnapshot.size;
     } catch (error) {
-      console.error('Error getting reports count:', error);
       return 0;
     }
   };

@@ -123,11 +123,14 @@ const totalUsers = computed(() => usersStore.totalUsers);
 const isInitializing = ref(false);
 
 onMounted(async () => {
-  // Fetch users from store (will use cache if available)
+  // Fetch data from stores (will use cache if available)
   try {
-    await usersStore.fetchUsers();
+    await Promise.all([
+      categoriesStore.fetchCategories(),
+      usersStore.fetchUsers(),
+    ]);
   } catch (error) {
-    console.error('Error fetching users:', error);
+    // Error handling
   }
 });
 
@@ -144,7 +147,6 @@ const initializeDatabase = async () => {
       showToast(result.message || 'Failed to initialize categories', 'warning', 3000);
     }
   } catch (error) {
-    console.error('Error initializing database:', error);
     showToast('An error occurred while initializing', 'error', 3000);
   } finally {
     isInitializing.value = false;

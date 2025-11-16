@@ -50,19 +50,10 @@ export function useAuth() {
                 phoneNumber: userData.phoneNumber || '',
               });
 
-              console.log('User data loaded:', {
-                email: firebaseUser.email,
-                role: userData.role,
-                username: userData.userName,
-                isActive: userData.isActive
-              });
-
               // Load categories from Firebase and cache in store
               await categoriesStore.fetchCategories();
 
             } else {
-              console.warn('User document not found in Firestore for:', firebaseUser.email);
-
               userStore.setUser({
                 uid: firebaseUser.uid,
                 username: firebaseUser.email?.split('@')[0] || 'User',
@@ -73,8 +64,7 @@ export function useAuth() {
               });
             }
           } catch (error) {
-            console.error('Error fetching user data:', error);
-
+            // Error handling
             userStore.setUser({
               uid: firebaseUser.uid,
               username: firebaseUser.email?.split('@')[0] || 'User',
@@ -99,15 +89,11 @@ export function useAuth() {
   // Login function - username-based with Firebase Auth
   const login = async (username: string, password: string) => {
     try {
-      console.log('🔐 LOGIN ATTEMPT:', { username });
-
       // Convert username to email format for Firebase Auth
       const email = `${username}@catering.local`;
-      console.log('📧 Converted to email:', email);
 
       // Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword($auth, email, password);
-      console.log('✅ Firebase Auth successful');
 
       // Fetch user data from Firestore using UID
       const userRef = doc($db, 'users', userCredential.user.uid);
@@ -118,7 +104,6 @@ export function useAuth() {
 
         // Check if user is active
         if (!userData.isActive) {
-          console.log('❌ User is inactive');
           await signOut($auth);
           return { success: false, error: 'Your account has been deactivated. Please contact an administrator.' };
         }
@@ -139,12 +124,9 @@ export function useAuth() {
         // Create session tracking
         try {
           await createSession(userCredential.user.uid);
-          console.log('✅ Session created');
         } catch (error) {
-          console.error('❌ Error creating session:', error);
+          // Error handling
         }
-
-        console.log('✅ Login successful. User role:', userStore.user?.role);
 
         // Return success with redirect path
         return {
@@ -152,12 +134,10 @@ export function useAuth() {
           redirectTo: userStore.user?.role === 'admin' && userStore.user?.isActive ? '/admin' : '/'
         };
       } else {
-        console.error('❌ User document not found in Firestore');
         await signOut($auth);
         return { success: false, error: 'User account not found. Please contact an administrator.' };
       }
     } catch (error: any) {
-      console.error('❌ LOGIN ERROR:', error);
       let message = 'Login failed. Please try again.';
 
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -180,16 +160,14 @@ export function useAuth() {
       if (sessionId) {
         try {
           await deleteSession(sessionId);
-          console.log('✅ Session deleted');
         } catch (error) {
-          console.error('❌ Error deleting session:', error);
+          // Error handling
         }
       }
 
       await signOut($auth);
       return { success: true };
     } catch (error) {
-      console.error('Logout error:', error);
       return { success: false, error: 'Logout failed' };
     }
   };

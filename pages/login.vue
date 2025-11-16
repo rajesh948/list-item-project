@@ -124,7 +124,6 @@ const handleLogin = async () => {
 
   if (result.success) {
     // Redirect to the appropriate page
-    console.log('Login successful, redirecting to:', result.redirectTo);
 
     // Small delay to ensure Firebase Auth state is saved
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -144,8 +143,6 @@ onMounted(async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (isAuthenticated.value) {
-      console.log('🔄 Already logged in, redirecting...', userRole.value);
-
       if (userRole.value === 'admin') {
         await navigateTo('/admin');
       } else {

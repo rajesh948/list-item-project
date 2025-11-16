@@ -11,16 +11,12 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
     // Check if trying to access a public route
     if (publicRoutes.includes(to.path)) {
-      console.log('📖 Public route, allowing access:', to.path);
       return; // Allow access to public routes
     }
 
     // Check if user is authenticated via Firebase Auth
     if (!$auth.currentUser) {
-      console.log('🔒 Not authenticated, redirecting to /login (from:', to.path + ')');
       return navigateTo('/login');
     }
-
-    console.log('✅ User authenticated, allowing access:', $auth.currentUser.email, '→', to.path);
   }
 });

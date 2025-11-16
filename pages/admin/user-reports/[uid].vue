@@ -247,13 +247,11 @@ const loadReports = async () => {
 
     // Use cached reports from store
     reports.value = usersStore.getUserReports(userId);
-    console.log('📦 Using cached reports for user:', userId);
 
     if (reports.value.length > 0) {
       userName.value = reports.value[0].userName;
     }
   } catch (error) {
-    console.error('Error loading reports:', error);
     showToast('Failed to load reports', 'error', 2000);
   } finally {
     isLoading.value = false;
@@ -317,7 +315,6 @@ const handleDelete = async () => {
       showToast(result.error || 'Failed to delete report', 'error', 2000);
     }
   } catch (error) {
-    console.error('Error deleting report:', error);
     showToast('Failed to delete report', 'error', 2000);
   } finally {
     isOperationLoading.value = false;
@@ -571,11 +568,17 @@ const handleDelete = async () => {
   }
 
   .report-actions {
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .report-actions ion-button {
-    width: 100%;
+    flex: 1;
+    min-width: auto;
+  }
+
+  .report-actions ion-button span {
+    display: none;
   }
 
   .info-grid {

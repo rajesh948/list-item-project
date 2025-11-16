@@ -315,7 +315,6 @@ const saveItem = async () => {
     await categoriesStore.refreshCategories();
     closeModal();
   } catch (error) {
-    console.error('Error saving item:', error);
     errorMessage.value = 'Failed to save item';
   }
 };
@@ -359,7 +358,6 @@ const deleteItem = async () => {
 
     closeDeleteModal();
   } catch (error) {
-    console.error('Error deleting item:', error);
     showToast('Failed to delete item', 'error', 2000);
   }
 };

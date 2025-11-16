@@ -410,7 +410,6 @@ const handleRefresh = async () => {
 
     showToast('Users refreshed successfully', 'success', 2000);
   } catch (error) {
-    console.error('Error refreshing users:', error);
     showToast('Failed to refresh users', 'error', 2000);
   } finally {
     isRefreshing.value = false;
@@ -548,9 +547,7 @@ const viewUserSessions = async (user: UserData) => {
   try {
     // Use cached sessions from store
     userSessions.value = usersStore.getUserSessions(user.uid);
-    console.log('📦 Using cached sessions for user:', user.uid);
   } catch (error) {
-    console.error('Error loading sessions:', error);
     showToast('Failed to load sessions', 'error', 2000);
   } finally {
     isLoadingSessions.value = false;
@@ -577,7 +574,6 @@ const logoutFromDevice = async (sessionId: string) => {
       userSessions.value = usersStore.getUserSessions(selectedUserForSessions.value.uid);
     }
   } catch (error) {
-    console.error('Error logging out user:', error);
     showToast('Failed to logout user', 'error', 2000);
   }
 };
@@ -598,7 +594,6 @@ const logoutFromAllDevices = async () => {
     // Update local sessions list from store
     userSessions.value = usersStore.getUserSessions(selectedUserForSessions.value.uid);
   } catch (error) {
-    console.error('Error logging out from all devices:', error);
     showToast('Failed to logout user from all devices', 'error', 2000);
   }
 };
@@ -659,6 +654,11 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.header-actions .button-text {
+  display: inline;
+  margin-left: 4px;
 }
 
 .loading-container {
@@ -1041,11 +1041,21 @@ onMounted(() => {
 
   .header-actions {
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .header-actions ion-button {
-    width: 100%;
+    flex: 1;
+    font-size: 0.875rem;
+  }
+
+  .header-actions .button-text {
+    display: none !important;
+  }
+
+  .header-actions ion-button ion-icon {
+    margin: 0;
   }
 
   .user-info {

@@ -15,7 +15,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // If user store has role, use it
     if (userStore.user && userStore.user.role) {
       if (userStore.isAdmin) {
-        console.log('🔄 Admin user accessing regular page, redirecting to /admin');
         return navigateTo('/admin');
       }
       return;
@@ -32,12 +31,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
           const userData = userDoc.data();
 
           if (userData.role === 'admin') {
-            console.log('🔄 Admin user accessing regular page, redirecting to /admin');
             return navigateTo('/admin');
           }
         }
       } catch (error) {
-        console.error('Error checking user role:', error);
+        // Error handling
       }
     }
   }

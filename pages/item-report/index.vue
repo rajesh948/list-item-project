@@ -439,7 +439,6 @@ const getPDF = async () => {
 
               resolve(true);
             } catch (fsError) {
-              console.error('Filesystem error:', fsError);
               // Fallback to browser download if filesystem fails
               const url = URL.createObjectURL(pdfBlob);
               const link = document.createElement('a');
@@ -477,7 +476,6 @@ const getPDF = async () => {
       }, 500);
     }
   } catch (error) {
-    console.log('PDF generate error:', error);
     isLoading.value = false;
     isChipClosable.value = true;
 
@@ -525,7 +523,6 @@ const handleSaveReport = async () => {
       showToast(result.error || 'Failed to save report', 'error', 2000);
     }
   } catch (error) {
-    console.error('Error saving report:', error);
     isLoading.value = false;
     showToast('Failed to save report. Please try again.', 'error', 2000);
   }

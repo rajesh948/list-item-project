@@ -52,38 +52,72 @@ const firebaseConfig = {
 ## Step 6: Set Up Firestore Security Rules
 
 1. In Firestore Database, go to "Rules" tab
-2. Replace the default rules with these:
+2. Replace the default rules with the updated rules from `firestore.rules` file:
+
+**Option 1: Copy from firestore.rules file**
+- Copy the entire content from `firestore.rules` in your project root
+- Paste it into the Firebase Console Rules editor
+
+**Option 2: Deploy using Firebase CLI**
+```bash
+firebase deploy --only firestore:rules
+```
+
+**Option 3: Manual Copy - Use these rules:**
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users collection - only admins can write
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null &&
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(userId));
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isOwner(userId);
+      allow delete: if isAdmin();
     }
 
-    // Orders - users can only read/write their own
-    match /orders/{orderId} {
-      allow read: if request.auth != null &&
-                  (resource.data.userId == request.auth.uid ||
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
-      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
-    }
-
-    // Categories - all authenticated users can read, only admin can write
+    // Categories collection rules
     match /categories/{categoryId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null &&
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Saved Reports collection rules
+    match /savedReports/{reportId} {
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+      allow delete: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
     }
   }
 }
 ```
 
 3. Click "Publish"
+
+**Important:** Make sure to publish the rules, or your app won't be able to save reports!
 
 ## Step 7: Create Admin Account
 
@@ -180,34 +214,66 @@ After setup:
 {
   uid: "firebase_auth_uid",
   email: "user@example.com",
-  name: "User Name",
+  userName: "username",
+  password: "stored_password", // For re-authentication
   role: "admin" | "user",
   isActive: true,
+  businessName: "Business Name",
+  phoneNumber: "Phone Number",
   createdAt: timestamp,
-  createdBy: "admin_uid"
+  updatedAt: timestamp
 }
 ```
 
-### categories (Optional - for future use)
+### categories
 ```javascript
 {
   id: 1,
   name: "કોલ્ડ ડ્રિંક",
-  order: 1,
-  items: [...]
+  items: [
+    {
+      id: 1,
+      name: "Item Name"
+    }
+  ],
+  createdAt: timestamp,
+  updatedAt: timestamp
 }
 ```
 
-### orders (Optional - for future use)
+### savedReports
 ```javascript
 {
-  id: "order_id",
   userId: "user_uid",
-  customerName: "Customer Name",
-  customerPhone: "1234567890",
-  items: [...],
+  userName: "username",
+  reportData: {
+    name: "Customer Name",
+    address: "Customer Address",
+    phone: "Phone Number",
+    date: "Event Date",
+    noOfPeople: "Number of People",
+    shift: "Morning/Evening",
+    price: "Price"
+  },
+  selectedCategories: [
+    {
+      id: 1,
+      name: "Category Name",
+      items: [
+        {
+          id: 1,
+          name: "Item Name",
+          categoryId: 1
+        }
+      ]
+    }
+  ],
+  selectedTable: {
+    id: 1,
+    name: "Table Decoration Name"
+  } | null,
   createdAt: timestamp,
-  pdfUrl: "storage_url"
+  updatedAt: timestamp
 }
 ```
 

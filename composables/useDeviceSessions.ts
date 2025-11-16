@@ -44,16 +44,13 @@ export const useDeviceSessions = () => {
         lastActive: Timestamp.now(),
       };
 
-      console.log('📝 Creating session:', sessionId, 'for user:', userId);
       await setDoc(doc($db, 'activeSessions', sessionId), sessionData);
-      console.log('✅ Session document created in Firestore');
 
       // Store session ID in localStorage
       localStorage.setItem('sessionId', sessionId);
 
       return sessionId;
     } catch (error) {
-      console.error('Error creating session:', error);
       throw error;
     }
   };
@@ -66,7 +63,7 @@ export const useDeviceSessions = () => {
         lastActive: Timestamp.now(),
       }, { merge: true });
     } catch (error) {
-      console.error('Error updating session:', error);
+      // Error handling
     }
   };
 
@@ -76,7 +73,7 @@ export const useDeviceSessions = () => {
       await deleteDoc(doc($db, 'activeSessions', sessionId));
       localStorage.removeItem('sessionId');
     } catch (error) {
-      console.error('Error deleting session:', error);
+      // Error handling
     }
   };
 
@@ -102,7 +99,6 @@ export const useDeviceSessions = () => {
 
       return sessions;
     } catch (error) {
-      console.error('Error getting user sessions:', error);
       return [];
     }
   };
@@ -118,7 +114,6 @@ export const useDeviceSessions = () => {
       );
       return activeSessions.length;
     } catch (error) {
-      console.error('Error getting session count:', error);
       return 0;
     }
   };
@@ -166,7 +161,7 @@ export const useDeviceSessions = () => {
         }
       }
     } catch (error) {
-      console.error('Error cleaning up sessions:', error);
+      // Error handling
     }
   };
 

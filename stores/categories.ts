@@ -39,7 +39,6 @@ export const useCategoriesStore = defineStore('categories', {
       if (!force && this.categories.length > 0 && this.lastFetched) {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         if (this.lastFetched > fiveMinutesAgo) {
-          console.log('📦 Using cached categories');
           return this.categories;
         }
       }
@@ -47,7 +46,6 @@ export const useCategoriesStore = defineStore('categories', {
       this.isLoading = true;
 
       try {
-        console.log('🔄 Fetching categories from Firebase...');
         const categoriesSnapshot = await getDocs(collection(db, 'categories'));
 
         const fetchedCategories: Category[] = [];
@@ -67,11 +65,8 @@ export const useCategoriesStore = defineStore('categories', {
         this.categories = fetchedCategories;
         this.lastFetched = new Date();
 
-        console.log(`✅ Loaded ${fetchedCategories.length} categories from Firebase`);
-
         return this.categories;
       } catch (error) {
-        console.error('❌ Error fetching categories:', error);
         throw error;
       } finally {
         this.isLoading = false;
