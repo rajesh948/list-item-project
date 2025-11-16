@@ -149,6 +149,7 @@ import {
 // Authentication is handled by global middleware (02-redirect-login.global.ts)
 
 const { showToast } = useToast();
+const reportStore = useReportStore();
 const errorMessage = ref<string | null>(null);
 
 const userFormData = ref({
@@ -162,10 +163,10 @@ const userFormData = ref({
 });
 
 onMounted(() => {
-  // Load existing userData if available
-  if (localStorage.getItem('userData')) {
-    const userData = JSON.parse(localStorage.getItem('userData')!);
-    userFormData.value = { ...userFormData.value, ...userData };
+  // Load existing userData from store
+  reportStore.loadFromLocalStorage();
+  if (reportStore.userData.name) {
+    userFormData.value = { ...reportStore.userData } as any;
   }
 });
 
@@ -173,7 +174,8 @@ const onSaveDetails = () => {
   if (!Object.values(userFormData.value).every((value) => value)) {
     return (errorMessage.value = 'Please Fill All Fields!');
   }
-  localStorage.setItem('userData', JSON.stringify(userFormData.value));
+
+  reportStore.updateUserData(userFormData.value as any);
   errorMessage.value = null;
   showToast('Event details saved successfully!', 'success', 2000);
 

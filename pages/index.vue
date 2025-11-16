@@ -63,8 +63,8 @@
       <ion-fab v-if="totalSelectedItems > 0" slot="fixed" vertical="bottom" horizontal="end">
         <ion-fab-button @click="goToReport">
           <ion-icon :icon="documentTextOutline"></ion-icon>
-          <div class="item-count-badge">{{ totalSelectedItems }}</div>
         </ion-fab-button>
+        <div class="item-count-badge">{{ totalSelectedItems }}</div>
       </ion-fab>
     </ion-content>
   </ion-page>
@@ -89,9 +89,9 @@ import { searchInGujarati } from '~/utils/transliterate';
 // Authentication is handled by global middleware (02-redirect-login.global.ts)
 
 const categoriesStore = useCategoriesStore();
+const reportStore = useReportStore();
 const data = computed(() => categoriesStore.allCategories);
 const searchQuery = ref('');
-const selectedDataFromStorage = ref<any>(null);
 
 // Search results across all categories
 const searchResults = computed(() => {
@@ -122,8 +122,7 @@ const onSelectCategory = (categoryId: string) => {
 };
 
 const onAddItem = (itemData: any) => {
-  const selectedData =
-    JSON.parse(localStorage.getItem('selectedData') || '[]');
+  const selectedData = [...reportStore.selectedCategories];
 
   const categoryId = itemData.categoryId;
   const categoryName = itemData.categoryName;
@@ -159,17 +158,15 @@ const onAddItem = (itemData: any) => {
     });
   }
 
-  localStorage.setItem('selectedData', JSON.stringify(selectedData));
-  selectedDataFromStorage.value = selectedData;
+  reportStore.updateCategories(selectedData);
 };
 
 onMounted(() => {
-  selectedDataFromStorage.value =
-    JSON.parse(localStorage.getItem('selectedData') || '[]');
+  reportStore.loadFromLocalStorage();
 });
 
 const isItemSelected = (itemId: string, categoryId?: number) => {
-  const selectedData = selectedDataFromStorage.value || [];
+  const selectedData = reportStore.selectedCategories || [];
 
   if (!categoryId) {
     return selectedData.some((category: any) =>
@@ -189,13 +186,8 @@ const isItemSelected = (itemId: string, categoryId?: number) => {
   return false;
 };
 
-// Calculate total selected items
-const totalSelectedItems = computed(() => {
-  const selectedData = selectedDataFromStorage.value || [];
-  return selectedData.reduce((total: number, category: any) => {
-    return total + (category.items?.length || 0);
-  }, 0);
-});
+// Calculate total selected items from store
+const totalSelectedItems = computed(() => reportStore.totalSelectedItems);
 
 const goToReport = () => {
   navigateTo('/item-report');

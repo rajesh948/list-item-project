@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      // Allow read if authenticated and either admin or own user
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(userId));
+
+      // Allow create only for admins
+      allow create: if isAdmin();
+
+      // Allow update for admins or own user
+      allow update: if isAdmin() || isOwner(userId);
+
+      // Allow delete only for admins
+      allow delete: if isAdmin();
+    }
+
+    // Categories collection rules
+    match /categories/{categoryId} {
+      // Allow read for all authenticated users
+      allow read: if isAuthenticated();
+
+      // Allow write only for admins
+      allow write: if isAdmin();
+    }
+
+    // Saved Reports collection rules
+    match /savedReports/{reportId} {
+      // Allow read if authenticated and either admin or own report
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update if owner or admin
+      allow update: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow delete if owner or admin
+      allow delete: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Active Sessions collection rules
+    match /activeSessions/{sessionId} {
+      // Allow read if authenticated and either admin or own session
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update if owner (for updating lastActive timestamp)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // Allow delete if owner or admin
+      allow delete: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+  }
+}

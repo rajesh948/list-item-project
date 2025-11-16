@@ -44,12 +44,17 @@
               </ion-button>
             </transition>
             <transition name="slide-fade">
-              <ion-button v-if="isHeaderMenuOpen" @click="onToggleDialog" class="menu-item" style="transition-delay: 0.2s">
+              <ion-button v-if="isHeaderMenuOpen" @click="onGoto('/saved-reports')" class="menu-item" style="transition-delay: 0.2s">
+                <ion-icon slot="icon-only" :icon="bookmarkOutline"></ion-icon>
+              </ion-button>
+            </transition>
+            <transition name="slide-fade">
+              <ion-button v-if="isHeaderMenuOpen" @click="onToggleDialog" class="menu-item" style="transition-delay: 0.25s">
                 <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
               </ion-button>
             </transition>
             <transition name="slide-fade">
-              <ion-button v-if="isHeaderMenuOpen" @click="handleLogout" class="menu-item" style="transition-delay: 0.25s">
+              <ion-button v-if="isHeaderMenuOpen" @click="handleLogout" class="menu-item" style="transition-delay: 0.3s">
                 <ion-icon slot="icon-only" :icon="logOutOutline"></ion-icon>
               </ion-button>
             </transition>
@@ -171,37 +176,35 @@
 
     <!-- Alert Dialog for Reset Confirmation -->
     <ion-modal :is-open="isShowDialog" @didDismiss="onDialogDismiss" class="reset-modal">
-      <ion-header>
-        <ion-toolbar class="gradient-toolbar">
-          <ion-title>Confirm Reset</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="closeDialog">
-              <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding reset-modal-content">
-        <div class="dialog-content">
-          <div class="warning-icon-wrapper">
-            <ion-icon :icon="warningOutline" class="warning-icon"></ion-icon>
+      <div class="modal-content-wrapper">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Confirm Reset</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeDialog">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <div class="modal-body">
+          <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+            <ion-icon :icon="warningOutline" style="font-size: 60px; color: #eb445a;"></ion-icon>
           </div>
-          <div class="content-wrapper">
-            <h2>Reset All Data?</h2>
-            <p>This will permanently delete all your selected items and categories. This action cannot be undone.</p>
-            <div class="dialog-actions">
-              <ion-button expand="block" fill="outline" color="medium" @click="closeDialog">
-                <ion-icon slot="start" :icon="closeOutline"></ion-icon>
-                Cancel
-              </ion-button>
-              <ion-button expand="block" color="danger" @click="resetDataBase(true)">
-                <ion-icon slot="start" :icon="trashOutline"></ion-icon>
-                Yes, Reset All
-              </ion-button>
-            </div>
+          <h2 style="margin: 0 0 12px 0; font-size: 1.5rem; color: #333; font-weight: 700;">Reset All Data?</h2>
+          <p style="margin: 0 0 24px 0; font-size: 0.95rem; color: #666; line-height: 1.5;">This will permanently delete all your selected items and categories. This action cannot be undone.</p>
+          <div style="display: flex; gap: 12px;">
+            <ion-button fill="outline" color="medium" @click="closeDialog" style="flex: 1;">
+              <ion-icon slot="start" :icon="closeOutline"></ion-icon>
+              Cancel
+            </ion-button>
+            <ion-button color="danger" @click="resetDataBase(true)" style="flex: 1;">
+              <ion-icon slot="start" :icon="trashOutline"></ion-icon>
+              Yes, Reset All
+            </ion-button>
           </div>
         </div>
-      </ion-content>
+      </div>
     </ion-modal>
   </div>
 </template>
@@ -238,6 +241,7 @@ import {
   warningOutline,
   fastFoodOutline,
   peopleOutline,
+  bookmarkOutline,
 } from 'ionicons/icons';
 
 // Props
@@ -248,6 +252,7 @@ const props = defineProps<{
 const isShowDialog = ref(false);
 const isHeaderMenuOpen = ref(false);
 const categoriesStore = useCategoriesStore();
+const reportStore = useReportStore();
 const data = computed(() => categoriesStore.allCategories);
 const route = useRoute();
 const selectedCategoryId = computed(() => route.params?.id);
@@ -281,7 +286,14 @@ const onSelectCategory = async (categoryId: string) => {
 
 const resetDataBase = (isReset: boolean) => {
   if (isReset) {
+    // Clear report store
+    reportStore.clearReportData();
+    reportStore.clearViewModeData();
+
+    // Clear all localStorage
     localStorage.clear();
+
+    // Navigate to home
     onGoto('/');
   }
   closeDialog();
@@ -534,89 +546,22 @@ ion-menu ion-content::part(scroll)::-webkit-scrollbar {
 }
 
 /* Reset Modal Styling */
-.reset-modal-content {
-  --background: #f8f9fa;
+.reset-modal {
+  --width: 90%;
+  --max-width: 450px;
+  --height: auto;
+  --border-radius: 12px;
 }
 
-.dialog-content {
-  max-width: 600px;
-  margin: 0 auto;
+.modal-content-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modal-body {
+  padding: 24px 20px;
   text-align: center;
-}
-
-.warning-icon-wrapper {
-  margin-bottom: 24px;
-}
-
-.warning-icon {
-  font-size: 64px;
-  color: #eb445a;
-}
-
-.dialog-content h2 {
-  margin: 0 0 12px 0;
-  font-size: 1.75rem;
-  color: #333;
-  font-weight: 700;
-}
-
-.dialog-content p {
-  margin: 0 0 24px 0;
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.6;
-}
-
-.dialog-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.dialog-actions ion-button {
-  height: 48px;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-/* Mobile Layout - Icon left, Content right */
-@media (max-width: 768px) {
-  .dialog-content {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-    text-align: left !important;
-    gap: 16px !important;
-  }
-
-  .warning-icon-wrapper {
-    margin-bottom: 0 !important;
-    flex-shrink: 0 !important;
-    order: -1 !important;
-  }
-
-  .warning-icon {
-    font-size: 48px !important;
-  }
-
-  .content-wrapper {
-    flex: 1 !important;
-    order: 1 !important;
-  }
-
-  .dialog-content h2 {
-    font-size: 1.5rem !important;
-    text-align: left !important;
-  }
-
-  .dialog-content p {
-    font-size: 0.95rem !important;
-    text-align: left !important;
-  }
-
-  .dialog-actions {
-    margin-top: 16px !important;
-  }
+  background: #f8f9fa;
 }
 </style>

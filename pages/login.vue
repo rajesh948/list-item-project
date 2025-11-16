@@ -123,16 +123,14 @@ const handleLogin = async () => {
   const result = await login(username.value, password.value);
 
   if (result.success) {
-    // Redirect to the appropriate page with full page reload
+    // Redirect to the appropriate page
     console.log('Login successful, redirecting to:', result.redirectTo);
 
     // Small delay to ensure Firebase Auth state is saved
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Use window.location for full page reload to ensure Firebase Auth initializes properly
-    if (process.client) {
-      window.location.href = result.redirectTo || '/';
-    }
+    // Use Nuxt navigation (SPA)
+    await navigateTo(result.redirectTo || '/');
   } else {
     errorMessage.value = result.error || 'Login failed';
     isLoading.value = false;
@@ -149,9 +147,9 @@ onMounted(async () => {
       console.log('🔄 Already logged in, redirecting...', userRole.value);
 
       if (userRole.value === 'admin') {
-        window.location.href = '/admin';
+        await navigateTo('/admin');
       } else {
-        window.location.href = '/';
+        await navigateTo('/');
       }
     }
   }

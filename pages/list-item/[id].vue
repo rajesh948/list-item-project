@@ -43,8 +43,8 @@
       <ion-fab v-if="totalSelectedItems > 0" slot="fixed" vertical="bottom" horizontal="end">
         <ion-fab-button @click="goToReport">
           <ion-icon :icon="documentTextOutline"></ion-icon>
-          <div class="item-count-badge">{{ totalSelectedItems }}</div>
         </ion-fab-button>
+        <div class="item-count-badge">{{ totalSelectedItems }}</div>
       </ion-fab>
     </ion-content>
   </ion-page>
@@ -58,9 +58,9 @@ import { searchInGujarati } from '~/utils/transliterate';
 // Authentication is handled by global middleware (02-redirect-login.global.ts)
 
 const route = useRoute();
-const selectedDataFromStorage = ref<any>(null);
 const searchQuery = ref('');
 const categoriesStore = useCategoriesStore();
+const reportStore = useReportStore();
 const data = computed(() => categoriesStore.allCategories);
 
 const selectedCategoryData = computed(() =>
@@ -102,8 +102,7 @@ const filteredItems = computed(() => {
 });
 
 const onAddItem = (itemData: any) => {
-  const selectedData =
-    JSON.parse(localStorage.getItem('selectedData') || '[]');
+  const selectedData = [...reportStore.selectedCategories];
 
   // Use the item's category if available (global search), otherwise use selected category
   const categoryId = itemData.categoryId || selectedCategoryData.value.id;
@@ -141,17 +140,15 @@ const onAddItem = (itemData: any) => {
     });
   }
 
-  localStorage.setItem('selectedData', JSON.stringify(selectedData));
-  selectedDataFromStorage.value = selectedData;
+  reportStore.updateCategories(selectedData);
 };
 
 onMounted(() => {
-  selectedDataFromStorage.value =
-    JSON.parse(localStorage.getItem('selectedData') || '[]');
+  reportStore.loadFromLocalStorage();
 });
 
 const isItemSelected = (itemId: string, categoryId?: number) => {
-  const selectedData = selectedDataFromStorage.value || [];
+  const selectedData = reportStore.selectedCategories || [];
 
   // During global search, check all categories
   if (!categoryId) {
@@ -173,13 +170,8 @@ const isItemSelected = (itemId: string, categoryId?: number) => {
   return false;
 };
 
-// Calculate total selected items
-const totalSelectedItems = computed(() => {
-  const selectedData = selectedDataFromStorage.value || [];
-  return selectedData.reduce((total: number, category: any) => {
-    return total + (category.items?.length || 0);
-  }, 0);
-});
+// Calculate total selected items from store
+const totalSelectedItems = computed(() => reportStore.totalSelectedItems);
 
 const goToReport = () => {
   navigateTo('/item-report');
@@ -269,26 +261,36 @@ const goToReport = () => {
 }
 
 /* Floating Action Button */
+ion-fab {
+  overflow: visible !important;
+}
+
 ion-fab-button {
   --background: var(--gradient-primary);
   --box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  overflow: visible !important;
+  position: relative;
 }
 
 .item-count-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -6px;
+  right: -6px;
   background: #eb445a;
   color: white;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 700;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 8px rgba(235, 68, 90, 0.6), 0 1px 4px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  pointer-events: none;
 }
 </style>

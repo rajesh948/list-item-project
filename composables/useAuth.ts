@@ -13,6 +13,7 @@ export function useAuth() {
   const router = useRouter();
   const userStore = useUserStore();
   const categoriesStore = useCategoriesStore();
+  const { createSession, updateSessionActivity, deleteSession } = useDeviceSessions();
 
   const user = ref<User | null>(null);
   const isLoading = ref(true);
@@ -135,6 +136,14 @@ export function useAuth() {
         // Load categories from Firebase and cache in store
         await categoriesStore.fetchCategories();
 
+        // Create session tracking
+        try {
+          await createSession(userCredential.user.uid);
+          console.log('✅ Session created');
+        } catch (error) {
+          console.error('❌ Error creating session:', error);
+        }
+
         console.log('✅ Login successful. User role:', userStore.user?.role);
 
         // Return success with redirect path
@@ -166,6 +175,17 @@ export function useAuth() {
   // Logout function
   const logout = async () => {
     try {
+      // Delete session before signing out
+      const sessionId = localStorage.getItem('sessionId');
+      if (sessionId) {
+        try {
+          await deleteSession(sessionId);
+          console.log('✅ Session deleted');
+        } catch (error) {
+          console.error('❌ Error deleting session:', error);
+        }
+      }
+
       await signOut($auth);
       return { success: true };
     } catch (error) {

@@ -58,6 +58,7 @@
           <ion-card class="user-info-card">
             <ion-card-header>
               <ion-button
+                v-if="!isViewMode"
                 fill="clear"
                 class="edit-icon-btn"
                 @click="editUserData"
@@ -118,7 +119,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons-grid">
+        <div v-if="!isViewMode" class="action-buttons-grid">
           <button class="action-card add-item-card" @click="toggleAddItemDialog">
             <div class="action-icon">
               <ion-icon :icon="addCircleOutline"></ion-icon>
@@ -129,6 +130,16 @@
             </div>
           </button>
 
+          <button class="action-card save-report-card" @click="handleSaveReport">
+            <div class="action-icon">
+              <ion-icon :icon="saveOutline"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Save Report</h3>
+              <p>Save this report for later</p>
+            </div>
+          </button>
+
           <button class="action-card generate-pdf-card" @click="getPDF">
             <div class="action-icon">
               <ion-icon :icon="downloadOutline"></ion-icon>
@@ -136,6 +147,29 @@
             <div class="action-content">
               <h3>Generate PDF</h3>
               <p>Download the complete report</p>
+            </div>
+          </button>
+        </div>
+
+        <!-- View Mode Action Buttons -->
+        <div v-else class="action-buttons-grid">
+          <button class="action-card generate-pdf-card" @click="getPDF">
+            <div class="action-icon">
+              <ion-icon :icon="downloadOutline"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Generate PDF</h3>
+              <p>Download the complete report</p>
+            </div>
+          </button>
+
+          <button class="action-card load-report-card" @click="loadReportData">
+            <div class="action-icon">
+              <ion-icon :icon="createOutline"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Load Report Data</h3>
+              <p>Edit this report</p>
             </div>
           </button>
         </div>
@@ -267,6 +301,7 @@ import {
   restaurantOutline,
   folderOutline,
   fastFoodOutline,
+  saveOutline,
 } from 'ionicons/icons';
 import { uuid } from 'vue-uuid';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -276,32 +311,39 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 const NAMESPACE = '65f9af5d-f23f-4065-ac85-da725569fdcd';
 const { businessName, phoneNumbers } = useSettings();
 const { showToast } = useToast();
+const { saveReport } = useSavedReports();
+const userStore = useUserStore();
+const reportStore = useReportStore();
+const route = useRoute();
+const router = useRouter();
 const isLoading = ref(false);
 const isShowAddItemDialog = ref(false);
-const selectedDataFromStorage = ref<any>(null);
-const selectedTableFromStorage = ref<any>(null);
-const isChipClosable = ref(true);
+const isViewMode = computed(() => route.query.mode === 'view');
+const isChipClosable = computed(() => !isViewMode.value);
 const isEditMode = ref(false);
 
-const userData = ref({
-  name: null,
-  phone: null,
-  noOfPeople: null,
-  date: null,
-  address: null,
-  price: null,
-  shift: null,
-});
+// Use view mode data or current working data
+const selectedDataFromStorage = computed(() =>
+  isViewMode.value ? reportStore.viewModeCategories : reportStore.selectedCategories
+);
+const selectedTableFromStorage = computed(() =>
+  isViewMode.value ? reportStore.viewModeTable : reportStore.selectedTable
+);
+const userData = computed(() =>
+  isViewMode.value ? reportStore.viewModeUserData : reportStore.userData
+);
 
 const newItemFormData = ref([{ id: uuid.v4(), name: null, items: [] }]);
 
 onMounted(() => {
-  selectedDataFromStorage.value =
-    JSON.parse(localStorage.getItem('selectedData') || '[]');
-  selectedTableFromStorage.value =
-    JSON.parse(localStorage.getItem('selectedTable') || 'null');
-  if (localStorage.getItem('userData')) {
-    userData.value = JSON.parse(localStorage.getItem('userData')!);
+  // Load from localStorage into store on mount
+  reportStore.loadFromLocalStorage();
+});
+
+// Watch for route changes and clear view mode data when leaving view mode
+watch(() => route.query.mode, (newMode, oldMode) => {
+  if (oldMode === 'view' && newMode !== 'view') {
+    reportStore.clearViewModeData();
   }
 });
 
@@ -450,28 +492,49 @@ const getPDF = async () => {
   }
 };
 
+const handleSaveReport = async () => {
+  try {
+    if (!Object.values(userData.value).every((value) => value)) {
+      showToast('Please fill in event details first', 'warning', 2000);
+      setTimeout(() => {
+        navigateTo('/event-details');
+      }, 500);
+      return;
+    }
+
+    if (!userStore.user) {
+      showToast('Please login to save reports', 'error', 2000);
+      return;
+    }
+
+    isLoading.value = true;
+
+    const result = await saveReport(
+      userStore.user.uid,
+      userStore.user.username || 'User',
+      userData.value as any,
+      selectedDataFromStorage.value || [],
+      selectedTableFromStorage.value
+    );
+
+    isLoading.value = false;
+
+    if (result.success) {
+      showToast('Report saved successfully!', 'success', 2000);
+    } else {
+      showToast(result.error || 'Failed to save report', 'error', 2000);
+    }
+  } catch (error) {
+    console.error('Error saving report:', error);
+    isLoading.value = false;
+    showToast('Failed to save report. Please try again.', 'error', 2000);
+  }
+};
+
 const onGotoHome = () => navigateTo('/');
 
 const removeItem = (itemId: string, categoryId: number) => {
-  const categoryIndex = selectedDataFromStorage.value.findIndex(
-    (item: any) => item.id === categoryId
-  );
-  if (categoryIndex != -1) {
-    const itemIndex = selectedDataFromStorage.value[
-      categoryIndex
-    ].items.findIndex((item: any) => item.id === itemId);
-    if (itemIndex != -1) {
-      if (selectedDataFromStorage.value[categoryIndex].items.length === 1) {
-        selectedDataFromStorage.value.splice(categoryIndex, 1);
-      } else {
-        selectedDataFromStorage.value[categoryIndex].items.splice(itemIndex, 1);
-      }
-      localStorage.setItem(
-        'selectedData',
-        JSON.stringify(selectedDataFromStorage.value)
-      );
-    }
-  }
+  reportStore.removeItem(itemId, categoryId);
 };
 
 const editUserData = () => {
@@ -480,8 +543,19 @@ const editUserData = () => {
 };
 
 const removeTable = () => {
-  localStorage.removeItem('selectedTable');
-  selectedTableFromStorage.value = null;
+  reportStore.removeTable();
+};
+
+const loadReportData = () => {
+  // Copy view mode data to working data and exit view mode
+  reportStore.loadReportData(
+    reportStore.viewModeCategories,
+    reportStore.viewModeTable,
+    reportStore.viewModeUserData
+  );
+  reportStore.clearViewModeData();
+  router.push('/item-report');
+  showToast('Report loaded for editing', 'success', 2000);
 };
 
 const toggleAddItemDialog = () => {
@@ -498,8 +572,10 @@ const onAddItemModalDismiss = () => {
 };
 
 const onSaveData = () => {
+  let updatedCategories = [...reportStore.selectedCategories];
+
   if (isEditMode.value) {
-    selectedDataFromStorage.value.forEach((item: any) => {
+    updatedCategories.forEach((item: any) => {
       if (
         newItemFormData.value.length &&
         item.id === newItemFormData.value[0].id
@@ -508,16 +584,13 @@ const onSaveData = () => {
       }
     });
   } else {
-    selectedDataFromStorage.value = [
-      ...selectedDataFromStorage.value,
+    updatedCategories = [
+      ...updatedCategories,
       ...newItemFormData.value.filter((category: any) => category.items.length),
     ];
   }
 
-  localStorage.setItem(
-    'selectedData',
-    JSON.stringify(selectedDataFromStorage.value)
-  );
+  reportStore.updateCategories(updatedCategories);
   newItemFormData.value = [{ id: uuid.v4(), name: null, items: [] }];
   isEditMode.value = false;
   closeAddItemDialog();
@@ -759,8 +832,16 @@ const editCategoryItems = (category: any) => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+.save-report-card::before {
+  background: linear-gradient(135deg, #ffc409 0%, #ff9500 100%);
+}
+
 .generate-pdf-card::before {
   background: linear-gradient(135deg, #2dd36f 0%, #1aa251 100%);
+}
+
+.load-report-card::before {
+  background: linear-gradient(135deg, #3880ff 0%, #1a5cff 100%);
 }
 
 .action-icon {
@@ -780,9 +861,19 @@ const editCategoryItems = (category: any) => {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.save-report-card .action-icon {
+  background: linear-gradient(135deg, #ffc409 0%, #ff9500 100%);
+  box-shadow: 0 4px 12px rgba(255, 196, 9, 0.3);
+}
+
 .generate-pdf-card .action-icon {
   background: linear-gradient(135deg, #2dd36f 0%, #1aa251 100%);
   box-shadow: 0 4px 12px rgba(45, 211, 111, 0.3);
+}
+
+.load-report-card .action-icon {
+  background: linear-gradient(135deg, #3880ff 0%, #1a5cff 100%);
+  box-shadow: 0 4px 12px rgba(56, 128, 255, 0.3);
 }
 
 .action-icon ion-icon {

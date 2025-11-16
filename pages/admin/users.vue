@@ -35,13 +35,29 @@
                     <ion-chip :color="user.isActive ? 'success' : 'danger'">
                       <ion-label>{{ user.isActive ? 'Active' : 'Inactive' }}</ion-label>
                     </ion-chip>
+                    <ion-chip color="tertiary">
+                      <ion-icon :icon="phonePortraitOutline" style="margin-right: 4px;"></ion-icon>
+                      <ion-label>{{ sessionCounts[user.uid] || 0 }} device{{ sessionCounts[user.uid] === 1 ? '' : 's' }}</ion-label>
+                    </ion-chip>
                   </div>
                 </div>
                 <div class="user-actions">
-                  <ion-button fill="clear" @click="openEditModal(user)">
+                  <div class="action-button-with-badge">
+                    <ion-button fill="clear" @click="viewUserSessions(user)" title="View Active Sessions">
+                      <ion-icon slot="icon-only" :icon="phonePortraitOutline"></ion-icon>
+                    </ion-button>
+                    <span v-if="sessionCounts[user.uid] > 0" class="action-badge">{{ sessionCounts[user.uid] }}</span>
+                  </div>
+                  <div class="action-button-with-badge">
+                    <ion-button fill="clear" @click="viewReports(user)" title="View Reports">
+                      <ion-icon slot="icon-only" :icon="bookmarkOutline"></ion-icon>
+                    </ion-button>
+                    <span v-if="reportsCounts[user.uid] > 0" class="action-badge">{{ reportsCounts[user.uid] }}</span>
+                  </div>
+                  <ion-button fill="clear" @click="openEditModal(user)" title="Edit User">
                     <ion-icon slot="icon-only" :icon="createOutline"></ion-icon>
                   </ion-button>
-                  <ion-button fill="clear" color="danger" @click="confirmDelete(user)">
+                  <ion-button fill="clear" color="danger" @click="confirmDelete(user)" title="Delete User">
                     <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
                   </ion-button>
                 </div>
@@ -201,6 +217,86 @@
           </div>
         </ion-content>
       </ion-modal>
+
+      <!-- Active Sessions Modal -->
+      <ion-modal :is-open="isSessionsModalOpen" @didDismiss="closeSessionsModal" class="sessions-modal">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Active Sessions - @{{ selectedUserForSessions?.username }}</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeSessionsModal">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <div class="sessions-container">
+            <!-- Loading State -->
+            <div v-if="isLoadingSessions" class="loading-sessions">
+              <ion-spinner name="crescent"></ion-spinner>
+              <p>Loading sessions...</p>
+            </div>
+
+            <!-- Sessions List -->
+            <div v-else-if="userSessions.length > 0">
+              <div class="sessions-header">
+                <p>{{ userSessions.length }} active session{{ userSessions.length > 1 ? 's' : '' }}</p>
+                <ion-button
+                  size="small"
+                  color="danger"
+                  fill="outline"
+                  @click="logoutFromAllDevices"
+                  v-if="userSessions.length > 0"
+                >
+                  <ion-icon slot="start" :icon="logOutOutline"></ion-icon>
+                  Logout All
+                </ion-button>
+              </div>
+
+              <div class="sessions-list">
+                <div v-for="session in userSessions" :key="session.sessionId" class="session-card">
+                  <div class="session-info">
+                    <div class="session-device">
+                      <ion-icon
+                        :icon="formatDeviceInfo(session) === 'Mobile' ? phonePortraitOutline : (formatDeviceInfo(session) === 'Tablet' ? tabletLandscapeOutline : desktopOutline)"
+                        class="device-icon"
+                      ></ion-icon>
+                      <div class="device-details">
+                        <h4>{{ formatDeviceInfo(session) }}</h4>
+                        <p class="platform-info">{{ session.deviceInfo?.platform }}</p>
+                        <p class="screen-info">{{ session.deviceInfo?.screenResolution }}</p>
+                      </div>
+                    </div>
+                    <div class="session-time">
+                      <ion-icon :icon="timeOutline"></ion-icon>
+                      <span>{{ formatLastActive(session.lastActive) }}</span>
+                    </div>
+                  </div>
+                  <div class="session-actions">
+                    <ion-button
+                      size="small"
+                      color="danger"
+                      fill="outline"
+                      @click="logoutFromDevice(session.sessionId)"
+                    >
+                      <ion-icon slot="start" :icon="logOutOutline"></ion-icon>
+                      Logout
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="no-sessions">
+              <ion-icon :icon="phonePortraitOutline" class="empty-icon"></ion-icon>
+              <h3>No Active Sessions</h3>
+              <p>This user is not logged in on any device</p>
+            </div>
+          </div>
+        </ion-content>
+      </ion-modal>
     </ion-content>
   </ion-page>
 </template>
@@ -242,6 +338,12 @@ import {
   saveOutline,
   businessOutline,
   callOutline,
+  bookmarkOutline,
+  phonePortraitOutline,
+  desktopOutline,
+  tabletLandscapeOutline,
+  logOutOutline,
+  timeOutline,
 } from 'ionicons/icons';
 import type { UserData } from '~/stores/user';
 
@@ -252,16 +354,24 @@ definePageMeta({
 const { fetchUsers, createUser, updateUser, deleteUser } = useUsers();
 const { showToast } = useToast();
 const userStore = useUserStore();
+const { getActiveSessionCount, getUserSessions, deleteSession } = useDeviceSessions();
+const { getReportsCount } = useSavedReports();
 
 const users = ref<UserData[]>([]);
 const isLoading = ref(true);
+const sessionCounts = ref<Record<string, number>>({});
+const reportsCounts = ref<Record<string, number>>({});
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
+const isSessionsModalOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
 const formError = ref('');
 const editingUser = ref<UserData | null>(null);
 const userToDelete = ref<UserData | null>(null);
+const selectedUserForSessions = ref<UserData | null>(null);
+const userSessions = ref<any[]>([]);
+const isLoadingSessions = ref(false);
 
 const formData = ref({
   username: '',
@@ -275,7 +385,42 @@ const formData = ref({
 const loadUsers = async () => {
   isLoading.value = true;
   users.value = await fetchUsers();
+
+  // Load session counts and reports counts for each user
+  await loadSessionCounts();
+  await loadReportsCounts();
+
   isLoading.value = false;
+};
+
+const loadSessionCounts = async () => {
+  const counts: Record<string, number> = {};
+
+  for (const user of users.value) {
+    try {
+      counts[user.uid] = await getActiveSessionCount(user.uid);
+    } catch (error) {
+      console.error(`Error loading session count for user ${user.uid}:`, error);
+      counts[user.uid] = 0;
+    }
+  }
+
+  sessionCounts.value = counts;
+};
+
+const loadReportsCounts = async () => {
+  const counts: Record<string, number> = {};
+
+  for (const user of users.value) {
+    try {
+      counts[user.uid] = await getReportsCount(user.uid);
+    } catch (error) {
+      console.error(`Error loading reports count for user ${user.uid}:`, error);
+      counts[user.uid] = 0;
+    }
+  }
+
+  reportsCounts.value = counts;
 };
 
 const openCreateModal = () => {
@@ -290,6 +435,10 @@ const openCreateModal = () => {
   };
   formError.value = '';
   isModalOpen.value = true;
+};
+
+const viewReports = (user: UserData) => {
+  navigateTo(`/admin/user-reports/${user.uid}`);
 };
 
 const openEditModal = (user: UserData) => {
@@ -396,6 +545,97 @@ const handleDelete = async () => {
   isDeleting.value = false;
 };
 
+// View user sessions
+const viewUserSessions = async (user: UserData) => {
+  selectedUserForSessions.value = user;
+  isSessionsModalOpen.value = true;
+  isLoadingSessions.value = true;
+
+  try {
+    const sessions = await getUserSessions(user.uid);
+    userSessions.value = sessions;
+  } catch (error) {
+    console.error('Error loading sessions:', error);
+    showToast('Failed to load sessions', 'error', 2000);
+  } finally {
+    isLoadingSessions.value = false;
+  }
+};
+
+const closeSessionsModal = () => {
+  isSessionsModalOpen.value = false;
+  selectedUserForSessions.value = null;
+  userSessions.value = [];
+};
+
+// Logout user from specific device
+const logoutFromDevice = async (sessionId: string) => {
+  try {
+    await deleteSession(sessionId);
+    showToast('User logged out from device', 'success', 2000);
+
+    // Refresh sessions list
+    if (selectedUserForSessions.value) {
+      const sessions = await getUserSessions(selectedUserForSessions.value.uid);
+      userSessions.value = sessions;
+
+      // Update session count
+      await loadSessionCounts();
+    }
+  } catch (error) {
+    console.error('Error logging out user:', error);
+    showToast('Failed to logout user', 'error', 2000);
+  }
+};
+
+// Logout from all devices
+const logoutFromAllDevices = async () => {
+  if (!selectedUserForSessions.value) return;
+
+  try {
+    for (const session of userSessions.value) {
+      await deleteSession(session.sessionId);
+    }
+    showToast('User logged out from all devices', 'success', 2000);
+
+    // Clear sessions list
+    userSessions.value = [];
+
+    // Update session count
+    await loadSessionCounts();
+  } catch (error) {
+    console.error('Error logging out from all devices:', error);
+    showToast('Failed to logout user from all devices', 'error', 2000);
+  }
+};
+
+const formatDeviceInfo = (session: any) => {
+  const ua = session.deviceInfo?.userAgent || '';
+
+  if (ua.includes('Mobile') || ua.includes('Android') || ua.includes('iPhone')) {
+    return 'Mobile';
+  } else if (ua.includes('Tablet') || ua.includes('iPad')) {
+    return 'Tablet';
+  } else {
+    return 'Desktop';
+  }
+};
+
+const formatLastActive = (date: Date) => {
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(date).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
+
 onMounted(() => {
   loadUsers();
 });
@@ -482,6 +722,32 @@ onMounted(() => {
 .user-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.action-button-with-badge {
+  position: relative;
+  display: inline-block;
+}
+
+.action-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #eb445a;
+  color: white;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
 }
 
 /* Modal Styles */
@@ -637,6 +903,135 @@ onMounted(() => {
   margin-top: 24px;
 }
 
+/* Sessions Modal Styles */
+.sessions-modal {
+  --width: 90%;
+  --max-width: 700px;
+  --height: 80%;
+  --border-radius: 12px;
+}
+
+.sessions-container {
+  max-width: 100%;
+}
+
+.loading-sessions {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-sessions p {
+  margin-top: 16px;
+  color: #666;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.sessions-header p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.session-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.session-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.session-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.session-device {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.device-icon {
+  font-size: 40px;
+  color: #667eea;
+}
+
+.device-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.platform-info,
+.screen-info {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.session-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
+}
+
+.session-time ion-icon {
+  font-size: 16px;
+}
+
+.session-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-sessions {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-sessions .empty-icon {
+  font-size: 80px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.no-sessions h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.no-sessions p {
+  margin: 0;
+  color: #666;
+}
+
 @media (max-width: 768px) {
   .users-header {
     flex-direction: column;
@@ -657,6 +1052,22 @@ onMounted(() => {
   .user-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .sessions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .session-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .session-time {
+    align-self: flex-start;
   }
 }
 </style>
