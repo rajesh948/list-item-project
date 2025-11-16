@@ -105,8 +105,6 @@ import {
   alertCircleOutline,
   cloudDownloadOutline,
 } from 'ionicons/icons';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '~/firebase';
 import { initializeCategories } from '~/scripts/initCategories';
 
 definePageMeta({
@@ -114,20 +112,20 @@ definePageMeta({
 });
 
 const categoriesStore = useCategoriesStore();
+const usersStore = useUsersStore();
 const { showToast } = useToast();
 
 // Calculate statistics
 const totalCategories = computed(() => categoriesStore.totalCategories);
 const totalItems = computed(() => categoriesStore.totalItems);
+const totalUsers = computed(() => usersStore.totalUsers);
 
-const totalUsers = ref(0);
 const isInitializing = ref(false);
 
 onMounted(async () => {
-  // Fetch user count from Firebase
+  // Fetch users from store (will use cache if available)
   try {
-    const usersSnapshot = await getDocs(collection(db, 'users'));
-    totalUsers.value = usersSnapshot.size;
+    await usersStore.fetchUsers();
   } catch (error) {
     console.error('Error fetching users:', error);
   }

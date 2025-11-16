@@ -4,10 +4,17 @@
       <div class="users-container">
         <div class="users-header">
           <h2>Users</h2>
-          <ion-button color="primary" @click="openCreateModal">
-            <ion-icon slot="start" :icon="personAddOutline"></ion-icon>
-            Create User
-          </ion-button>
+          <div class="header-actions">
+            <ion-button fill="outline" color="medium" @click="handleRefresh" :disabled="isRefreshing">
+              <ion-spinner v-if="isRefreshing" name="crescent"></ion-spinner>
+              <ion-icon v-else slot="start" :icon="refreshOutline"></ion-icon>
+              <span v-if="!isRefreshing">Refresh</span>
+            </ion-button>
+            <ion-button color="primary" @click="openCreateModal">
+              <ion-icon slot="start" :icon="personAddOutline"></ion-icon>
+              Create User
+            </ion-button>
+          </div>
         </div>
 
         <div v-if="isLoading" class="loading-container">
@@ -344,6 +351,7 @@ import {
   tabletLandscapeOutline,
   logOutOutline,
   timeOutline,
+  refreshOutline,
 } from 'ionicons/icons';
 import type { UserData } from '~/stores/user';
 
@@ -351,16 +359,17 @@ definePageMeta({
   middleware: 'admin',
 });
 
-const { fetchUsers, createUser, updateUser, deleteUser } = useUsers();
+const { createUser, updateUser, deleteUser } = useUsers();
 const { showToast } = useToast();
 const userStore = useUserStore();
-const { getActiveSessionCount, getUserSessions, deleteSession } = useDeviceSessions();
-const { getReportsCount } = useSavedReports();
+const usersStore = useUsersStore();
+const { getUserSessions, deleteSession } = useDeviceSessions();
 
-const users = ref<UserData[]>([]);
-const isLoading = ref(true);
-const sessionCounts = ref<Record<string, number>>({});
-const reportsCounts = ref<Record<string, number>>({});
+const users = computed(() => usersStore.allUsers);
+const isLoading = computed(() => usersStore.isLoading);
+const isRefreshing = ref(false);
+const sessionCounts = computed(() => usersStore.sessionCounts);
+const reportsCounts = computed(() => usersStore.reportsCounts);
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const isSessionsModalOpen = ref(false);
@@ -383,44 +392,29 @@ const formData = ref({
 });
 
 const loadUsers = async () => {
-  isLoading.value = true;
-  users.value = await fetchUsers();
+  // Fetch users from store (will use cache if available)
+  await usersStore.fetchUsers();
 
-  // Load session counts and reports counts for each user
-  await loadSessionCounts();
-  await loadReportsCounts();
-
-  isLoading.value = false;
+  // Fetch counts from store (will use cache if available)
+  await usersStore.fetchUserCounts();
 };
 
-const loadSessionCounts = async () => {
-  const counts: Record<string, number> = {};
+const handleRefresh = async () => {
+  isRefreshing.value = true;
+  try {
+    // Force refresh users from Firebase
+    await usersStore.refreshUsers();
 
-  for (const user of users.value) {
-    try {
-      counts[user.uid] = await getActiveSessionCount(user.uid);
-    } catch (error) {
-      console.error(`Error loading session count for user ${user.uid}:`, error);
-      counts[user.uid] = 0;
-    }
+    // Force refresh counts
+    await usersStore.refreshUserCounts();
+
+    showToast('Users refreshed successfully', 'success', 2000);
+  } catch (error) {
+    console.error('Error refreshing users:', error);
+    showToast('Failed to refresh users', 'error', 2000);
+  } finally {
+    isRefreshing.value = false;
   }
-
-  sessionCounts.value = counts;
-};
-
-const loadReportsCounts = async () => {
-  const counts: Record<string, number> = {};
-
-  for (const user of users.value) {
-    try {
-      counts[user.uid] = await getReportsCount(user.uid);
-    } catch (error) {
-      console.error(`Error loading reports count for user ${user.uid}:`, error);
-      counts[user.uid] = 0;
-    }
-  }
-
-  reportsCounts.value = counts;
 };
 
 const openCreateModal = () => {
@@ -552,8 +546,9 @@ const viewUserSessions = async (user: UserData) => {
   isLoadingSessions.value = true;
 
   try {
-    const sessions = await getUserSessions(user.uid);
-    userSessions.value = sessions;
+    // Use cached sessions from store
+    userSessions.value = usersStore.getUserSessions(user.uid);
+    console.log('📦 Using cached sessions for user:', user.uid);
   } catch (error) {
     console.error('Error loading sessions:', error);
     showToast('Failed to load sessions', 'error', 2000);
@@ -574,13 +569,12 @@ const logoutFromDevice = async (sessionId: string) => {
     await deleteSession(sessionId);
     showToast('User logged out from device', 'success', 2000);
 
-    // Refresh sessions list
+    // Update cached sessions for this user
     if (selectedUserForSessions.value) {
-      const sessions = await getUserSessions(selectedUserForSessions.value.uid);
-      userSessions.value = sessions;
+      await usersStore.updateUserSessions(selectedUserForSessions.value.uid);
 
-      // Update session count
-      await loadSessionCounts();
+      // Update local sessions list from store
+      userSessions.value = usersStore.getUserSessions(selectedUserForSessions.value.uid);
     }
   } catch (error) {
     console.error('Error logging out user:', error);
@@ -598,11 +592,11 @@ const logoutFromAllDevices = async () => {
     }
     showToast('User logged out from all devices', 'success', 2000);
 
-    // Clear sessions list
-    userSessions.value = [];
+    // Update cached sessions for this user
+    await usersStore.updateUserSessions(selectedUserForSessions.value.uid);
 
-    // Update session count
-    await loadSessionCounts();
+    // Update local sessions list from store
+    userSessions.value = usersStore.getUserSessions(selectedUserForSessions.value.uid);
   } catch (error) {
     console.error('Error logging out from all devices:', error);
     showToast('Failed to logout user from all devices', 'error', 2000);
@@ -659,6 +653,12 @@ onMounted(() => {
   font-size: 28px;
   margin: 0;
   color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .loading-container {
@@ -1039,7 +1039,12 @@ onMounted(() => {
     gap: 16px;
   }
 
-  .users-header ion-button {
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions ion-button {
     width: 100%;
   }
 

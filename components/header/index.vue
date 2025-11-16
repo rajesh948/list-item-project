@@ -7,7 +7,7 @@
         </ion-buttons>
         <ion-title
           :class="{ 'title-hidden': isHeaderMenuOpen }"
-          @click="navigateTo('/')"
+          @click="navigateTo(isAdmin ? '/admin' : '/')"
           style="cursor: pointer;"
         >
           {{ isAdmin ? (props.title || 'CaterPro') : businessName }}

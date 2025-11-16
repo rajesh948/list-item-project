@@ -226,8 +226,9 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { fetchSavedReports, deleteReport } = useSavedReports();
+const { deleteReport } = useSavedReports();
 const { showToast } = useToast();
+const usersStore = useUsersStore();
 
 const userId = route.params.uid as string;
 const userName = ref('User');
@@ -243,7 +244,11 @@ const reportToDelete = ref<SavedReport | null>(null);
 const loadReports = async () => {
   try {
     isLoading.value = true;
-    reports.value = await fetchSavedReports(userId);
+
+    // Use cached reports from store
+    reports.value = usersStore.getUserReports(userId);
+    console.log('📦 Using cached reports for user:', userId);
+
     if (reports.value.length > 0) {
       userName.value = reports.value[0].userName;
     }
@@ -302,7 +307,12 @@ const handleDelete = async () => {
 
     if (result.success) {
       showToast('Report deleted successfully', 'success', 2000);
-      await loadReports();
+
+      // Update cached reports in store
+      await usersStore.updateUserReports(userId);
+
+      // Refresh local reports list from store
+      reports.value = usersStore.getUserReports(userId);
     } else {
       showToast(result.error || 'Failed to delete report', 'error', 2000);
     }
