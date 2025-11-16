@@ -54,8 +54,16 @@
       <!-- Main Report Content (Visible on screen) -->
       <div v-if="selectedDataFromStorage?.length" class="report-container">
         <div class="pdf-section">
-          <ion-card>
+          <!-- User Info Card -->
+          <ion-card class="user-info-card">
             <ion-card-header>
+              <ion-button
+                fill="clear"
+                class="edit-icon-btn"
+                @click="editUserData"
+              >
+                <ion-icon slot="icon-only" :icon="createOutline"></ion-icon>
+              </ion-button>
               <ion-card-title class="ion-text-center">
                 <h2>{{ businessName }}</h2>
                 <p class="phone-numbers">{{ phoneNumbers }}</p>
@@ -110,19 +118,26 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons ion-margin-top">
-          <ion-button expand="block" @click="onToggleDialog">
-            <ion-icon slot="start" :icon="createOutline"></ion-icon>
-            Edit User Info
-          </ion-button>
-          <ion-button expand="block" color="success" @click="getPDF">
-            <ion-icon slot="start" :icon="downloadOutline"></ion-icon>
-            Generate PDF
-          </ion-button>
-          <ion-button expand="block" color="tertiary" @click="toggleAddItemDialog">
-            <ion-icon slot="start" :icon="addCircleOutline"></ion-icon>
-            Add New Item
-          </ion-button>
+        <div class="action-buttons-grid">
+          <button class="action-card add-item-card" @click="toggleAddItemDialog">
+            <div class="action-icon">
+              <ion-icon :icon="addCircleOutline"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Add New Item</h3>
+              <p>Add categories and items to the list</p>
+            </div>
+          </button>
+
+          <button class="action-card generate-pdf-card" @click="getPDF">
+            <div class="action-icon">
+              <ion-icon :icon="downloadOutline"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Generate PDF</h3>
+              <p>Download the complete report</p>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -133,104 +148,88 @@
         </ion-chip>
       </div>
 
-      <!-- User Info Modal -->
-      <ion-modal :is-open="isShowDialog" @didDismiss="onUserModalDismiss">
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>User Profile</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="closeUserDialog">Close</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-          <ion-item>
-            <ion-input label="Enter Name" label-placement="floating" v-model="userFormData.name" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Phone Number" label-placement="floating" type="tel" v-model="userFormData.phone"
-              required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Number of People" label-placement="floating" type="number"
-              v-model="userFormData.noOfPeople" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Date" label-placement="floating" type="date" v-model="userFormData.date"
-              required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Address" label-placement="floating" v-model="userFormData.address" required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Price" label-placement="floating" type="number" v-model="userFormData.price"
-              required></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-select label="Select Shift" label-placement="floating" v-model="userFormData.shift">
-              <ion-select-option value="Morning">Morning</ion-select-option>
-              <ion-select-option value="Afternoon">Afternoon</ion-select-option>
-              <ion-select-option value="Night">Night</ion-select-option>
-            </ion-select>
-          </ion-item>
-
-          <ion-chip v-if="errorMessage" color="danger" class="ion-margin-top">
-            <ion-label>{{ errorMessage }}</ion-label>
-          </ion-chip>
-
-          <ion-button expand="block" class="ion-margin-top" @click="onAddUser">
-            Save
-          </ion-button>
-        </ion-content>
-      </ion-modal>
-
       <!-- Loading -->
-      <ion-loading
-        :is-open="isLoading"
-        message="Generating PDF..."
-        spinner="crescent"
-        :backdrop-dismiss="false"
-        css-class="custom-loading"
-      ></ion-loading>
+      <AppLoader :show="isLoading" message="Generating PDF..." />
 
       <!-- Add New Item Modal -->
-      <ion-modal :is-open="isShowAddItemDialog" @didDismiss="onAddItemModalDismiss">
+      <ion-modal :is-open="isShowAddItemDialog" @didDismiss="onAddItemModalDismiss" class="add-item-modal">
         <ion-header>
-          <ion-toolbar>
-            <ion-title>Add New Item</ion-title>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>{{ isEditMode ? 'Edit Items' : 'Add New Item' }}</ion-title>
             <ion-buttons slot="end">
-              <ion-button @click="closeAddItemDialog">Close</ion-button>
+              <ion-button @click="closeAddItemDialog">
+                <ion-icon slot="icon-only" :icon="closeCircle"></ion-icon>
+              </ion-button>
             </ion-buttons>
           </ion-toolbar>
         </ion-header>
-        <ion-content class="ion-padding">
-          <div v-for="(category, mainIndex) of newItemFormData" :key="category.id">
-            <ion-item>
-              <ion-input :label="`Category ${mainIndex + 1}`" label-placement="floating" v-model="category.name"
-                :disabled="isEditMode"></ion-input>
-            </ion-item>
-
-            <div v-for="(subItem, index) of category.items" :key="subItem.id">
-              <ion-item>
-                <ion-input :label="`Item ${index + 1}`" label-placement="floating" v-model="subItem.name"
-                  :disabled="subItem?.disable"></ion-input>
-              </ion-item>
+        <ion-content class="ion-padding add-item-modal-content">
+          <div class="add-item-content">
+            <div class="add-item-header">
+              <ion-icon :icon="listOutline" class="add-item-icon"></ion-icon>
+              <h2>{{ isEditMode ? 'Edit Category Items' : 'Create New Category' }}</h2>
+              <p class="help-text">Add categories and their items to organize your menu</p>
             </div>
 
-            <ion-button fill="outline" @click="onAddNewItem('subItem', category.items)">
-              <ion-icon slot="start" :icon="addCircleOutline"></ion-icon>
-              Add Sub Item
-            </ion-button>
+            <div class="categories-list">
+              <div v-for="(category, mainIndex) of newItemFormData" :key="category.id" class="category-block">
+                <div class="category-header-block">
+                  <ion-icon :icon="restaurantOutline" class="category-icon"></ion-icon>
+                  <h3>Category {{ mainIndex + 1 }}</h3>
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label">Category Name</label>
+                  <div class="input-wrapper">
+                    <ion-icon :icon="folderOutline" class="input-icon"></ion-icon>
+                    <input
+                      v-model="category.name"
+                      type="text"
+                      class="item-input"
+                      placeholder="Enter category name"
+                      :disabled="isEditMode"
+                    />
+                  </div>
+                </div>
+
+                <div class="items-section">
+                  <div class="items-header">
+                    <h4>Items</h4>
+                    <button class="add-sub-btn" @click="onAddNewItem('subItem', category.items)">
+                      <ion-icon :icon="addCircleOutline"></ion-icon>
+                      Add Item
+                    </button>
+                  </div>
+
+                  <div v-for="(subItem, index) of category.items" :key="subItem.id" class="input-group">
+                    <label class="input-label">Item {{ index + 1 }}</label>
+                    <div class="input-wrapper">
+                      <ion-icon :icon="fastFoodOutline" class="input-icon"></ion-icon>
+                      <input
+                        v-model="subItem.name"
+                        type="text"
+                        class="item-input"
+                        placeholder="Enter item name"
+                        :disabled="subItem?.disable"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button v-if="!isEditMode" class="secondary-button" @click="onAddNewItem('category')">
+                <ion-icon :icon="addCircleOutline"></ion-icon>
+                Add Another Category
+              </button>
+
+              <ion-button expand="block" color="primary" @click="onSaveData" class="save-button">
+                <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
+                Save All
+              </ion-button>
+            </div>
           </div>
-
-          <ion-button v-if="!isEditMode" expand="block" class="ion-margin-top" @click="onAddNewItem('category')">
-            <ion-icon slot="start" :icon="addCircleOutline"></ion-icon>
-            Add Category
-          </ion-button>
-
-          <ion-button expand="block" color="success" class="ion-margin-top" @click="onSaveData">
-            Save
-          </ion-button>
         </ion-content>
       </ion-modal>
     </ion-content>
@@ -257,44 +256,34 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
-  IonItem,
-  IonInput,
-  IonSelect,
-  IonSelectOption,
-  IonLoading,
 } from '@ionic/vue';
 import {
   closeCircle,
   createOutline,
   downloadOutline,
   addCircleOutline,
+  checkmarkCircleOutline,
+  listOutline,
+  restaurantOutline,
+  folderOutline,
+  fastFoodOutline,
 } from 'ionicons/icons';
 import { uuid } from 'vue-uuid';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
+// Authentication is handled by global middleware (02-redirect-login.global.ts)
+
 const NAMESPACE = '65f9af5d-f23f-4065-ac85-da725569fdcd';
 const { businessName, phoneNumbers } = useSettings();
 const { showToast } = useToast();
-const errorMessage = ref<string | null>(null);
 const isLoading = ref(false);
 const isShowAddItemDialog = ref(false);
 const selectedDataFromStorage = ref<any>(null);
 const selectedTableFromStorage = ref<any>(null);
 const isChipClosable = ref(true);
-const isShowDialog = ref(false);
 const isEditMode = ref(false);
 
 const userData = ref({
-  name: null,
-  phone: null,
-  noOfPeople: null,
-  date: null,
-  address: null,
-  price: null,
-  shift: null,
-});
-
-const userFormData = ref({
   name: null,
   phone: null,
   noOfPeople: null,
@@ -314,13 +303,16 @@ onMounted(() => {
   if (localStorage.getItem('userData')) {
     userData.value = JSON.parse(localStorage.getItem('userData')!);
   }
-  userFormData.value = { ...userFormData.value, ...userData.value };
 });
 
 const getPDF = async () => {
   try {
     if (!Object.values(userData.value).every((value) => value)) {
-      return onToggleDialog();
+      showToast('Please fill in event details first', 'warning', 2000);
+      setTimeout(() => {
+        navigateTo('/event-details');
+      }, 500);
+      return;
     }
 
     isLoading.value = true;
@@ -482,26 +474,9 @@ const removeItem = (itemId: string, categoryId: number) => {
   }
 };
 
-const onAddUser = () => {
-  if (!Object.values(userFormData.value).every((value) => value)) {
-    return (errorMessage.value = 'Please Fill All Fields!');
-  }
-  localStorage.setItem('userData', JSON.stringify(userFormData.value));
-  userData.value = { ...userFormData.value };
-  closeUserDialog();
-};
-
-const onToggleDialog = () => {
-  isShowDialog.value = true;
-};
-
-const closeUserDialog = () => {
-  isShowDialog.value = false;
-};
-
-const onUserModalDismiss = () => {
-  userFormData.value = { ...userFormData.value, ...userData.value };
-  errorMessage.value = null;
+const editUserData = () => {
+  // Navigate to event details page
+  navigateTo('/event-details');
 };
 
 const removeTable = () => {
@@ -701,6 +676,23 @@ const editCategoryItems = (category: any) => {
   padding: 16px;
 }
 
+.user-info-card {
+  position: relative;
+}
+
+.edit-icon-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  --color: #667eea;
+  --background-hover: rgba(102, 126, 234, 0.1);
+}
+
+.edit-icon-btn ion-icon {
+  font-size: 24px;
+}
+
 .phone-numbers {
   font-size: 0.9rem;
   margin-top: 8px;
@@ -722,11 +714,150 @@ const editCategoryItems = (category: any) => {
   font-weight: bold;
 }
 
-.action-buttons {
+/* Action Buttons Grid */
+.action-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.action-card {
+  position: relative;
+  background: white;
+  border: none;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transition: height 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.action-card:hover::before {
+  height: 100%;
+  opacity: 0.05;
+}
+
+.add-item-card::before {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.generate-pdf-card::before {
+  background: linear-gradient(135deg, #2dd36f 0%, #1aa251 100%);
+}
+
+.action-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.add-item-card .action-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.generate-pdf-card .action-icon {
+  background: linear-gradient(135deg, #2dd36f 0%, #1aa251 100%);
+  box-shadow: 0 4px 12px rgba(45, 211, 111, 0.3);
+}
+
+.action-icon ion-icon {
+  font-size: 32px;
+  color: white;
+}
+
+.action-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 24px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.action-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.action-card p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.action-card:active {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .action-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-card {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .action-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .action-icon ion-icon {
+    font-size: 28px;
+  }
+
+  .action-content {
+    flex: 1;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .action-card h3 {
+    margin-bottom: 6px;
+    margin-top: 0;
+    font-size: 1.1rem;
+    text-align: left;
+  }
+
+  .action-card p {
+    font-size: 0.85rem;
+    text-align: left;
+    margin: 0;
+  }
 }
 
 .empty-state {
@@ -738,30 +869,168 @@ const editCategoryItems = (category: any) => {
   padding: 32px;
   cursor: pointer;
 }
-</style>
 
-<style>
-/* Global styles for loading overlay - NOT scoped */
-ion-loading.custom-loading {
-  --backdrop-opacity: 1;
-  --background: #ffffff;
-  --spinner-color: #3880ff;
+/* Gradient Toolbar */
+.gradient-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
 }
 
-ion-loading.custom-loading::part(backdrop) {
-  background: #ffffff !important;
-  opacity: 1 !important;
+/* Add Item Modal Styling */
+.add-item-modal-content {
+  --background: #f8f9fa;
 }
 
-ion-loading.custom-loading {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 99999 !important;
-  
+.add-item-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.add-item-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.add-item-icon {
+  font-size: 64px;
+  color: #667eea;
+  margin-bottom: 16px;
+}
+
+.add-item-content h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.category-block {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.category-header-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.category-icon {
+  font-size: 32px;
+  color: #667eea;
+}
+
+.category-header-block h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.items-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.items-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.add-sub-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid #667eea;
+  color: #667eea;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-sub-btn:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.add-sub-btn ion-icon {
+  font-size: 18px;
+}
+
+.item-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.item-input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.item-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: white;
+  border: 2px solid #667eea;
+  color: #667eea;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 48px;
+}
+
+.secondary-button:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.secondary-button ion-icon {
+  font-size: 22px;
 }
 </style>

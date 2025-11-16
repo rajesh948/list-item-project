@@ -1,18 +1,26 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
+  compatibilityDate: '2025-11-15',
   devtools: { enabled: false },
   ssr: false,
+  spaLoadingTemplate: 'app/spa-loading-template.html',
+  app: {
+    pageTransition: false,
+    layoutTransition: false,
+  },
   modules: [
+    "@pinia/nuxt",
     "@sidebase/nuxt-pdf",
     "nuxt-swiper",
     "@vite-pwa/nuxt",
   ],
   pwa: {
     manifest: {
-      name: "Catering App",
-      description: "Mobile catering order management app",
-      theme_color: "#3880ff",
+      name: "Cater Pro",
+      short_name: "Cater Pro",
+      description: "Professional Catering Management Platform",
+      theme_color: "#667eea",
     },
   },
   css: [
@@ -26,6 +34,7 @@ export default defineNuxtConfig({
     '@ionic/vue/css/text-transformation.css',
     '@ionic/vue/css/flex-utils.css',
     '@ionic/vue/css/display.css',
+    '~/assets/css/theme.css',
   ],
   build: {
     transpile: ['@ionic/vue'],

@@ -1,0 +1,89 @@
+<template>
+  <div v-if="show" class="app-loader-screen">
+    <div class="loader-content">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 512 512" fill="currentColor">
+          <path
+            d="M57.49 47.74l368.43 368.43a37.28 37.28 0 010 52.72 37.29 37.29 0 01-52.72 0l-90-91.55a32 32 0 01-9.2-22.43v-5.53a48 48 0 00-48-48h-5.53a32 32 0 01-22.43-9.2l-91.55-90a37.29 37.29 0 010-52.72 37.28 37.28 0 0152.72 0zM463.14 96a48 48 0 010 67.86l-39.31 39.31a48 48 0 01-67.86 0l-39.31-39.31a48 48 0 010-67.86L356 56.69a48 48 0 0167.86 0L463.14 96zM160 368L32 240c-10.65 10.7-22.28 21.38-32 32V320a96 96 0 0096 96h48c10.62-9.72 21.3-21.35 32-32zM304 208a48 48 0 1148 48 48 48 0 01-48-48z"
+          ></path>
+        </svg>
+      </div>
+      <div class="loading-text">CaterPro</div>
+      <div class="loading-subtitle">{{ message }}</div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  show: boolean;
+  message?: string;
+}>();
+</script>
+
+<style scoped>
+.app-loader-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 99999;
+}
+
+.loader-content {
+  text-align: center;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.logo-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  color: white;
+}
+
+.loader-content .loading-text {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.loader-content .loading-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+  }
+}
+</style>
