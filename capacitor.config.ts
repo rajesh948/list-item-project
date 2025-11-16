@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.caterpro.mobile',
-  appName: 'Cater Pro',
+  appId: 'com.caterhub.mobile',
+  appName: 'CaterHub',
   webDir: '.output/public',
   server: {
     androidScheme: 'https'

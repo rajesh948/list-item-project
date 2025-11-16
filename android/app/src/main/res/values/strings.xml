@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Catering App</string>
-    <string name="title_activity_main">Catering App</string>
-    <string name="package_name">com.cateringapp.mobile</string>
-    <string name="custom_url_scheme">com.cateringapp.mobile</string>
+    <string name="app_name">CaterHub</string>
+    <string name="title_activity_main">CaterHub</string>
+    <string name="package_name">com.caterhub.mobile</string>
+    <string name="custom_url_scheme">com.caterhub.mobile</string>
 </resources>

@@ -17,8 +17,8 @@ export default defineNuxtConfig({
   ],
   pwa: {
     manifest: {
-      name: "Cater Pro",
-      short_name: "Cater Pro",
+      name: "CaterHub",
+      short_name: "CaterHub",
       description: "Professional Catering Management Platform",
       theme_color: "#667eea",
     },

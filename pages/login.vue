@@ -8,7 +8,7 @@
             <div class="app-logo">
               <ion-icon :icon="restaurantOutline" class="logo-icon"></ion-icon>
             </div>
-            <h1 class="app-name">CaterPro</h1>
+            <h1 class="app-name">CaterHub</h1>
             <p class="app-tagline">Professional Catering Management Platform</p>
           </div>
 
@@ -71,7 +71,7 @@
             <div class="form-footer">
               <div class="help-text">
                 <ion-icon :icon="informationCircleOutline"></ion-icon>
-                <span>Need access? Contact your administrator</span>
+                <span>Need access? <a href="tel:8530104561" class="contact-link">Contact your administrator</a></span>
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
 
         <!-- Footer -->
         <div class="login-footer">
-          <p>&copy; 2024 CaterPro. All rights reserved.</p>
+          <p>&copy; 2024 CaterHub. All rights reserved.</p>
         </div>
       </div>
     </ion-content>
@@ -358,6 +358,18 @@ onMounted(async () => {
 .help-text ion-icon {
   font-size: 16px;
   color: #667eea;
+}
+
+.contact-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.contact-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
 }
 
 .login-footer {

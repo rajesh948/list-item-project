@@ -8,7 +8,7 @@
           ></path>
         </svg>
       </div>
-      <div class="loading-text">CaterPro</div>
+      <div class="loading-text">CaterHub</div>
       <div class="loading-subtitle">{{ message }}</div>
     </div>
   </div>

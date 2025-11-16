@@ -10,7 +10,7 @@
           @click="navigateTo(isAdmin ? '/admin' : '/')"
           style="cursor: pointer;"
         >
-          {{ isAdmin ? (props.title || 'CaterPro') : businessName }}
+          {{ isAdmin ? (props.title || 'CaterHub') : businessName }}
         </ion-title>
         <ion-buttons slot="end">
           <!-- For Admin Users: Only show Logout button (no toggle) -->

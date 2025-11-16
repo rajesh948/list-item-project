@@ -81,7 +81,7 @@ async function seedDatabase() {
     console.log(`📊 Summary:`);
     console.log(`   - Categories created: ${categories.length}`);
     console.log(`   - Total items: ${totalItems}`);
-    console.log('\n🎉 Your CaterPro app is ready to use!\n');
+    console.log('\n🎉 Your CaterHub app is ready to use!\n');
 
     process.exit(0);
   } catch (error) {
