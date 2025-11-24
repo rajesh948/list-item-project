@@ -481,7 +481,9 @@ const handleSubmit = async () => {
       if (result.success) {
         showToast('User updated successfully!', 'success', 3000);
         closeModal();
-        await loadUsers();
+        // Force refresh to bypass cache and show updated user
+        await usersStore.refreshUsers();
+        await usersStore.refreshUserCounts();
       } else {
         formError.value = result.error || 'Failed to update user';
       }
@@ -498,7 +500,9 @@ const handleSubmit = async () => {
       if (result.success) {
         showToast('User created successfully!', 'success', 3000);
         closeModal();
-        await loadUsers();
+        // Force refresh to bypass cache and show new user
+        await usersStore.refreshUsers();
+        await usersStore.refreshUserCounts();
       } else {
         formError.value = result.error || 'Failed to create user';
       }
@@ -530,7 +534,9 @@ const handleDelete = async () => {
   if (result.success) {
     showToast('User deleted successfully!', 'success', 3000);
     cancelDelete();
-    await loadUsers();
+    // Force refresh to bypass cache and update user list
+    await usersStore.refreshUsers();
+    await usersStore.refreshUserCounts();
   } else {
     showToast(result.error || 'Failed to delete user', 'error', 3000);
   }

@@ -90,7 +90,7 @@ export function useAuth() {
   const login = async (username: string, password: string) => {
     try {
       // Convert username to email format for Firebase Auth
-      const email = `${username}@catering.local`;
+      const email = `${username}@caterhub.app`;
 
       // Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword($auth, email, password);

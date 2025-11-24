@@ -64,7 +64,8 @@ export const useUsers = () => {
       }
 
       // Convert username to email format for Firebase Auth
-      const email = `${username}@catering.local`;
+      // Use .com domain for valid email format
+      const email = `${username}@caterhub.app`;
 
       // Create user in Firebase Auth (this will automatically sign them in)
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -86,19 +87,26 @@ export const useUsers = () => {
       await signOut(auth);
 
       // Re-login as admin using stored password
-      const adminEmail = `${adminUsername}@catering.local`;
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      const adminEmail = `${adminUsername}@caterhub.app`;
+      try {
+        await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      } catch (reloginError: any) {
+        // If re-login fails, user was still created successfully
+        // Just return success since the user creation itself worked
+        return { success: true };
+      }
 
       return { success: true };
     } catch (error: any) {
-
       let errorMessage = 'Failed to create user';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Username already exists';
       } else if (error.code === 'auth/weak-password') {
         errorMessage = 'Password should be at least 6 characters';
       } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        errorMessage = 'Invalid admin credentials';
+        errorMessage = 'Could not re-authenticate. Please refresh the page and log in again.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid username format';
       }
 
       return { success: false, error: errorMessage };

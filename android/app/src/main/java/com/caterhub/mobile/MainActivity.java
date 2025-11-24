@@ -1,4 +1,4 @@
-package com.cateringapp.mobile;
+package com.caterhub.mobile;
 
 import com.getcapacitor.BridgeActivity;
 

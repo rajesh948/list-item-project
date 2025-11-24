@@ -23,8 +23,8 @@ service cloud.firestore {
       // Allow read if authenticated and either admin or own user
       allow read: if isAuthenticated() && (isAdmin() || isOwner(userId));
 
-      // Allow create only for admins
-      allow create: if isAdmin();
+      // Allow create if admin OR if user is creating their own document (for initial signup)
+      allow create: if isAuthenticated() && (isAdmin() || isOwner(userId));
 
       // Allow update for admins or own user
       allow update: if isAdmin() || isOwner(userId);

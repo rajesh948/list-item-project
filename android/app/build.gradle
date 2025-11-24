@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.cateringapp.mobile"
+    namespace "com.caterhub.mobile"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.cateringapp.mobile"
+        applicationId "com.caterhub.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

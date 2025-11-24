@@ -24,7 +24,7 @@
           <Card
             @addItem="onAddItem"
             v-for="item in filteredItems"
-            :key="item.id"
+            :key="`${item.categoryId}-${item.id}`"
             :item="item"
             :selected="isItemSelected(item.id, item.categoryId)"
             :categoryName="item.categoryName || selectedCategoryData.name"
