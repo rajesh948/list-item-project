@@ -30,6 +30,13 @@ export interface ReminderSettings {
   notificationPermission?: 'granted' | 'denied' | 'default';
 }
 
+export interface NotificationPreferences {
+  premiumExpiry: boolean;      // Notify before subscription expires
+  newFeatures: boolean;        // Notify about new features/updates
+  eventReminders: boolean;     // Remind about upcoming events
+  requestUpdates: boolean;     // Notify when premium request approved/rejected
+}
+
 export interface SubscriptionHistoryEntry {
   action: 'upgraded' | 'downgraded' | 'expired' | 'renewed';
   description: string;
@@ -56,6 +63,9 @@ export interface UserData {
   pdfBranding?: PdfBranding;
   // Event Reminder Settings
   reminderSettings?: ReminderSettings;
+  // Push Notification Settings
+  fcmTokens?: string[];                        // Array of FCM tokens (multiple devices)
+  notificationPreferences?: NotificationPreferences;
 }
 
 export const useUserStore = defineStore('user', {
@@ -90,6 +100,13 @@ export const useUserStore = defineStore('user', {
       time: '09:00',
       notificationPermission: 'default',
     },
+    notificationPreferences: (state) => state.user?.notificationPreferences || {
+      premiumExpiry: true,
+      newFeatures: true,
+      eventReminders: true,
+      requestUpdates: true,
+    },
+    fcmTokens: (state) => state.user?.fcmTokens || [],
   },
 
   actions: {

@@ -15,6 +15,100 @@
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-shade: #5a6fcd;
   --ion-color-primary-tint: #7589ec;
+
+  /* Theme colors - Light Mode */
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f5f5f5;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #888888;
+  --color-border: #e8e8e8;
+  --color-border-light: #f0f0f0;
+}
+
+/* Dark Theme */
+.dark,
+:root.dark {
+  --gradient-primary: linear-gradient(135deg, #8b9df5 0%, #a67bc5 100%);
+  --color-primary: #8b9df5;
+  --color-primary-dark: #a67bc5;
+  --ion-color-primary: #8b9df5;
+  --color-background: #121212;
+  --color-surface: #1e1e1e;
+  --color-surface-secondary: #2a2a2a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #808080;
+  --color-border: #333333;
+  --color-border-light: #2a2a2a;
+}
+
+/* Apply theme to body */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode overrides */
+.dark .sidebar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .top-header {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .settings-section,
+.dark .chart-card,
+.dark .stat-card,
+.dark .faq-section,
+.dark .tickets-section,
+.dark .support-page .quick-actions .action-btn:not(.primary) {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .setting-card,
+.dark .toggle-card,
+.dark .pdf-stat,
+.dark .activity-item,
+.dark .faq-item,
+.dark .ticket-card {
+  background: var(--color-surface-secondary);
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background: var(--color-surface-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark .section-title,
+.dark .chart-title,
+.dark .stat-value {
+  color: var(--color-text-primary);
+}
+
+.dark p,
+.dark .stat-label,
+.dark .ticket-preview,
+.dark .faq-answer {
+  color: var(--color-text-secondary);
 }
 
 /* Modern Card Styling */

@@ -83,6 +83,10 @@ import {
   fastFoodOutline,
   cardOutline,
   shieldOutline,
+  statsChartOutline,
+  helpCircleOutline,
+  ticketOutline,
+  documentsOutline,
 } from 'ionicons/icons';
 
 const props = defineProps<{
@@ -107,6 +111,7 @@ const isMobile = ref(false);
 const userMainNavItems = [
   { path: '/', icon: homeOutline, label: 'Dashboard' },
   { path: '/reports', icon: documentTextOutline, label: 'Reports' },
+  { path: '/templates', icon: documentsOutline, label: 'Templates' },
   { path: '/calendar', icon: calendarOutline, label: 'Calendar' },
   { path: '/customers', icon: peopleOutline, label: 'Customers' },
 ];
@@ -114,10 +119,12 @@ const userMainNavItems = [
 // Navigation items for admin users
 const adminMainNavItems = [
   { path: '/admin', icon: shieldOutline, label: 'Admin Panel' },
+  { path: '/admin/analytics', icon: statsChartOutline, label: 'Analytics' },
   { path: '/admin/categories', icon: gridOutline, label: 'Categories' },
   { path: '/admin/items', icon: fastFoodOutline, label: 'Menu Items' },
   { path: '/admin/users', icon: peopleOutline, label: 'Users' },
   { path: '/admin/requests', icon: cardOutline, label: 'Requests' },
+  { path: '/admin/tickets', icon: ticketOutline, label: 'Tickets' },
   { path: '/admin/settings', icon: settingsOutline, label: 'Settings' },
 ];
 
@@ -131,6 +138,7 @@ const bottomNavItems = computed(() => {
   return [
     { path: '/profile', icon: personCircleOutline, label: 'Profile' },
     { path: '/settings', icon: settingsOutline, label: 'Settings' },
+    { path: '/support', icon: helpCircleOutline, label: 'Help & Support' },
   ];
 });
 

@@ -2,8 +2,9 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   // Firebase configuration for Catering App
   const firebaseConfig = {
     apiKey: "AIzaSyAudiW6v9OlVudtm2hIS3O68z86c-MjiJE",
@@ -23,12 +24,24 @@ export default defineNuxtPlugin(() => {
   const db = getFirestore(app);
   const storage = getStorage(app);
 
+  // Initialize Firebase Cloud Messaging (only if supported)
+  let messaging = null;
+  try {
+    const supported = await isSupported();
+    if (supported) {
+      messaging = getMessaging(app);
+    }
+  } catch {
+    // FCM not supported in this environment
+  }
+
   return {
     provide: {
       firebase: app,
       auth,
       db,
       storage,
+      messaging,
     },
   };
 });

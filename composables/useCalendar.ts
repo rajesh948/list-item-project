@@ -94,18 +94,12 @@ export function useCalendar() {
       const snapshot = await getDocs(q);
       const loadedEvents: CalendarEvent[] = [];
 
-      console.log('Calendar: Found', snapshot.docs.length, 'saved reports');
-
       snapshot.docs.forEach((doc) => {
         const data = doc.data();
-        // Reports use 'reportData' not 'userData'
         const reportData = data.reportData;
-
-        console.log('Calendar: Report data:', reportData);
 
         if (reportData?.date) {
           const eventDate = parseDate(reportData.date);
-          console.log('Calendar: Parsed date', reportData.date, '->', eventDate);
           if (eventDate) {
             loadedEvents.push({
               id: doc.id,

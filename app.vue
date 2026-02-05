@@ -24,7 +24,13 @@ const { initAuth, isLoading: isAuthLoading } = useAuth();
 const showLoading = ref(true);
 const loadingMessage = ref('Loading...');
 
+// Initialize theme
+const themeStore = useThemeStore();
+
 onMounted(async () => {
+  // Initialize theme
+  themeStore.initTheme();
+
   // Initialize auth
   initAuth();
 
@@ -63,6 +69,10 @@ if (process.client) {
 <style>
 /* Global styles */
 ion-app {
-  --ion-background-color: #f8f9fa;
+  --ion-background-color: var(--color-background, #f8f9fa);
+}
+
+.dark ion-app {
+  --ion-background-color: var(--color-background, #121212);
 }
 </style>

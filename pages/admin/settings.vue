@@ -258,6 +258,25 @@
             </div>
           </div>
 
+          <!-- Appearance Section -->
+          <div class="settings-card">
+            <div class="card-header">
+              <ion-icon :icon="contrastOutline" class="card-icon"></ion-icon>
+              <h3>Appearance</h3>
+            </div>
+            <p class="card-description">
+              Choose your preferred color scheme for the admin panel.
+            </p>
+
+            <div class="appearance-setting">
+              <div class="appearance-info">
+                <span class="appearance-label">Theme</span>
+                <span class="appearance-description">Select light, dark, or system default theme</span>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
+
           <!-- Last Updated Info -->
           <div v-if="lastUpdatedInfo" class="last-updated">
             <ion-icon :icon="timeOutline"></ion-icon>
@@ -317,6 +336,7 @@ import {
   waterOutline,
   textOutline,
   eyeOutline,
+  contrastOutline,
 } from 'ionicons/icons';
 import type { UpiMethod, BankMethod } from '~/stores/appSettings';
 
@@ -567,7 +587,7 @@ onMounted(() => {
 .settings-header h2 {
   font-size: 28px;
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .loading-container {
@@ -577,7 +597,7 @@ onMounted(() => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .settings-content {
@@ -588,7 +608,7 @@ onMounted(() => {
 
 /* Settings Card */
 .settings-card {
-  background: white;
+  background: var(--color-surface, white);
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -610,13 +630,13 @@ onMounted(() => {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .card-description {
   margin: 0 0 20px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .settings-form {
@@ -639,7 +659,7 @@ onMounted(() => {
 .input-label {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -649,7 +669,7 @@ onMounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 10px;
   padding: 12px 16px;
   border: 2px solid transparent;
@@ -658,7 +678,7 @@ onMounted(() => {
 
 .input-wrapper:focus-within {
   border-color: #667eea;
-  background: white;
+  background: var(--color-surface, white);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
@@ -683,12 +703,12 @@ onMounted(() => {
   outline: none;
   background: transparent;
   font-size: 15px;
-  color: #333;
+  color: var(--color-text-primary, #333);
   font-weight: 500;
 }
 
 .custom-input::placeholder {
-  color: #999;
+  color: var(--color-text-muted, #999);
   font-weight: 400;
 }
 
@@ -704,7 +724,7 @@ onMounted(() => {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
   border-radius: 10px;
   font-size: 14px;
-  color: #555;
+  color: var(--color-text-secondary, #555);
 }
 
 .preview-box ion-icon {
@@ -719,9 +739,9 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #888;
+  color: var(--color-text-muted, #888);
   padding: 12px 16px;
-  background: #f5f5f5;
+  background: var(--color-surface-secondary, #f5f5f5);
   border-radius: 8px;
 }
 
@@ -764,7 +784,7 @@ onMounted(() => {
 .payment-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border, #e0e0e0);
 }
 
 .payment-section:first-of-type {
@@ -787,7 +807,7 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .payment-section-header h4 ion-icon {
@@ -822,14 +842,14 @@ onMounted(() => {
 .empty-methods {
   text-align: center;
   padding: 24px;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 10px;
-  border: 2px dashed #ddd;
+  border: 2px dashed var(--color-border, #ddd);
 }
 
 .empty-methods p {
   margin: 0;
-  color: #999;
+  color: var(--color-text-muted, #999);
   font-size: 14px;
 }
 
@@ -838,10 +858,10 @@ onMounted(() => {
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 12px;
   margin-bottom: 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border, #e0e0e0);
 }
 
 .method-inputs {
@@ -862,15 +882,18 @@ onMounted(() => {
 .input-group.small .input-label {
   font-size: 11px;
   margin-bottom: 4px;
+  color: var(--color-text-secondary, #666);
 }
 
 .custom-input.small {
   padding: 10px 12px;
   font-size: 14px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border, #ddd);
   border-radius: 8px;
   width: 100%;
   transition: all 0.2s;
+  background: var(--color-surface, white);
+  color: var(--color-text-primary, #333);
 }
 
 .custom-input.small:focus {
@@ -917,6 +940,33 @@ onMounted(() => {
   opacity: 0.6;
 }
 
+/* Appearance Section */
+.appearance-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-secondary, #f8f9fa);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.appearance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.appearance-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.appearance-description {
+  font-size: 13px;
+  color: var(--color-text-muted, #888);
+  margin-top: 2px;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .settings-header {
@@ -934,72 +984,5 @@ onMounted(() => {
   }
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  .settings-card {
-    background: #1a1a1a;
-  }
-
-  .card-header h3 {
-    color: #fff;
-  }
-
-  .card-description {
-    color: #999;
-  }
-
-  .input-label {
-    color: #ccc;
-  }
-
-  .input-wrapper {
-    background: #2a2a2a;
-  }
-
-  .input-wrapper:focus-within {
-    background: #333;
-  }
-
-  .custom-input,
-  .custom-select {
-    color: #fff;
-  }
-
-  .preview-box {
-    color: #ddd;
-  }
-
-  .last-updated {
-    background: #2a2a2a;
-    color: #999;
-  }
-
-  .payment-section {
-    border-top-color: #333;
-  }
-
-  .payment-section-header h4 {
-    color: #fff;
-  }
-
-  .empty-methods {
-    background: #2a2a2a;
-    border-color: #444;
-  }
-
-  .method-item-card {
-    background: #2a2a2a;
-    border-color: #333;
-  }
-
-  .custom-input.small {
-    background: #1a1a1a;
-    border-color: #444;
-    color: #fff;
-  }
-
-  .delete-btn {
-    background: rgba(244, 67, 54, 0.1);
-  }
-}
+/* Dark mode styles are handled by CSS variables from theme.css */
 </style>

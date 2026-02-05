@@ -1,8 +1,10 @@
 <template>
   <div class="reports-page">
     <div class="page-header">
-      <h1>Reports</h1>
-      <p>View and manage your saved reports</p>
+      <div class="header-left">
+        <h1>Reports</h1>
+        <p>View and manage your saved reports</p>
+      </div>
       <button class="refresh-btn" :disabled="isRefreshing" @click="handleRefresh">
         <ion-spinner v-if="isRefreshing" name="crescent"></ion-spinner>
         <ion-icon v-else :icon="refreshOutline"></ion-icon>
@@ -248,43 +250,49 @@ const handleDelete = async () => {
 }
 
 .page-header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 24px;
+  gap: 16px;
 }
 
-.page-header h1 {
+.header-left h1 {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 4px 0;
 }
 
-.page-header p {
+.header-left p {
   color: #666;
   font-size: 0.9rem;
-  margin: 0 0 16px 0;
+  margin: 0;
 }
 
 .refresh-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: #f5f5f5;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 8px;
-  color: #666;
+  border-radius: 10px;
+  color: white;
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #e8e8e8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .refresh-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -577,6 +585,15 @@ const handleDelete = async () => {
 }
 
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .refresh-btn {
+    justify-content: center;
+  }
+
   .reports-grid {
     grid-template-columns: 1fr;
   }

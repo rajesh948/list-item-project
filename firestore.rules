@@ -124,5 +124,42 @@ service cloud.firestore {
       allow delete: if isAuthenticated() &&
                        (isAdmin() || resource.data.userId == request.auth.uid);
     }
+
+    // Support Tickets collection rules
+    match /tickets/{ticketId} {
+      // Allow read if admin or own ticket
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update if admin (to change status, reply) or owner (to add messages)
+      allow update: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow delete only for admins
+      allow delete: if isAdmin();
+    }
+
+    // Report Templates collection rules (Premium feature)
+    match /templates/{templateId} {
+      // Allow read if authenticated and either admin or own template
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update if owner
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // Allow delete if owner or admin
+      allow delete: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+    }
   }
 }

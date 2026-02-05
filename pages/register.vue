@@ -40,6 +40,36 @@
 
             <form @submit.prevent="handleRegister" class="register-form">
               <div class="input-group">
+                <label class="input-label">Business Name *</label>
+                <div class="input-wrapper">
+                  <ion-icon :icon="businessOutline" class="input-icon"></ion-icon>
+                  <input
+                    v-model="businessName"
+                    type="text"
+                    class="form-input"
+                    placeholder="Your business name"
+                    required
+                    autocomplete="organization"
+                  />
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label">Phone Number *</label>
+                <div class="input-wrapper">
+                  <ion-icon :icon="callOutline" class="input-icon"></ion-icon>
+                  <input
+                    v-model="phoneNumber"
+                    type="tel"
+                    class="form-input"
+                    placeholder="Your phone number"
+                    required
+                    autocomplete="tel"
+                  />
+                </div>
+              </div>
+
+              <div class="input-group">
                 <label class="input-label">Email Address *</label>
                 <div class="input-wrapper">
                   <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
@@ -93,34 +123,6 @@
                     @click="showConfirmPassword = !showConfirmPassword"
                     class="password-toggle-icon"
                   ></ion-icon>
-                </div>
-              </div>
-
-              <div class="input-group">
-                <label class="input-label">Business Name (Optional)</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="businessOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="businessName"
-                    type="text"
-                    class="form-input"
-                    placeholder="Your business name"
-                    autocomplete="organization"
-                  />
-                </div>
-              </div>
-
-              <div class="input-group">
-                <label class="input-label">Phone Number (Optional)</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="callOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="phoneNumber"
-                    type="tel"
-                    class="form-input"
-                    placeholder="Your phone number"
-                    autocomplete="tel"
-                  />
                 </div>
               </div>
 
@@ -200,11 +202,21 @@ const isFormValid = computed(() => {
          password.value &&
          password.value.length >= 6 &&
          confirmPassword.value &&
-         password.value === confirmPassword.value;
+         password.value === confirmPassword.value &&
+         businessName.value.trim() &&
+         phoneNumber.value.trim();
 });
 
 const handleRegister = async () => {
   // Validate form
+  if (!businessName.value.trim()) {
+    errorMessage.value = 'Please enter your business name';
+    return;
+  }
+  if (!phoneNumber.value.trim()) {
+    errorMessage.value = 'Please enter your phone number';
+    return;
+  }
   if (!email.value) {
     errorMessage.value = 'Please enter your email address';
     return;

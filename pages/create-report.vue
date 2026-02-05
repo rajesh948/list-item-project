@@ -150,6 +150,7 @@ import {
 const { showToast } = useToast();
 const { saveReport, getSavedReport } = useSavedReports();
 const { isPremium } = useSubscription();
+const { templates, fetchTemplates, loadTemplateItems } = useTemplates();
 const categoriesStore = useCategoriesStore();
 const customersStore = useCustomersStore();
 const userStore = useUserStore();
@@ -274,6 +275,24 @@ onMounted(async () => {
     isEditMode.value = true;
     editReportId.value = editId;
     await loadReportForEdit(editId);
+    return;
+  }
+
+  // Check for template to load (from templates page "Use Template" button)
+  const templateId = localStorage.getItem('useTemplateId');
+  if (templateId && isPremium.value) {
+    localStorage.removeItem('useTemplateId'); // Clear it immediately
+
+    // Fetch templates first if not loaded
+    await fetchTemplates();
+
+    // Load template items
+    const templateCategories = loadTemplateItems(templateId);
+    if (templateCategories) {
+      selectedItems.value = templateCategories;
+      currentStep.value = 2; // Go directly to item selection step
+      showToast('Template items loaded! Review and continue.', 'success');
+    }
   }
 });
 

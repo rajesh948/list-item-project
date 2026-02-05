@@ -1,5 +1,45 @@
 <template>
   <div class="step-items">
+    <!-- Template Section (Premium Only) -->
+    <div v-if="isPremium" class="template-section">
+      <div class="template-row">
+        <div class="template-dropdown" ref="dropdownRef">
+          <div class="dropdown-trigger" @click="toggleDropdown">
+            <ion-icon :icon="documentsOutline" class="template-icon"></ion-icon>
+            <span class="dropdown-text">Load from template...</span>
+            <ion-icon :icon="chevronDownOutline" class="dropdown-arrow" :class="{ open: isDropdownOpen }"></ion-icon>
+          </div>
+          <div v-if="isDropdownOpen" class="dropdown-menu">
+            <div v-if="templates.length === 0" class="dropdown-empty">
+              <ion-icon :icon="documentsOutline"></ion-icon>
+              <span>No templates yet</span>
+            </div>
+            <div
+              v-else
+              v-for="template in templates"
+              :key="template.id"
+              class="dropdown-item"
+              @click="selectTemplate(template.id)"
+            >
+              <div class="item-info">
+                <span class="item-name">{{ template.name }}</span>
+                <span class="item-count">{{ template.itemCount }} items</span>
+              </div>
+              <ion-icon :icon="arrowForwardOutline" class="item-arrow"></ion-icon>
+            </div>
+          </div>
+        </div>
+        <button
+          v-if="totalSelected > 0"
+          class="save-template-btn"
+          @click="showSaveModal = true"
+        >
+          <ion-icon :icon="saveOutline"></ion-icon>
+          <span class="btn-text">Save</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Search Bar -->
     <div class="search-container">
       <ion-icon :icon="searchOutline" class="search-icon"></ion-icon>
@@ -99,11 +139,93 @@
         <ion-icon :icon="arrowForwardOutline"></ion-icon>
       </button>
     </div>
+
+    <!-- Save Template Modal -->
+    <div v-if="showSaveModal" class="modal-overlay" @click.self="showSaveModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Save as Template</h3>
+          <button class="modal-close" @click="showSaveModal = false">
+            <ion-icon :icon="closeOutline"></ion-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Template Name</label>
+            <input
+              v-model="templateName"
+              type="text"
+              class="form-input"
+              placeholder="e.g., Wedding Menu, Birthday Party"
+              maxlength="50"
+            />
+          </div>
+          <div class="form-group">
+            <label>Description (optional)</label>
+            <textarea
+              v-model="templateDescription"
+              class="form-textarea"
+              placeholder="Brief description of this template..."
+              rows="2"
+              maxlength="200"
+            ></textarea>
+          </div>
+          <p class="template-info">
+            <ion-icon :icon="informationCircleOutline"></ion-icon>
+            This will save {{ totalSelected }} items as a reusable template.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" @click="showSaveModal = false">Cancel</button>
+          <button
+            class="save-btn"
+            :disabled="!templateName.trim() || isSaving"
+            @click="handleSaveTemplate"
+          >
+            <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
+            <span v-else>Save Template</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Template Confirmation Modal -->
+    <div v-if="showLoadConfirmModal" class="modal-overlay" @click.self="showLoadConfirmModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Load Template</h3>
+          <button class="modal-close" @click="showLoadConfirmModal = false">
+            <ion-icon :icon="closeOutline"></ion-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="confirm-message">
+            You have <strong>{{ totalSelected }} items</strong> already selected. How would you like to load <strong>"{{ pendingTemplateName }}"</strong>?
+          </p>
+          <div class="load-options">
+            <button class="option-btn replace" @click="handleLoadTemplate('replace')">
+              <ion-icon :icon="refreshOutline"></ion-icon>
+              <div class="option-text">
+                <span class="option-title">Replace All</span>
+                <span class="option-desc">Remove current selection and load template</span>
+              </div>
+            </button>
+            <button class="option-btn add" @click="handleLoadTemplate('add')">
+              <ion-icon :icon="addOutline"></ion-icon>
+              <div class="option-text">
+                <span class="option-title">Add to Selection</span>
+                <span class="option-desc">Keep current items and add template items</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { IonIcon } from '@ionic/vue';
+import { IonIcon, IonSpinner } from '@ionic/vue';
 import {
   searchOutline,
   closeCircleOutline,
@@ -113,6 +235,12 @@ import {
   chevronDownOutline,
   arrowBackOutline,
   arrowForwardOutline,
+  documentsOutline,
+  saveOutline,
+  closeOutline,
+  informationCircleOutline,
+  refreshOutline,
+  addOutline,
 } from 'ionicons/icons';
 import { searchInGujarati } from '~/utils/transliterate';
 
@@ -136,12 +264,144 @@ const emit = defineEmits<{
 const searchQuery = ref('');
 const expandedCategories = ref<number[]>([]);
 
-// Expand first category by default
-onMounted(() => {
+// Template functionality
+const { isPremium } = useSubscription();
+const { templates, fetchTemplates, saveAsTemplate, loadTemplateItems } = useTemplates();
+const { showToast } = useToast();
+
+const showSaveModal = ref(false);
+const templateName = ref('');
+const templateDescription = ref('');
+const isSaving = ref(false);
+
+// Custom dropdown state
+const isDropdownOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+// Load template confirmation modal
+const showLoadConfirmModal = ref(false);
+const pendingTemplateId = ref<string | null>(null);
+const pendingTemplateName = ref('');
+
+// Fetch templates on mount (for premium users)
+onMounted(async () => {
   if (props.categories.length > 0) {
     expandedCategories.value = [props.categories[0].id];
   }
+
+  if (isPremium.value) {
+    await fetchTemplates();
+  }
 });
+
+// Dropdown methods
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const selectTemplate = (templateId: string) => {
+  const template = templates.value.find(t => t.id === templateId);
+  if (!template) return;
+
+  // If no items currently selected, load directly
+  if (totalSelected.value === 0) {
+    const templateCategories = loadTemplateItems(templateId);
+    if (templateCategories) {
+      emit('update:modelValue', templateCategories);
+      showToast('Template loaded!', 'success');
+    }
+    isDropdownOpen.value = false;
+    return;
+  }
+
+  // Show confirmation modal if items are already selected
+  pendingTemplateId.value = templateId;
+  pendingTemplateName.value = template.name;
+  showLoadConfirmModal.value = true;
+  isDropdownOpen.value = false;
+};
+
+// Handle template load confirmation
+const handleLoadTemplate = (mode: 'replace' | 'add') => {
+  if (!pendingTemplateId.value) return;
+
+  const templateCategories = loadTemplateItems(pendingTemplateId.value);
+  if (!templateCategories) {
+    showLoadConfirmModal.value = false;
+    return;
+  }
+
+  if (mode === 'replace') {
+    // Replace all existing items
+    emit('update:modelValue', templateCategories);
+    showToast('Template loaded!', 'success');
+  } else {
+    // Add to existing selection (merge)
+    const currentData = [...props.modelValue];
+
+    templateCategories.forEach((templateCat: any) => {
+      const existingCatIndex = currentData.findIndex(c => c.id === templateCat.id);
+
+      if (existingCatIndex !== -1) {
+        // Merge items into existing category
+        templateCat.items.forEach((templateItem: any) => {
+          const itemExists = currentData[existingCatIndex].items.some(
+            (i: any) => String(i.id) === String(templateItem.id)
+          );
+          if (!itemExists) {
+            currentData[existingCatIndex].items.push(templateItem);
+          }
+        });
+      } else {
+        // Add new category
+        currentData.push(templateCat);
+      }
+    });
+
+    emit('update:modelValue', currentData);
+    showToast('Template items added!', 'success');
+  }
+
+  showLoadConfirmModal.value = false;
+  pendingTemplateId.value = null;
+  pendingTemplateName.value = '';
+};
+
+// Close dropdown on click outside
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isDropdownOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
+// Handle save template
+const handleSaveTemplate = async () => {
+  if (!templateName.value.trim()) return;
+
+  isSaving.value = true;
+  const result = await saveAsTemplate(
+    templateName.value,
+    props.modelValue,
+    templateDescription.value
+  );
+
+  if (result.success) {
+    showSaveModal.value = false;
+    templateName.value = '';
+    templateDescription.value = '';
+    // Refresh templates list
+    await fetchTemplates(true);
+  }
+  isSaving.value = false;
+};
 
 // Watch for categories changes
 watch(() => props.categories, (newCats) => {
@@ -574,6 +834,445 @@ const toggleItem = (item: { id: string; name: string; image?: string; categoryId
     flex-direction: column;
     align-items: flex-end;
     gap: 4px;
+  }
+}
+
+/* Template Section */
+.template-section {
+  margin-bottom: 12px;
+}
+
+.template-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Custom Dropdown */
+.template-dropdown {
+  flex: 1;
+  position: relative;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 2px solid #e8e8e8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdown-trigger:hover {
+  border-color: #667eea;
+}
+
+.template-icon {
+  font-size: 20px;
+  color: #667eea;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.dropdown-text {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.dropdown-arrow {
+  font-size: 18px;
+  color: #888;
+  transition: transform 0.2s;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for dropdown */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
+.dropdown-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  color: #888;
+  gap: 8px;
+}
+
+.dropdown-empty ion-icon {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.dropdown-empty span {
+  font-size: 13px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+}
+
+.dropdown-item .item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-item .item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dropdown-item .item-count {
+  font-size: 12px;
+  color: #888;
+}
+
+.dropdown-item .item-arrow {
+  font-size: 18px;
+  color: #667eea;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.dropdown-item:hover .item-arrow {
+  opacity: 1;
+}
+
+.save-template-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.save-template-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.save-template-btn ion-icon {
+  font-size: 18px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.modal-close ion-icon {
+  font-size: 20px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #667eea;
+}
+
+.form-textarea {
+  resize: none;
+}
+
+.template-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.template-info ion-icon {
+  font-size: 18px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.cancel-btn,
+.save-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background: #e8e8e8;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-btn ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* Load Template Confirmation Modal */
+.confirm-message {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.confirm-message strong {
+  color: #333;
+}
+
+.load-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.option-btn:hover {
+  border-color: #667eea;
+  background: #f8f9fa;
+}
+
+.option-btn.replace:hover {
+  border-color: #ff9800;
+}
+
+.option-btn.add:hover {
+  border-color: #4CAF50;
+}
+
+.option-btn ion-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.option-btn.replace ion-icon {
+  color: #ff9800;
+}
+
+.option-btn.add ion-icon {
+  color: #4CAF50;
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.option-desc {
+  font-size: 13px;
+  color: #888;
+}
+
+@media (max-width: 480px) {
+  .template-row {
+    flex-direction: column;
+  }
+
+  .template-select-wrapper {
+    width: 100%;
+  }
+
+  .save-template-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .save-template-btn .btn-text {
+    display: inline;
   }
 }
 </style>

@@ -154,11 +154,149 @@
         </div>
       </div>
 
-      <!-- Event Reminders Section -->
+      <!-- Push Notifications Section -->
       <div class="settings-section">
         <div class="section-header">
           <div class="section-title">
             <ion-icon :icon="notificationsOutline"></ion-icon>
+            <h3>Push Notifications</h3>
+          </div>
+        </div>
+
+        <div class="notifications-content">
+          <!-- Enable Push Notifications -->
+          <div v-if="pushNotificationStatus !== 'granted'" class="permission-card">
+            <div class="permission-icon">
+              <ion-icon :icon="notificationsOutline"></ion-icon>
+            </div>
+            <div class="permission-text">
+              <h4>Enable Push Notifications</h4>
+              <p>Get important updates about your account and events</p>
+            </div>
+            <button class="permission-btn" @click="enablePushNotifications" :disabled="pushNotificationStatus === 'denied'">
+              <ion-icon :icon="notificationsOutline"></ion-icon>
+              {{ pushNotificationStatus === 'denied' ? 'Blocked' : 'Enable' }}
+            </button>
+          </div>
+
+          <!-- Permission Granted Indicator -->
+          <div v-else class="permission-granted">
+            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+            <span>Push notifications enabled</span>
+          </div>
+
+          <!-- Notification Preferences (only show if enabled) -->
+          <div v-if="pushNotificationStatus === 'granted'" class="notification-preferences">
+            <!-- Premium Expiry Notifications -->
+            <div class="toggle-card full-width">
+              <div class="toggle-info">
+                <ion-icon :icon="cardOutline"></ion-icon>
+                <div class="toggle-text">
+                  <span class="toggle-label">Subscription Alerts</span>
+                  <span class="toggle-description">Get notified before your subscription expires</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  v-model="notifPrefs.premiumExpiry"
+                  @change="saveNotificationPreferences"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- New Features Notifications -->
+            <div class="toggle-card full-width">
+              <div class="toggle-info">
+                <ion-icon :icon="sparklesOutline"></ion-icon>
+                <div class="toggle-text">
+                  <span class="toggle-label">New Features</span>
+                  <span class="toggle-description">Be the first to know about new features</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  v-model="notifPrefs.newFeatures"
+                  @change="saveNotificationPreferences"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Event Reminders -->
+            <div class="toggle-card full-width">
+              <div class="toggle-info">
+                <ion-icon :icon="calendarOutline"></ion-icon>
+                <div class="toggle-text">
+                  <span class="toggle-label">Event Reminders</span>
+                  <span class="toggle-description">Reminders for your upcoming catering events</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  v-model="notifPrefs.eventReminders"
+                  @change="saveNotificationPreferences"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Request Status Updates -->
+            <div class="toggle-card full-width">
+              <div class="toggle-info">
+                <ion-icon :icon="checkmarkDoneOutline"></ion-icon>
+                <div class="toggle-text">
+                  <span class="toggle-label">Request Updates</span>
+                  <span class="toggle-description">Get notified when your premium request is processed</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  v-model="notifPrefs.requestUpdates"
+                  @change="saveNotificationPreferences"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Test Notification Button -->
+            <button class="test-notification-btn" @click="sendTestPushNotification">
+              <ion-icon :icon="sendOutline"></ion-icon>
+              Send Test Notification
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance Section -->
+      <div class="settings-section">
+        <div class="section-header">
+          <div class="section-title">
+            <ion-icon :icon="contrastOutline"></ion-icon>
+            <h3>Appearance</h3>
+          </div>
+        </div>
+
+        <div class="appearance-content">
+          <div class="theme-setting">
+            <div class="theme-info">
+              <span class="theme-label">Theme</span>
+              <span class="theme-description">Choose your preferred color scheme</span>
+            </div>
+            <ThemeToggle />
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Reminders Section -->
+      <div class="settings-section">
+        <div class="section-header">
+          <div class="section-title">
+            <ion-icon :icon="alarmOutline"></ion-icon>
             <h3>Event Reminders</h3>
           </div>
         </div>
@@ -185,25 +323,10 @@
 
           <!-- Reminder Settings (only show if enabled) -->
           <div v-if="reminderForm.enabled" class="reminder-settings">
-            <!-- Notification Permission -->
-            <div v-if="notificationPermission !== 'granted'" class="permission-card">
-              <div class="permission-icon">
-                <ion-icon :icon="alertCircleOutline"></ion-icon>
-              </div>
-              <div class="permission-text">
-                <h4>Enable Notifications</h4>
-                <p>Allow notifications to receive event reminders</p>
-              </div>
-              <button class="permission-btn" @click="handleRequestPermission">
-                <ion-icon :icon="notificationsOutline"></ion-icon>
-                Allow
-              </button>
-            </div>
-
-            <!-- Permission Granted Indicator -->
-            <div v-else class="permission-granted">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Notifications enabled</span>
+            <!-- Note about enabling notifications -->
+            <div v-if="pushNotificationStatus !== 'granted'" class="info-card">
+              <ion-icon :icon="informationCircleOutline"></ion-icon>
+              <span>Enable Push Notifications above to receive event reminders</span>
             </div>
 
             <!-- Timing Selection -->
@@ -278,9 +401,17 @@ import {
   checkmarkCircleOutline,
   calendarOutline,
   timeOutline,
+  cardOutline,
+  sparklesOutline,
+  checkmarkDoneOutline,
+  sendOutline,
+  alarmOutline,
+  informationCircleOutline,
+  contrastOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
+const userStore = useUserStore();
 const { businessName, phoneNumbers } = useSettings();
 const { showToast } = useToast();
 const { isPremium } = useSubscription();
@@ -292,8 +423,62 @@ const {
   updateReminderSettings,
   showNotification,
 } = useEventReminders();
+const {
+  permissionStatus: pushNotificationStatus,
+  requestPermission: requestPushPermission,
+  updatePreferences: updatePushPreferences,
+  sendLocalNotification,
+  initNotifications,
+} = useNotifications();
 
 const isLoading = ref(false);
+
+// Push notification preferences
+const notifPrefs = reactive({
+  premiumExpiry: true,
+  newFeatures: true,
+  eventReminders: true,
+  requestUpdates: true,
+});
+
+// Initialize from store
+watch(() => userStore.notificationPreferences, (prefs) => {
+  if (prefs) {
+    notifPrefs.premiumExpiry = prefs.premiumExpiry ?? true;
+    notifPrefs.newFeatures = prefs.newFeatures ?? true;
+    notifPrefs.eventReminders = prefs.eventReminders ?? true;
+    notifPrefs.requestUpdates = prefs.requestUpdates ?? true;
+  }
+}, { immediate: true });
+
+// Enable push notifications
+const enablePushNotifications = async () => {
+  const granted = await requestPushPermission();
+  if (granted) {
+    showToast('Push notifications enabled!', 'success');
+  }
+};
+
+// Save notification preferences
+const saveNotificationPreferences = async () => {
+  await updatePushPreferences({
+    premiumExpiry: notifPrefs.premiumExpiry,
+    newFeatures: notifPrefs.newFeatures,
+    eventReminders: notifPrefs.eventReminders,
+    requestUpdates: notifPrefs.requestUpdates,
+  });
+};
+
+// Send test push notification
+const sendTestPushNotification = () => {
+  sendLocalNotification('Test Notification', 'This is a test push notification from CaterHub!');
+  showToast('Test notification sent!', 'success');
+};
+
+// Initialize notifications on mount
+onMounted(() => {
+  initNotifications();
+});
 
 // Branding form
 const brandingForm = reactive({
@@ -421,12 +606,12 @@ const testNotification = () => {
 .page-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
   margin: 0 0 4px 0;
 }
 
 .page-header p {
-  color: #666;
+  color: var(--color-text-secondary, #666);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -439,7 +624,7 @@ const testNotification = () => {
 
 /* Settings Section */
 .settings-section {
-  background: white;
+  background: var(--color-surface, white);
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -468,7 +653,7 @@ const testNotification = () => {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .premium-badge {
@@ -511,12 +696,12 @@ const testNotification = () => {
   margin: 0 0 8px 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .locked-content p {
   margin: 0 0 20px 0;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   max-width: 300px;
 }
 
@@ -566,7 +751,7 @@ const testNotification = () => {
 }
 
 .setting-card {
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 12px;
   padding: 16px;
 }
@@ -586,19 +771,21 @@ const testNotification = () => {
 .setting-header span {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .setting-input,
 .setting-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 2px solid #e8e8e8;
+  border: 2px solid var(--color-border, #e8e8e8);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   outline: none;
   resize: none;
+  background: var(--color-surface, white);
+  color: var(--color-text-primary, #333);
 }
 
 .setting-input:focus,
@@ -618,7 +805,7 @@ const testNotification = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 12px;
   padding: 14px;
 }
@@ -637,7 +824,7 @@ const testNotification = () => {
 .toggle-info span {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 /* Custom Toggle Switch */
@@ -691,7 +878,7 @@ const testNotification = () => {
   margin: 0 0 12px 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .color-cards {
@@ -704,7 +891,7 @@ const testNotification = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
@@ -726,14 +913,14 @@ const testNotification = () => {
 
 .color-info label {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   margin-bottom: 2px;
 }
 
 .color-info .color-code {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
   font-family: monospace;
 }
 
@@ -753,12 +940,12 @@ const testNotification = () => {
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  border: 2px solid #e8e8e8;
-  background: white;
+  border: 2px solid var(--color-border, #e8e8e8);
+  background: var(--color-surface, white);
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
@@ -785,7 +972,7 @@ const testNotification = () => {
   gap: 6px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   margin-bottom: 12px;
 }
 
@@ -794,8 +981,8 @@ const testNotification = () => {
 }
 
 .pdf-preview-card {
-  background: white;
-  border: 2px solid #e8e8e8;
+  background: var(--color-surface, white);
+  border: 2px solid var(--color-border, #e8e8e8);
   border-radius: 12px;
   padding: 20px;
   flex: 1;
@@ -855,10 +1042,26 @@ const testNotification = () => {
 
 .preview-item {
   padding: 8px 12px;
-  background: #f8f9fa;
+  background: var(--color-surface-secondary, #f8f9fa);
   border-radius: 6px;
   font-size: 0.85rem;
-  color: #555;
+  color: var(--color-text-secondary, #555);
+}
+
+/* Push Notifications */
+.notifications-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-light, #f0f0f0);
+  margin-top: 8px;
 }
 
 /* Event Reminders */
@@ -881,12 +1084,12 @@ const testNotification = () => {
 .toggle-label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .toggle-description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-muted, #888);
   margin-top: 2px;
 }
 
@@ -895,7 +1098,7 @@ const testNotification = () => {
   flex-direction: column;
   gap: 16px;
   padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-light, #f0f0f0);
   margin-top: 8px;
 }
 
@@ -934,13 +1137,13 @@ const testNotification = () => {
   margin: 0 0 4px 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 
 .permission-text p {
   margin: 0;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .permission-btn {
@@ -986,6 +1189,24 @@ const testNotification = () => {
   font-size: 20px;
 }
 
+/* Info Card */
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(61, 194, 255, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+  border: 1px solid rgba(61, 194, 255, 0.3);
+  border-radius: 10px;
+  color: #0ea5e9;
+  font-size: 0.85rem;
+}
+
+.info-card ion-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
 /* Timing Options */
 .timing-options {
   display: grid;
@@ -996,12 +1217,12 @@ const testNotification = () => {
 
 .timing-option {
   padding: 12px 16px;
-  border: 2px solid #e8e8e8;
-  background: white;
+  border: 2px solid var(--color-border, #e8e8e8);
+  background: var(--color-surface, white);
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -1027,12 +1248,12 @@ const testNotification = () => {
 .time-select {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e8e8e8;
+  border: 2px solid var(--color-border, #e8e8e8);
   border-radius: 10px;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
-  background: white;
+  color: var(--color-text-primary, #333);
+  background: var(--color-surface, white);
   cursor: pointer;
   outline: none;
   transition: all 0.3s ease;
@@ -1068,6 +1289,39 @@ const testNotification = () => {
 
 .test-notification-btn ion-icon {
   font-size: 20px;
+}
+
+/* Appearance Section */
+.appearance-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.theme-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-secondary, #f8f9fa);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.theme-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.theme-description {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #888);
+  margin-top: 2px;
 }
 
 @media (max-width: 480px) {
