@@ -1,7 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="users-container">
+  <div class="users-page">
+    <div class="users-container">
         <div class="users-header">
           <h2>Users</h2>
           <div class="header-actions">
@@ -86,136 +85,137 @@
 
       <!-- Create/Edit User Modal -->
       <ion-modal :is-open="isModalOpen" @didDismiss="closeModal" class="user-modal">
-        <ion-header>
-          <ion-toolbar class="gradient-toolbar">
-            <ion-title>{{ editingUser ? 'Edit User' : 'Create User' }}</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="closeModal">
-                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="modal-content">
-          <div class="form-container">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h2>{{ editingUser ? 'Edit User' : 'Create New User' }}</h2>
+            <button class="modal-close-btn" @click="closeModal">
+              <ion-icon :icon="closeOutline"></ion-icon>
+            </button>
+          </div>
+
+          <div class="modal-body">
             <form @submit.prevent="handleSubmit" autocomplete="off">
               <!-- Username Field -->
-              <div class="input-group">
-                <label class="input-label">Username</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="personCircleOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="formData.username"
-                    type="text"
-                    class="custom-input"
-                    placeholder="Enter username"
-                    autocomplete="off"
-                    required
-                  />
-                </div>
+              <div class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="personCircleOutline"></ion-icon>
+                  Username
+                </label>
+                <input
+                  v-model="formData.username"
+                  type="text"
+                  class="field-input"
+                  placeholder="Enter username"
+                  autocomplete="off"
+                  required
+                />
               </div>
 
               <!-- Business Name Field -->
-              <div class="input-group">
-                <label class="input-label">Business Name</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="businessOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="formData.businessName"
-                    type="text"
-                    class="custom-input"
-                    placeholder="Enter business name"
-                    autocomplete="off"
-                  />
-                </div>
+              <div class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="businessOutline"></ion-icon>
+                  Business Name
+                </label>
+                <input
+                  v-model="formData.businessName"
+                  type="text"
+                  class="field-input"
+                  placeholder="Enter business name"
+                  autocomplete="off"
+                />
               </div>
 
               <!-- Phone Number Field -->
-              <div class="input-group">
-                <label class="input-label">Phone Number</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="callOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="formData.phoneNumber"
-                    type="tel"
-                    class="custom-input"
-                    placeholder="Enter phone number"
-                    autocomplete="off"
-                  />
-                </div>
+              <div class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="callOutline"></ion-icon>
+                  Phone Number
+                </label>
+                <input
+                  v-model="formData.phoneNumber"
+                  type="tel"
+                  class="field-input"
+                  placeholder="Enter phone number"
+                  autocomplete="off"
+                />
               </div>
 
               <!-- Email Field (Edit only) -->
-              <div v-if="editingUser" class="input-group">
-                <label class="input-label">Email Address</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="formData.email"
-                    type="email"
-                    class="custom-input"
-                    placeholder="Enter email address"
-                    autocomplete="off"
-                  />
-                </div>
+              <div v-if="editingUser" class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="mailOutline"></ion-icon>
+                  Email Address
+                </label>
+                <input
+                  v-model="formData.email"
+                  type="email"
+                  class="field-input"
+                  placeholder="Enter email address"
+                  autocomplete="off"
+                />
               </div>
 
               <!-- Password Field (Create only) -->
-              <div v-if="!editingUser" class="input-group">
-                <label class="input-label">Password</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="formData.password"
-                    type="password"
-                    class="custom-input"
-                    placeholder="Enter password (min 6 characters)"
-                    minlength="6"
-                    autocomplete="new-password"
-                    required
-                  />
-                </div>
+              <div v-if="!editingUser" class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="lockClosedOutline"></ion-icon>
+                  Password
+                </label>
+                <input
+                  v-model="formData.password"
+                  type="password"
+                  class="field-input"
+                  placeholder="Enter password (min 6 characters)"
+                  minlength="6"
+                  autocomplete="new-password"
+                  required
+                />
               </div>
 
               <!-- Role Field -->
-              <div class="input-group">
-                <label class="input-label">Role</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="shieldCheckmarkOutline" class="input-icon"></ion-icon>
-                  <select v-model="formData.role" class="custom-select">
+              <div class="form-field">
+                <label class="field-label">
+                  <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+                  Role
+                </label>
+                <div class="select-wrapper">
+                  <select v-model="formData.role" class="field-select">
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
+                  <ion-icon :icon="chevronDownOutline" class="select-arrow"></ion-icon>
                 </div>
               </div>
 
               <!-- Active Status (Edit only) -->
-              <div v-if="editingUser" class="toggle-group">
-                <label class="toggle-label">Active Status</label>
+              <div v-if="editingUser" class="toggle-field">
+                <div class="toggle-info">
+                  <ion-icon :icon="checkmarkCircleOutline" :class="{ active: formData.isActive }"></ion-icon>
+                  <span>Active Status</span>
+                </div>
                 <ion-toggle v-model="formData.isActive" color="success"></ion-toggle>
               </div>
 
               <!-- Error Message -->
-              <div v-if="formError" class="error-message">
+              <div v-if="formError" class="error-alert">
                 <ion-icon :icon="alertCircleOutline"></ion-icon>
                 <span>{{ formError }}</span>
               </div>
-
-              <!-- Submit Button -->
-              <ion-button
-                expand="block"
-                type="submit"
-                :disabled="isSubmitting"
-                class="submit-button"
-                color="primary"
-              >
-                <ion-spinner v-if="isSubmitting" name="crescent"></ion-spinner>
-                <ion-icon v-else slot="start" :icon="editingUser ? saveOutline : personAddOutline"></ion-icon>
-                <span v-if="!isSubmitting">{{ editingUser ? 'Update User' : 'Create User' }}</span>
-              </ion-button>
             </form>
           </div>
-        </ion-content>
+
+          <div class="modal-footer">
+            <button class="cancel-btn" @click="closeModal">Cancel</button>
+            <button class="submit-btn" @click="handleSubmit" :disabled="isSubmitting">
+              <ion-spinner v-if="isSubmitting" name="crescent"></ion-spinner>
+              <template v-else>
+                <ion-icon :icon="editingUser ? saveOutline : personAddOutline"></ion-icon>
+                {{ editingUser ? 'Update User' : 'Create User' }}
+              </template>
+            </button>
+          </div>
+        </div>
       </ion-modal>
 
       <!-- Delete Confirmation Modal -->
@@ -608,13 +608,11 @@
           </div>
         </ion-content>
       </ion-modal>
-    </ion-content>
-  </ion-page>
+    </div>
 </template>
 
 <script setup lang="ts">
 import {
-  IonPage,
   IonContent,
   IonCard,
   IonCardContent,
@@ -663,6 +661,8 @@ import {
   checkmarkCircleOutline,
   chatboxOutline,
   imageOutline,
+  chevronDownOutline,
+  mailOutline,
 } from 'ionicons/icons';
 import type { UserData } from '~/stores/user';
 import { doc, updateDoc, Timestamp, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
@@ -1231,10 +1231,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.users-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .users-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .users-header {
@@ -1356,120 +1360,238 @@ onMounted(() => {
   --color: white;
 }
 
-.modal-content {
-  --background: #f8f9fa;
+/* Modal Container Styles */
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
 }
 
-.form-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.input-group {
-  margin-bottom: 24px;
-}
-
-.input-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.input-wrapper {
-  position: relative;
+.modal-header {
   display: flex;
   align-items: center;
-  background: white;
-  border-radius: 12px;
-  padding: 12px 16px;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.input-wrapper:focus-within {
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-close-btn ion-icon {
+  font-size: 20px;
+}
+
+.modal-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+
+.form-field {
+  margin-bottom: 18px;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.field-label ion-icon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.field-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #333;
+  background: white;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.field-input:focus {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.input-icon {
-  font-size: 22px;
-  color: #667eea;
-  margin-right: 12px;
-  flex-shrink: 0;
+.field-input::placeholder {
+  color: #999;
 }
 
-.custom-input,
-.custom-select {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
+.select-wrapper {
+  position: relative;
+}
+
+.field-select {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
   font-size: 15px;
   color: #333;
-  font-weight: 500;
-}
-
-.custom-input::placeholder {
-  color: #999;
-  font-weight: 400;
-}
-
-.custom-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.custom-select {
+  background: white;
+  transition: all 0.2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
-  padding-right: 8px;
 }
 
-.toggle-group {
+.field-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #888;
+  pointer-events: none;
+}
+
+.toggle-field {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: white;
+  border: 2px solid #e8e8e8;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 14px 16px;
+  margin-bottom: 18px;
 }
 
-.toggle-label {
+.toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-info ion-icon {
+  font-size: 22px;
+  color: #ccc;
+  transition: color 0.2s;
+}
+
+.toggle-info ion-icon.active {
+  color: #2dd36f;
+}
+
+.toggle-info span {
   font-size: 15px;
   font-weight: 600;
   color: #333;
-  margin: 0;
 }
 
-.error-message {
+.error-alert {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #fee;
-  color: #eb445a;
+  gap: 10px;
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  color: #c53030;
   padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 24px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: 500;
+  margin-bottom: 10px;
 }
 
-.error-message ion-icon {
+.error-alert ion-icon {
   font-size: 20px;
   flex-shrink: 0;
 }
 
-.submit-button {
-  margin-top: 24px;
-  height: 52px;
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: white;
+}
+
+.modal-footer .cancel-btn {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid #e8e8e8;
+  background: white;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
-  font-size: 16px;
-  --border-radius: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-footer .cancel-btn:hover {
+  background: #f5f5f5;
+  border-color: #ddd;
+}
+
+.modal-footer .submit-btn {
+  flex: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-footer .submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.modal-footer .submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modal-footer .submit-btn ion-icon {
+  font-size: 18px;
 }
 
 .delete-confirmation {
@@ -2453,5 +2575,20 @@ onMounted(() => {
   --border-radius: 12px;
   height: 52px;
   font-weight: 600;
+}
+</style>
+
+<style>
+/* Non-scoped styles for user modal */
+.user-modal {
+  --width: 90%;
+  --max-width: 500px;
+  --height: 85vh;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.user-modal::part(content) {
+  margin: auto;
 }
 </style>

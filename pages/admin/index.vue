@@ -1,124 +1,140 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="admin-container">
-        <h2>Welcome, Admin!</h2>
+  <div class="admin-dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Admin Dashboard</h1>
+      <p class="dashboard-subtitle">Manage your CaterHub platform</p>
+    </div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-cards">
-          <ion-card class="stat-card">
-            <ion-card-content>
-              <div class="stat-value">{{ totalCategories }}</div>
-              <div class="stat-label">Categories</div>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="stat-card">
-            <ion-card-content>
-              <div class="stat-value">{{ totalItems }}</div>
-              <div class="stat-label">Total Items</div>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="stat-card">
-            <ion-card-content>
-              <div class="stat-value">{{ totalUsers }}</div>
-              <div class="stat-label">Users</div>
-            </ion-card-content>
-          </ion-card>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card categories">
+        <div class="stat-icon">
+          <ion-icon :icon="gridOutline"></ion-icon>
         </div>
-
-        <div class="admin-cards">
-          <ion-card class="admin-card" button @click="navigateTo('/admin/categories')">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon :icon="gridOutline"></ion-icon>
-              </div>
-              <h3>Category Management</h3>
-              <p>Add, edit, and delete categories</p>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="admin-card" button @click="navigateTo('/admin/items')">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon :icon="fastFoodOutline"></ion-icon>
-              </div>
-              <h3>Item Management</h3>
-              <p>Manage items across all categories</p>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="admin-card" button @click="navigateTo('/admin/users')">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon :icon="peopleOutline"></ion-icon>
-              </div>
-              <h3>User Management</h3>
-              <p>Create, edit, and manage user accounts</p>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="admin-card" button @click="navigateTo('/admin/requests')">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon :icon="cardOutline"></ion-icon>
-                <span v-if="pendingRequestsCount > 0" class="badge">{{ pendingRequestsCount }}</span>
-              </div>
-              <h3>Premium Requests</h3>
-              <p>Review and approve subscription requests</p>
-            </ion-card-content>
-          </ion-card>
-
-          <ion-card class="admin-card" button @click="navigateTo('/admin/settings')">
-            <ion-card-content>
-              <div class="card-icon">
-                <ion-icon :icon="settingsOutline"></ion-icon>
-              </div>
-              <h3>App Settings</h3>
-              <p>Configure PDF limits and pricing</p>
-            </ion-card-content>
-          </ion-card>
-        </div>
-
-        <!-- Database Initialization Section -->
-        <div v-if="totalCategories === 0" class="init-section">
-          <ion-card color="warning">
-            <ion-card-content>
-              <div class="init-content">
-                <ion-icon :icon="alertCircleOutline" class="init-icon"></ion-icon>
-                <h3>No Categories Found</h3>
-                <p>Initialize your database with sample categories and items to get started.</p>
-                <ion-button
-                  expand="block"
-                  color="primary"
-                  @click="initializeDatabase"
-                  :disabled="isInitializing"
-                >
-                  <ion-spinner v-if="isInitializing" name="crescent"></ion-spinner>
-                  <ion-icon v-else slot="start" :icon="cloudDownloadOutline"></ion-icon>
-                  <span v-if="!isInitializing">Initialize Sample Data</span>
-                  <span v-else>Initializing...</span>
-                </ion-button>
-              </div>
-            </ion-card-content>
-          </ion-card>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalCategories }}</span>
+          <span class="stat-label">Categories</span>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+
+      <div class="stat-card items">
+        <div class="stat-icon">
+          <ion-icon :icon="fastFoodOutline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalItems }}</span>
+          <span class="stat-label">Menu Items</span>
+        </div>
+      </div>
+
+      <div class="stat-card users">
+        <div class="stat-icon">
+          <ion-icon :icon="peopleOutline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalUsers }}</span>
+          <span class="stat-label">Users</span>
+        </div>
+      </div>
+
+      <div class="stat-card requests">
+        <div class="stat-icon">
+          <ion-icon :icon="cardOutline"></ion-icon>
+          <span v-if="pendingRequestsCount > 0" class="pending-badge">{{ pendingRequestsCount }}</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ pendingRequestsCount }}</span>
+          <span class="stat-label">Pending Requests</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="section-header">
+      <h2 class="section-title">Quick Actions</h2>
+    </div>
+
+    <div class="actions-grid">
+      <div class="action-card" @click="navigateTo('/admin/categories')">
+        <div class="action-icon categories">
+          <ion-icon :icon="gridOutline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <h3>Category Management</h3>
+          <p>Add, edit, and delete categories</p>
+        </div>
+        <ion-icon :icon="chevronForwardOutline" class="action-arrow"></ion-icon>
+      </div>
+
+      <div class="action-card" @click="navigateTo('/admin/items')">
+        <div class="action-icon items">
+          <ion-icon :icon="fastFoodOutline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <h3>Item Management</h3>
+          <p>Manage items across all categories</p>
+        </div>
+        <ion-icon :icon="chevronForwardOutline" class="action-arrow"></ion-icon>
+      </div>
+
+      <div class="action-card" @click="navigateTo('/admin/users')">
+        <div class="action-icon users">
+          <ion-icon :icon="peopleOutline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <h3>User Management</h3>
+          <p>Create, edit, and manage user accounts</p>
+        </div>
+        <ion-icon :icon="chevronForwardOutline" class="action-arrow"></ion-icon>
+      </div>
+
+      <div class="action-card" @click="navigateTo('/admin/requests')">
+        <div class="action-icon requests">
+          <ion-icon :icon="cardOutline"></ion-icon>
+          <span v-if="pendingRequestsCount > 0" class="card-badge">{{ pendingRequestsCount }}</span>
+        </div>
+        <div class="action-content">
+          <h3>Premium Requests</h3>
+          <p>Review and approve subscription requests</p>
+        </div>
+        <ion-icon :icon="chevronForwardOutline" class="action-arrow"></ion-icon>
+      </div>
+
+      <div class="action-card" @click="navigateTo('/admin/settings')">
+        <div class="action-icon settings">
+          <ion-icon :icon="settingsOutline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <h3>App Settings</h3>
+          <p>Configure PDF limits and pricing</p>
+        </div>
+        <ion-icon :icon="chevronForwardOutline" class="action-arrow"></ion-icon>
+      </div>
+    </div>
+
+    <!-- Database Initialization Section -->
+    <div v-if="totalCategories === 0" class="init-section">
+      <div class="init-card">
+        <div class="init-icon">
+          <ion-icon :icon="alertCircleOutline"></ion-icon>
+        </div>
+        <h3>No Categories Found</h3>
+        <p>Initialize your database with sample categories and items to get started.</p>
+        <button class="init-btn" @click="initializeDatabase" :disabled="isInitializing">
+          <ion-spinner v-if="isInitializing" name="crescent"></ion-spinner>
+          <template v-else>
+            <ion-icon :icon="cloudDownloadOutline"></ion-icon>
+            <span>Initialize Sample Data</span>
+          </template>
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import {
-  IonPage,
-  IonContent,
-  IonCard,
-  IonCardContent,
-  IonButton,
-  IonIcon,
-  IonSpinner,
-} from '@ionic/vue';
+import { IonIcon, IonSpinner } from '@ionic/vue';
 import {
   peopleOutline,
   gridOutline,
@@ -127,6 +143,7 @@ import {
   cloudDownloadOutline,
   cardOutline,
   settingsOutline,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 import { initializeCategories } from '~/scripts/initCategories';
 
@@ -181,151 +198,358 @@ const initializeDatabase = async () => {
 </script>
 
 <style scoped>
-.admin-container {
+.admin-dashboard {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
-.admin-container h2 {
-  font-size: 28px;
-  margin-bottom: 24px;
-  color: #333;
+/* Header */
+.dashboard-header {
+  margin-bottom: 28px;
 }
 
-.stats-cards {
+.dashboard-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-subtitle {
+  font-size: 0.95rem;
+  color: #888;
+  margin: 0;
+}
+
+/* Stats Grid */
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 32px;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border-left: 4px solid #667eea;
-}
-
-.stat-card ion-card-content {
-  text-align: center;
+  background: white;
+  border-radius: 16px;
   padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
 }
 
-.stat-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 8px;
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-.stat-label {
-  font-size: 14px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.admin-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.admin-card {
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.admin-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.admin-card ion-card-content {
-  text-align: center;
-  padding: 24px;
-}
-
-.card-icon {
-  font-size: 48px;
-  color: #3880ff;
-  margin-bottom: 16px;
-  position: relative;
-  display: inline-block;
-}
-
-.card-icon .badge {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  background: #eb445a;
-  color: white;
-  border-radius: 12px;
-  min-width: 24px;
-  height: 24px;
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 0 6px;
+  position: relative;
+}
+
+.stat-icon ion-icon {
+  font-size: 28px;
+  color: white;
+}
+
+.stat-card.categories .stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card.items .stat-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-card.users .stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card.requests .stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.pending-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #eb445a;
+  color: white;
+  border-radius: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
   box-shadow: 0 2px 6px rgba(235, 68, 90, 0.4);
 }
 
-.admin-card h3 {
-  font-size: 20px;
-  margin: 0 0 8px 0;
-  color: #333;
+.stat-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.admin-card p {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
 }
 
-.init-section {
-  margin-top: 40px;
+.stat-label {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 500;
 }
 
-.init-content {
-  text-align: center;
-  padding: 20px;
-}
-
-.init-icon {
-  font-size: 48px;
+/* Section Header */
+.section-header {
   margin-bottom: 16px;
 }
 
-.init-content h3 {
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Actions Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+}
+
+.action-card:hover .action-arrow {
+  transform: translateX(4px);
+  color: #667eea;
+}
+
+.action-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.action-icon ion-icon {
+  font-size: 26px;
+  color: white;
+}
+
+.action-icon.categories {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.action-icon.items {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.action-icon.users {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.action-icon.requests {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.action-icon.settings {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.action-icon.settings ion-icon {
+  color: #555;
+}
+
+.card-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #eb445a;
+  color: white;
+  border-radius: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(235, 68, 90, 0.4);
+}
+
+.action-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.action-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.action-content p {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+.action-arrow {
   font-size: 20px;
+  color: #ccc;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+/* Init Section */
+.init-section {
+  margin-top: 32px;
+}
+
+.init-card {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  border: 1px solid #ffc107;
+}
+
+.init-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.init-icon ion-icon {
+  font-size: 32px;
+  color: #ffc107;
+}
+
+.init-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #856404;
   margin: 0 0 8px 0;
-  color: #333;
 }
 
-.init-content p {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
+.init-card p {
+  font-size: 0.9rem;
+  color: #856404;
+  margin: 0 0 20px 0;
 }
 
-.init-content ion-button {
-  max-width: 400px;
-  margin: 0 auto;
+.init-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.init-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.init-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.init-btn ion-icon {
+  font-size: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .admin-container {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
     padding: 16px;
   }
 
-  .admin-container h2 {
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-icon ion-icon {
     font-size: 24px;
   }
 
-  .admin-cards {
-    grid-template-columns: 1fr;
+  .stat-value {
+    font-size: 1.5rem;
   }
 }
 </style>

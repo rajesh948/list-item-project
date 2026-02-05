@@ -177,6 +177,10 @@ import {
   arrowBackOutline,
 } from 'ionicons/icons';
 
+definePageMeta({
+  layout: 'auth',
+});
+
 const { registerWithEmail, isAuthenticated, userRole } = useAuth();
 
 const email = ref('');

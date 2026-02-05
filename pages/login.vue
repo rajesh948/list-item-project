@@ -110,6 +110,10 @@ import {
   lockClosedOutline,
 } from 'ionicons/icons';
 
+definePageMeta({
+  layout: 'auth',
+});
+
 const { login, userRole, isAuthenticated } = useAuth();
 
 const username = ref('');

@@ -7,27 +7,22 @@
 
     <!-- Main App -->
     <template v-if="!showLoading">
-      <Header v-if="showHeader" />
-      <ion-content id="main-content">
-        <NuxtLayout>
-          <NuxtPage />
-        </NuxtLayout>
-      </ion-content>
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </template>
   </ion-app>
 </template>
 
 <script setup lang="ts">
-import { IonApp, IonContent } from '@ionic/vue';
+import { IonApp } from '@ionic/vue';
 import { App } from '@capacitor/app';
-
-const route = useRoute();
 
 // Initialize authentication
 const { initAuth, isLoading: isAuthLoading } = useAuth();
 
 const showLoading = ref(true);
-const loadingMessage = ref('Loading user data...');
+const loadingMessage = ref('Loading...');
 
 onMounted(async () => {
   // Initialize auth
@@ -37,13 +32,10 @@ onMounted(async () => {
   const checkAuth = setInterval(() => {
     if (!isAuthLoading.value) {
       loadingMessage.value = 'Ready!';
-      // Keep loading screen for a brief moment to show "Ready!" message
       setTimeout(() => {
         showLoading.value = false;
-      }, 500);
+      }, 300);
       clearInterval(checkAuth);
-    } else {
-      loadingMessage.value = 'Loading user data...';
     }
   }, 100);
 
@@ -55,10 +47,6 @@ onMounted(async () => {
     }
   }, 5000);
 });
-
-// Show header only when not on auth pages
-const authPages = ['/login', '/register', '/forgot-password', '/verify-email'];
-const showHeader = computed(() => !authPages.includes(route.path));
 
 // Handle Android hardware back button
 if (process.client) {
@@ -72,6 +60,9 @@ if (process.client) {
 }
 </script>
 
-<style scoped>
-/* App styles */
+<style>
+/* Global styles */
+ion-app {
+  --ion-background-color: #f8f9fa;
+}
 </style>

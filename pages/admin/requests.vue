@@ -1,7 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="requests-container">
+  <div class="requests-page">
+    <div class="requests-container">
         <div class="requests-header">
           <h2>Premium Requests</h2>
           <ion-button fill="outline" color="medium" @click="handleRefresh" :disabled="isRefreshing">
@@ -147,13 +146,11 @@
           </div>
         </ion-content>
       </ion-modal>
-    </ion-content>
-  </ion-page>
+    </div>
 </template>
 
 <script setup lang="ts">
 import {
-  IonPage,
   IonContent,
   IonButton,
   IonIcon,
@@ -291,10 +288,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.requests-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .requests-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .requests-header {

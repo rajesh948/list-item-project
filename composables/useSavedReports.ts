@@ -4,7 +4,12 @@ import { db } from '~/firebase';
 export interface SavedReport {
   id?: string;
   userId: string;
-  userName: string;
+  userName?: string;
+  reportName?: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerId?: string | null;
+  isDraft?: boolean;
   reportData: {
     name: string;
     address: string;
@@ -18,9 +23,10 @@ export interface SavedReport {
     id: number;
     name: string;
     items: Array<{
-      id: number;
+      id: number | string;
       name: string;
       categoryId?: number;
+      image?: string;
     }>;
   }>;
   selectedTable?: {
@@ -52,8 +58,13 @@ export const useSavedReports = () => {
           id: doc.id,
           userId: data.userId,
           userName: data.userName,
-          reportData: data.reportData,
-          selectedCategories: data.selectedCategories || [],
+          reportName: data.reportName,
+          customerName: data.customerName,
+          customerPhone: data.customerPhone,
+          customerId: data.customerId,
+          isDraft: data.isDraft || false,
+          reportData: data.reportData || data.userData,
+          selectedCategories: data.selectedCategories || data.selectedData || [],
           selectedTable: data.selectedTable || null,
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -83,8 +94,13 @@ export const useSavedReports = () => {
         id: reportDoc.id,
         userId: data.userId,
         userName: data.userName,
-        reportData: data.reportData,
-        selectedCategories: data.selectedCategories || [],
+        reportName: data.reportName,
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        customerId: data.customerId,
+        isDraft: data.isDraft || false,
+        reportData: data.reportData || data.userData,
+        selectedCategories: data.selectedCategories || data.selectedData || [],
         selectedTable: data.selectedTable || null,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -95,6 +111,42 @@ export const useSavedReports = () => {
   };
 
   const saveReport = async (
+    userId: string,
+    data: {
+      reportName?: string;
+      customerName?: string;
+      customerPhone?: string;
+      customerId?: string | null;
+      userData: SavedReport['reportData'];
+      selectedData: SavedReport['selectedCategories'];
+      selectedTable?: SavedReport['selectedTable'];
+      isDraft?: boolean;
+    }
+  ): Promise<{ success: boolean; error?: string; id?: string }> => {
+    try {
+      const newReport = {
+        userId,
+        reportName: data.reportName || '',
+        customerName: data.customerName || '',
+        customerPhone: data.customerPhone || '',
+        customerId: data.customerId || null,
+        reportData: data.userData,
+        selectedCategories: data.selectedData,
+        selectedTable: data.selectedTable || null,
+        isDraft: data.isDraft || false,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
+
+      const docRef = await addDoc(collection(db, 'savedReports'), newReport);
+
+      return { success: true, id: docRef.id };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to save report' };
+    }
+  };
+
+  const saveReportLegacy = async (
     userId: string,
     userName: string,
     reportData: SavedReport['reportData'],
@@ -168,6 +220,7 @@ export const useSavedReports = () => {
     fetchSavedReports,
     getSavedReport,
     saveReport,
+    saveReportLegacy,
     updateReport,
     deleteReport,
     getReportsCount,

@@ -1,7 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="subscription-container">
+  <div class="subscription-page">
+    <div class="subscription-container">
         <!-- Current Plan Status -->
         <div class="current-plan-section">
           <div class="plan-status" :class="isPremium ? 'premium' : 'free'">
@@ -162,17 +161,11 @@
           </div>
         </div>
       </div>
-
-    </ion-content>
-  </ion-page>
+    </div>
 </template>
 
 <script setup lang="ts">
-import {
-  IonPage,
-  IonContent,
-  IonIcon,
-} from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
 import {
   starOutline,
   personOutline,

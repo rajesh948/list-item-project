@@ -1,7 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="settings-container">
+  <div class="settings-page">
+    <div class="settings-container">
         <div class="settings-header">
           <h2>App Settings</h2>
           <ion-button fill="outline" color="medium" @click="handleRefresh" :disabled="isRefreshing">
@@ -290,14 +289,11 @@
           </ion-button>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import {
-  IonPage,
-  IonContent,
   IonButton,
   IonIcon,
   IonSpinner,
@@ -551,10 +547,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.settings-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .settings-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .settings-header {

@@ -115,6 +115,10 @@ import {
   refreshOutline,
 } from 'ionicons/icons';
 
+definePageMeta({
+  layout: 'auth',
+});
+
 const { requestPasswordReset, isAuthenticated, userRole } = useAuth();
 
 const email = ref('');

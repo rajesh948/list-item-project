@@ -1,342 +1,377 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
-      <div class="categories-container">
-        <!-- Modern Search Bar -->
-        <div class="modern-search-container">
-          <ion-icon :icon="searchOutline" class="search-icon"></ion-icon>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="modern-search-input"
-            placeholder="Search items..."
+  <div class="dashboard">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <h1 class="business-name">{{ businessName }}</h1>
+      <p class="welcome-subtitle">Here's your business overview</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <DashboardStatCard
+        title="Total Reports"
+        :value="reportsCount"
+        icon="document-text-outline"
+        color="primary"
+        @click="navigateTo('/reports')"
+      />
+      <DashboardStatCard
+        title="Upcoming Events"
+        :value="upcomingEventsCount"
+        icon="calendar-outline"
+        color="success"
+        @click="navigateTo('/calendar')"
+      />
+      <DashboardStatCard
+        title="Customers"
+        :value="customersCount"
+        icon="people-outline"
+        color="warning"
+        :disabled="!isPremium"
+        @click="isPremium && navigateTo('/customers')"
+      />
+      <DashboardStatCard
+        title="This Month"
+        :value="monthlyReports"
+        icon="trending-up-outline"
+        color="tertiary"
+      />
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="two-columns">
+      <!-- Recent Reports -->
+      <div class="column">
+        <div class="section-header">
+          <h2 class="section-title">Recent Reports</h2>
+          <button class="view-all-btn" @click="navigateTo('/reports')">View All</button>
+        </div>
+        <div class="reports-list">
+          <div v-if="isLoadingReports" class="loading-state">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+          <div v-else-if="recentReports.length === 0" class="empty-state">
+            <ion-icon :icon="documentTextOutline"></ion-icon>
+            <p>No reports yet</p>
+            <button class="create-btn" @click="navigateTo('/create-report')">Create First Report</button>
+          </div>
+          <DashboardReportItem
+            v-else
+            v-for="report in recentReports"
+            :key="report.id"
+            :report="report"
+            @click="viewReport(report)"
           />
-          <ion-icon
-            v-if="searchQuery"
-            :icon="closeCircleOutline"
-            class="clear-icon"
-            @click="searchQuery = ''"
-          ></ion-icon>
-        </div>
-
-        <!-- Show items when searching -->
-        <div v-if="searchQuery.trim() && searchResults.length > 0" class="search-results">
-          <Card
-            @addItem="onAddItem"
-            v-for="item in searchResults"
-            :key="`${item.categoryId}-${item.id}`"
-            :item="item"
-            :selected="isItemSelected(item.id, item.categoryId)"
-            :categoryName="item.categoryName"
-            :showCategoryBadge="true"
-          />
-        </div>
-
-        <!-- Show categories when not searching -->
-        <div v-else-if="!searchQuery.trim()">
-          <ion-card
-            v-for="category in data"
-            :key="category.id"
-            button
-            @click="onSelectCategory(category.id)"
-            class="category-card"
-          >
-            <ion-card-content class="category-content">
-              <ion-thumbnail v-if="category.image" class="category-thumbnail">
-                <ion-img :src="category.image" :alt="category.name"></ion-img>
-              </ion-thumbnail>
-              <ion-card-title class="category-title">
-                {{ category.name }}
-              </ion-card-title>
-            </ion-card-content>
-          </ion-card>
-        </div>
-
-        <!-- No Results Message -->
-        <div v-else class="no-results">
-          <ion-icon :icon="searchOutline" size="large"></ion-icon>
-          <p>No results found</p>
         </div>
       </div>
 
-      <!-- Floating Report Button -->
-      <ion-fab v-if="totalSelectedItems > 0" slot="fixed" vertical="bottom" horizontal="end">
-        <ion-fab-button @click="goToReport">
-          <ion-icon :icon="documentTextOutline"></ion-icon>
-        </ion-fab-button>
-        <div class="item-count-badge">{{ totalSelectedItems }}</div>
-      </ion-fab>
-    </ion-content>
-  </ion-page>
+      <!-- Upcoming Events -->
+      <div class="column">
+        <div class="section-header">
+          <h2 class="section-title">Upcoming Events</h2>
+          <button class="view-all-btn" @click="navigateTo('/calendar')">View Calendar</button>
+        </div>
+        <div class="events-list">
+          <div v-if="isLoadingEvents" class="loading-state">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+          <div v-else-if="upcomingEvents.length === 0" class="empty-state">
+            <ion-icon :icon="calendarOutline"></ion-icon>
+            <p>No upcoming events</p>
+          </div>
+          <DashboardEventItem
+            v-else
+            v-for="event in upcomingEvents"
+            :key="event.id"
+            :event="event"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { IonIcon, IonSpinner } from '@ionic/vue';
 import {
-  IonPage,
-  IonContent,
-  IonCard,
-  IonCardContent,
-  IonCardTitle,
-  IonThumbnail,
-  IonImg,
-  IonIcon,
-  IonFab,
-  IonFabButton,
-} from '@ionic/vue';
-import { searchOutline, closeCircleOutline, documentTextOutline } from 'ionicons/icons';
-import { searchInGujarati } from '~/utils/transliterate';
+  documentTextOutline,
+  calendarOutline,
+} from 'ionicons/icons';
 
-// Authentication is handled by global middleware (02-redirect-login.global.ts)
+const userStore = useUserStore();
+const { isPremium } = useSubscription();
+const { fetchSavedReports } = useSavedReports();
+const { loadEvents } = useCalendar();
+const customersStore = useCustomersStore();
 
-const categoriesStore = useCategoriesStore();
-const reportStore = useReportStore();
-const data = computed(() => categoriesStore.allCategories);
-const searchQuery = ref('');
-
-// Search results across all categories
-const searchResults = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return [];
-  }
-
-  const query = searchQuery.value.trim();
-  const allMatchingItems: any[] = [];
-
-  data.value.forEach((category: any) => {
-    category.items.forEach((item: any) => {
-      if (searchInGujarati(item.name, query)) {
-        allMatchingItems.push({
-          ...item,
-          categoryName: category.name,
-          categoryId: category.id
-        });
-      }
-    });
-  });
-
-  return allMatchingItems;
+// Business name from user
+const businessName = computed(() => {
+  return userStore.user?.businessName || userStore.user?.username || 'Welcome';
 });
 
-const onSelectCategory = (categoryId: string) => {
-  navigateTo(`/list-item/${categoryId}`);
-};
+// State
+const isLoadingReports = ref(true);
+const isLoadingEvents = ref(true);
+const recentReports = ref<any[]>([]);
+const upcomingEvents = ref<any[]>([]);
 
-const onAddItem = (itemData: any) => {
-  const selectedData = [...reportStore.selectedCategories];
+// Computed stats
+const reportsCount = ref(0);
+const customersCount = computed(() => customersStore.totalCustomers);
+const upcomingEventsCount = computed(() => upcomingEvents.value.length);
+const monthlyReports = ref(0);
 
-  const categoryId = itemData.categoryId;
-  const categoryName = itemData.categoryName;
+// Load data
+const loadDashboardData = async () => {
+  if (!userStore.user?.uid) return;
 
-  const categoryIndex = selectedData.findIndex(
-    (item: any) => item.id === categoryId
-  );
+  // Load reports
+  isLoadingReports.value = true;
+  try {
+    const reports = await fetchSavedReports(userStore.user.uid);
+    recentReports.value = reports.slice(0, 5);
+    reportsCount.value = reports.length;
 
-  const cleanItemData = {
-    id: itemData.id,
-    name: itemData.name,
-    image: itemData.image
-  };
-
-  if (categoryIndex != -1) {
-    const itemIndex = selectedData[categoryIndex].items.findIndex(
-      (item: any) => item.id === cleanItemData.id
-    );
-    if (itemIndex === -1) {
-      selectedData[categoryIndex].items.push(cleanItemData);
-    } else {
-      if (selectedData[categoryIndex].items.length === 1) {
-        selectedData.splice(categoryIndex, 1);
-      } else {
-        selectedData[categoryIndex].items.splice(itemIndex, 1);
-      }
-    }
-  } else {
-    selectedData.push({
-      id: categoryId,
-      name: categoryName,
-      items: [cleanItemData],
-    });
+    // Calculate monthly reports
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    monthlyReports.value = reports.filter((r: any) => {
+      const reportDate = r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt);
+      return reportDate >= startOfMonth;
+    }).length;
+  } catch (error) {
+    console.error('Error loading reports:', error);
+  } finally {
+    isLoadingReports.value = false;
   }
 
-  reportStore.updateCategories(selectedData);
+  // Load events
+  isLoadingEvents.value = true;
+  try {
+    const events = await loadEvents();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    upcomingEvents.value = events
+      .filter((e: any) => {
+        const eventDate = new Date(e.date);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      })
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5);
+  } catch (error) {
+    console.error('Error loading events:', error);
+  } finally {
+    isLoadingEvents.value = false;
+  }
+
+  // Load customers count if premium
+  if (isPremium.value) {
+    try {
+      await customersStore.fetchCustomers(userStore.user.uid);
+    } catch (error) {
+      console.error('Error loading customers:', error);
+    }
+  }
+};
+
+const viewReport = (report: any) => {
+  navigateTo(`/preview-report?id=${report.id}`);
 };
 
 onMounted(() => {
-  reportStore.loadFromLocalStorage();
+  loadDashboardData();
 });
 
-const isItemSelected = (itemId: string, categoryId?: number) => {
-  const selectedData = reportStore.selectedCategories || [];
-
-  if (!categoryId) {
-    return selectedData.some((category: any) =>
-      category.items.some((item: any) => item.id === itemId)
-    );
-  }
-
-  const index = selectedData.findIndex((item: any) => item.id === categoryId);
-  if (index != -1) {
-    const itemIndex = selectedData[index].items.findIndex(
-      (item: any) => item.id === itemId
-    );
-    if (itemIndex != -1) {
-      return true;
-    }
-  }
-  return false;
-};
-
-// Calculate total selected items from store
-const totalSelectedItems = computed(() => reportStore.totalSelectedItems);
-
-const goToReport = () => {
-  navigateTo('/item-report');
-};
+// Refresh when user changes
+watch(() => userStore.user?.uid, () => {
+  loadDashboardData();
+});
 </script>
 
 <style scoped>
-.categories-container {
-  max-width: 600px;
+.dashboard {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 0;
 }
 
-/* Modern Search Bar */
-.modern-search-container {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  background: white;
-  border-radius: 16px;
-  padding: 12px 20px;
+/* Welcome Header */
+.welcome-header {
   margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
 }
 
-.modern-search-container:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+.business-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.search-icon {
-  font-size: 22px;
-  color: #667eea;
-  margin-right: 12px;
-  flex-shrink: 0;
+.welcome-subtitle {
+  font-size: 0.95rem;
+  color: #888;
+  margin: 0;
 }
 
-.modern-search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  color: #333;
-  background: transparent;
-  font-weight: 500;
-}
-
-.modern-search-input::placeholder {
-  color: #999;
-  font-weight: 400;
-}
-
-.clear-icon {
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  margin-left: 8px;
-  transition: color 0.2s;
-  flex-shrink: 0;
-}
-
-.clear-icon:hover {
-  color: #eb445a;
-}
-
-.category-card {
-  margin: 16px 0;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.category-card:hover {
-  transform: scale(1.02);
-}
-
-.category-content {
-  display: flex;
-  align-items: center;
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  padding: 16px;
+  margin-bottom: 24px;
 }
 
-.category-thumbnail {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
 }
 
-.category-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  flex: 1;
+/* Two Columns */
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
 }
 
-.search-bar {
+.column {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
-  --background: var(--ion-color-light);
-  --border-radius: 8px;
 }
 
-.search-results {
-  margin-top: 8px;
+.section-header .section-title {
+  margin: 0;
 }
 
-.no-results {
+.view-all-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.view-all-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+/* Lists */
+.reports-list,
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar */
+.reports-list::-webkit-scrollbar,
+.events-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reports-list::-webkit-scrollbar-track,
+.events-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.reports-list::-webkit-scrollbar-thumb,
+.events-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.reports-list::-webkit-scrollbar-thumb:hover,
+.events-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  height: 200px;
+  color: #888;
   text-align: center;
-  color: var(--ion-color-medium);
 }
 
-.no-results ion-icon {
-  margin-bottom: 16px;
+.empty-state ion-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
   opacity: 0.5;
 }
 
-.no-results p {
-  font-size: 1rem;
-  margin: 0;
+.empty-state p {
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
 }
 
-/* Floating Action Button */
-ion-fab-button {
-  --background: var(--gradient-primary);
-  --box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.item-count-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #eb445a;
+.create-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-btn:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

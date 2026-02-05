@@ -157,6 +157,10 @@ import {
   eyeOffOutline,
 } from 'ionicons/icons';
 
+definePageMeta({
+  layout: 'auth',
+});
+
 const { $auth } = useNuxtApp();
 const { resendVerificationWithCredentials } = useAuth();
 const route = useRoute();

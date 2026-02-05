@@ -2,74 +2,13 @@
   <div class="calendar-page">
     <div class="ion-padding calendar-content">
       <div class="calendar-container">
-        <!-- Tab Buttons (only show when there are events) -->
-        <div v-if="events.length > 0" class="tab-buttons">
-          <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'upcoming' }"
-            @click="activeTab = 'upcoming'"
-          >
-            <ion-icon :icon="timeOutline"></ion-icon>
-            Upcoming
-          </button>
-          <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'calendar' }"
-            @click="activeTab = 'calendar'"
-          >
-            <ion-icon :icon="calendarOutline"></ion-icon>
-            Calendar
-          </button>
+        <!-- Loading State -->
+        <div v-if="isLoading" class="inline-loading">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Loading events...</p>
         </div>
 
-        <!-- Upcoming Events Tab -->
-        <div v-if="events.length > 0 && activeTab === 'upcoming'" class="tab-content">
-          <div v-if="upcomingEvents.length > 0" class="upcoming-list">
-            <div
-              v-for="event in upcomingEvents"
-              :key="event.id"
-              class="upcoming-item"
-              @click="viewReport(event.reportId)"
-            >
-              <div class="event-left">
-                <div class="event-date-badge" :class="{ 'today': isToday(event.date) }">
-                  <span class="day">{{ event.date.getDate() }}</span>
-                  <span class="month">{{ getMonthShort(event.date) }}</span>
-                </div>
-              </div>
-              <div class="event-center">
-                <h4 class="customer-name">{{ event.customerName }}</h4>
-                <div class="event-meta">
-                  <span class="shift-badge" :class="getShiftClass(event.shift)">
-                    {{ event.shift || 'Full Day' }}
-                  </span>
-                  <span v-if="event.noOfPeople" class="people-count">
-                    <ion-icon :icon="peopleOutline"></ion-icon>
-                    {{ event.noOfPeople }}
-                  </span>
-                </div>
-                <p v-if="event.customerPhone" class="phone-text">
-                  {{ event.customerPhone }}
-                </p>
-              </div>
-              <div class="event-right">
-                <button v-if="event.customerPhone" class="call-btn" @click.stop="callCustomer(event.customerPhone)">
-                  <ion-icon :icon="callOutline"></ion-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Empty State for Upcoming -->
-          <div v-else class="empty-state">
-            <ion-icon :icon="timeOutline"></ion-icon>
-            <h3>No Upcoming Events</h3>
-            <p>Your upcoming events will appear here</p>
-          </div>
-        </div>
-
-        <!-- Calendar Tab -->
-        <div v-if="events.length > 0 && activeTab === 'calendar'" class="tab-content">
+        <template v-else>
           <!-- Calendar Header -->
           <div class="calendar-nav">
             <button class="nav-btn" @click="prevMonth">
@@ -184,56 +123,32 @@
             <ion-icon :icon="calendarOutline"></ion-icon>
             <p>Select a date to view events</p>
           </div>
-        </div>
-
-        <!-- Empty State (no events at all) -->
-        <div v-if="!isLoading && events.length === 0" class="empty-state">
-          <ion-icon :icon="calendarOutline"></ion-icon>
-          <h3>No Events Yet</h3>
-          <p>Events from your saved reports will appear here</p>
-          <ion-button @click="goToReports">
-            <ion-icon slot="start" :icon="documentTextOutline"></ion-icon>
-            View Saved Reports
-          </ion-button>
-        </div>
+        </template>
       </div>
-
-      <AppLoader :show="isLoading" message="Loading events..." />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonButton,
   IonIcon,
-  IonBadge,
+  IonSpinner,
 } from '@ionic/vue';
 import {
-  timeOutline,
   chevronBackOutline,
   chevronForwardOutline,
   calendarOutline,
   callOutline,
   peopleOutline,
-  locationOutline,
-  documentTextOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
-const reportStore = useReportStore();
-const { getSavedReport } = useSavedReports();
 
 const {
   events,
   isLoading,
   calendarDays,
   currentMonthLabel,
-  upcomingEvents,
   loadEvents,
   getEventsForDate,
   prevMonth,
@@ -244,7 +159,6 @@ const {
 const { checkAndShowReminders } = useEventReminders();
 
 const selectedDate = ref<Date | null>(null);
-const activeTab = ref<'upcoming' | 'calendar'>('upcoming');
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Helper function to check if two dates are the same day
@@ -258,6 +172,9 @@ const isSameDate = (date1: Date, date2: Date): boolean => {
 
 // Load events on mount and check for reminders
 onMounted(async () => {
+  // Auto-select today's date
+  selectedDate.value = new Date();
+
   await loadEvents();
   // Check for event reminders after loading events
   if (events.value.length > 0) {
@@ -315,31 +232,12 @@ const getShiftColor = (shift?: string): string => {
   return 'medium';
 };
 
-const viewReport = async (reportId: string) => {
-  try {
-    const report = await getSavedReport(reportId);
-    if (report) {
-      // Load report data into view mode
-      reportStore.setViewModeData(
-        report.selectedCategories,
-        report.selectedTable || null,
-        report.reportData as any
-      );
-      router.push('/item-report?mode=view');
-    } else {
-      console.error('Report not found:', reportId);
-    }
-  } catch (error) {
-    console.error('Error loading report:', error);
-  }
+const viewReport = (reportId: string) => {
+  router.push(`/preview-report?id=${reportId}`);
 };
 
 const callCustomer = (phone: string) => {
   window.location.href = `tel:${phone}`;
-};
-
-const goToReports = () => {
-  router.push('/saved-reports');
 };
 </script>
 
@@ -354,63 +252,28 @@ const goToReports = () => {
   padding-bottom: 24px;
 }
 
-/* Tab Buttons */
-.tab-buttons {
+/* Inline Loading */
+.inline-loading {
   display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
   background: white;
-  padding: 6px;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.tab-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 20px;
-  border: none;
-  background: transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #666;
-  transition: all 0.3s ease;
-}
-
-.tab-btn:hover {
-  background: rgba(102, 126, 234, 0.08);
+.inline-loading ion-spinner {
+  width: 40px;
+  height: 40px;
   color: #667eea;
 }
 
-.tab-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
-}
-
-.tab-btn ion-icon {
-  font-size: 20px;
-}
-
-/* Tab Content */
-.tab-content {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.inline-loading p {
+  margin: 12px 0 0 0;
+  color: #888;
+  font-size: 0.95rem;
 }
 
 /* Calendar Navigation */
@@ -489,6 +352,28 @@ const goToReports = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom scrollbar for selected events list */
+.selected-events-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-events-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.selected-events-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.selected-events-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
 }
 
 .no-events-message {
@@ -951,33 +836,6 @@ const goToReports = () => {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-/* Empty State */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 24px;
-  text-align: center;
-}
-
-.empty-state ion-icon {
-  font-size: 80px;
-  color: #ddd;
-  margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.empty-state p {
-  margin: 0 0 24px 0;
-  color: #666;
 }
 
 /* Responsive */
