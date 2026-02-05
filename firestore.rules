@@ -143,6 +143,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Shared Reports collection rules (PUBLIC - for WhatsApp sharing)
+    match /sharedReports/{shareId} {
+      // Allow read for ANYONE (no authentication required)
+      allow read: if true;
+
+      // Allow create only for authenticated users
+      allow create: if isAuthenticated();
+
+      // No update or delete allowed
+      allow update, delete: if false;
+    }
+
     // Report Templates collection rules (Premium feature)
     match /templates/{templateId} {
       // Allow read if authenticated and either admin or own template

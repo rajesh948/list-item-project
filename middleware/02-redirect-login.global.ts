@@ -9,6 +9,11 @@ export default defineNuxtRouteMiddleware((to, from) => {
     // Public routes that don't require authentication
     const publicRoutes = ['/login', '/register', '/forgot-password', '/verify-email'];
 
+    // Check if it's a share route (public download page)
+    if (to.path.startsWith('/share/')) {
+      return; // Allow access to share routes without auth
+    }
+
     // Check if trying to access a public route
     if (publicRoutes.includes(to.path)) {
       return; // Allow access to public routes

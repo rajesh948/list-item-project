@@ -153,9 +153,12 @@
               <span>Generate PDF</span>
             </template>
           </button>
-          <button class="preview-btn whatsapp-btn" @click="shareOnWhatsApp">
-            <ion-icon :icon="logoWhatsapp"></ion-icon>
-            <span>Share on WhatsApp</span>
+          <button class="preview-btn whatsapp-btn" @click="shareOnWhatsApp" :disabled="isCreatingShare">
+            <ion-spinner v-if="isCreatingShare" name="crescent"></ion-spinner>
+            <template v-else>
+              <ion-icon :icon="logoWhatsapp"></ion-icon>
+              <span>Share on WhatsApp</span>
+            </template>
           </button>
         </div>
       </div>
@@ -220,7 +223,7 @@ const router = useRouter();
 const { businessName, phoneNumbers } = useSettings();
 const { showToast } = useToast();
 const { canGeneratePdf, getRemainingPdfs, incrementPdfCount, isPremium } = useSubscription();
-const { shareFullReport } = useWhatsApp();
+const { shareViaWhatsApp, isCreatingShare } = useShareReport();
 const { effectiveBranding } = usePdfBranding();
 const appSettingsStore = useAppSettingsStore();
 const savedReportsStore = useSavedReportsStore();
@@ -419,21 +422,14 @@ const generatePdf = async () => {
   }
 };
 
-const shareOnWhatsApp = () => {
+const shareOnWhatsApp = async () => {
   if (!reportData.value) return;
 
-  if (!reportData.value.phone) {
-    showToast('Customer phone number is required for WhatsApp sharing', 'warning', 2000);
-    return;
+  const success = await shareViaWhatsApp(reportData.value, selectedCategories.value);
+
+  if (success) {
+    showToast('Opening WhatsApp...', 'success', 1500);
   }
-
-  shareFullReport(
-    reportData.value.phone,
-    reportData.value,
-    selectedCategories.value
-  );
-
-  showToast('Opening WhatsApp...', 'success', 1500);
 };
 
 onMounted(async () => {
