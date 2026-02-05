@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     const { $auth } = useNuxtApp();
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/login'];
+    const publicRoutes = ['/login', '/register', '/forgot-password', '/verify-email'];
 
     // Check if trying to access a public route
     if (publicRoutes.includes(to.path)) {

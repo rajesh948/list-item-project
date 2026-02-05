@@ -2,6 +2,14 @@
   <ion-page>
     <ion-content class="ion-padding">
       <div v-if="selectedCategoryData" class="items-container">
+        <!-- Category Header with Back Button -->
+        <div class="category-header">
+          <button class="back-button" @click="goBack">
+            <ion-icon :icon="arrowBackOutline"></ion-icon>
+          </button>
+          <h1 class="category-title">{{ selectedCategoryData.name }}</h1>
+        </div>
+
         <!-- Modern Search Bar -->
         <div class="modern-search-container">
           <ion-icon :icon="searchOutline" class="search-icon"></ion-icon>
@@ -52,7 +60,7 @@
 
 <script setup lang="ts">
 import { IonPage, IonContent, IonIcon, IonFab, IonFabButton } from '@ionic/vue';
-import { searchOutline, closeCircleOutline, documentTextOutline } from 'ionicons/icons';
+import { searchOutline, closeCircleOutline, documentTextOutline, arrowBackOutline } from 'ionicons/icons';
 import { searchInGujarati } from '~/utils/transliterate';
 
 // Authentication is handled by global middleware (02-redirect-login.global.ts)
@@ -173,6 +181,12 @@ const isItemSelected = (itemId: string, categoryId?: number) => {
 // Calculate total selected items from store
 const totalSelectedItems = computed(() => reportStore.totalSelectedItems);
 
+const router = useRouter();
+
+const goBack = () => {
+  router.back();
+};
+
 const goToReport = () => {
   navigateTo('/item-report');
 };
@@ -182,6 +196,48 @@ const goToReport = () => {
 .items-container {
   max-width: 600px;
   margin: 0 auto;
+}
+
+/* Category Header */
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.back-button:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.back-button ion-icon {
+  font-size: 24px;
+  color: white;
+}
+
+.category-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  flex: 1;
 }
 
 /* Modern Search Bar */

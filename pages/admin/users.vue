@@ -34,13 +34,17 @@
               <div class="user-info">
                 <div class="user-details">
                   <h3>@{{ user.username }}</h3>
-                  <p class="email">{{ user.role }} account</p>
+                  <p class="email">{{ user.email || `${user.username}@caterhub.app` }}</p>
                   <div class="user-meta">
                     <ion-chip :color="user.role === 'admin' ? 'primary' : 'secondary'">
                       <ion-label>{{ user.role }}</ion-label>
                     </ion-chip>
                     <ion-chip :color="user.isActive ? 'success' : 'danger'">
                       <ion-label>{{ user.isActive ? 'Active' : 'Inactive' }}</ion-label>
+                    </ion-chip>
+                    <ion-chip :color="getSubscriptionColor(user)" class="subscription-chip">
+                      <ion-icon :icon="diamondOutline" style="margin-right: 4px;"></ion-icon>
+                      <ion-label>{{ getSubscriptionLabel(user) }}</ion-label>
                     </ion-chip>
                     <ion-chip color="tertiary">
                       <ion-icon :icon="phonePortraitOutline" style="margin-right: 4px;"></ion-icon>
@@ -61,6 +65,12 @@
                     </ion-button>
                     <span v-if="reportsCounts[user.uid] > 0" class="action-badge">{{ reportsCounts[user.uid] }}</span>
                   </div>
+                  <ion-button fill="clear" color="warning" @click="viewUserRequests(user)" title="Subscription Requests">
+                    <ion-icon slot="icon-only" :icon="receiptOutline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" color="tertiary" @click="viewSubscriptionHistory(user)" title="Subscription Details">
+                    <ion-icon slot="icon-only" :icon="diamondOutline"></ion-icon>
+                  </ion-button>
                   <ion-button fill="clear" @click="openEditModal(user)" title="Edit User">
                     <ion-icon slot="icon-only" :icon="createOutline"></ion-icon>
                   </ion-button>
@@ -130,6 +140,21 @@
                     type="tel"
                     class="custom-input"
                     placeholder="Enter phone number"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+
+              <!-- Email Field (Edit only) -->
+              <div v-if="editingUser" class="input-group">
+                <label class="input-label">Email Address</label>
+                <div class="input-wrapper">
+                  <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
+                  <input
+                    v-model="formData.email"
+                    type="email"
+                    class="custom-input"
+                    placeholder="Enter email address"
                     autocomplete="off"
                   />
                 </div>
@@ -304,6 +329,285 @@
           </div>
         </ion-content>
       </ion-modal>
+
+      <!-- Subscription History Modal -->
+      <ion-modal :is-open="isSubscriptionHistoryModalOpen" @didDismiss="closeSubscriptionHistoryModal" class="subscription-history-modal">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Subscription Details</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeSubscriptionHistoryModal">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding subscription-modal-content">
+          <div class="subscription-history-container">
+            <!-- User Info Header -->
+            <div class="user-info-header">
+              <div class="user-avatar">
+                <ion-icon :icon="personCircleOutline"></ion-icon>
+              </div>
+              <div class="user-name-section">
+                <h3>@{{ selectedUserForSubscription?.username }}</h3>
+                <span class="plan-badge" :class="getSubscriptionColor(selectedUserForSubscription)">
+                  {{ getSubscriptionLabel(selectedUserForSubscription) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon plan">
+                  <ion-icon :icon="diamondOutline"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Current Plan</span>
+                  <span class="stat-value">{{ getSubscriptionLabel(selectedUserForSubscription) }}</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon pdf">
+                  <ion-icon :icon="documentTextOutline"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">PDFs Generated</span>
+                  <span class="stat-value">{{ selectedUserForSubscription?.pdfUsage?.count || 0 }}</span>
+                </div>
+              </div>
+              <div v-if="selectedUserForSubscription?.subscription?.startDate" class="stat-card">
+                <div class="stat-icon start">
+                  <ion-icon :icon="calendarOutline"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">Start Date</span>
+                  <span class="stat-value">{{ formatSubscriptionDate(selectedUserForSubscription?.subscription?.startDate) }}</span>
+                </div>
+              </div>
+              <div v-if="selectedUserForSubscription?.subscription?.endDate" class="stat-card">
+                <div class="stat-icon end">
+                  <ion-icon :icon="calendarOutline"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">End Date</span>
+                  <span class="stat-value">{{ formatSubscriptionDate(selectedUserForSubscription?.subscription?.endDate) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+              <button class="action-btn primary" @click="openSetSubscriptionFromHistory">
+                <ion-icon :icon="createOutline"></ion-icon>
+                Change Plan
+              </button>
+            </div>
+          </div>
+        </ion-content>
+      </ion-modal>
+
+      <!-- Set Subscription Modal -->
+      <ion-modal :is-open="isSetSubscriptionModalOpen" @didDismiss="closeSetSubscriptionModal" class="set-subscription-modal">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Set Subscription - @{{ selectedUserForSubscription?.username }}</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeSetSubscriptionModal">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <div class="set-subscription-container">
+            <p class="current-plan-info">
+              Current Plan: <strong :class="getSubscriptionColor(selectedUserForSubscription)">{{ getSubscriptionLabel(selectedUserForSubscription) }}</strong>
+            </p>
+
+            <!-- Plan Selection -->
+            <div class="plan-selection">
+              <h4>Select New Plan</h4>
+              <div class="plan-options">
+                <div
+                  class="plan-option"
+                  :class="{ selected: subscriptionForm.plan === 'free' }"
+                  @click="subscriptionForm.plan = 'free'"
+                >
+                  <div class="plan-icon free">
+                    <ion-icon :icon="personOutline"></ion-icon>
+                  </div>
+                  <div class="plan-info">
+                    <h5>Free</h5>
+                    <p>Limited PDFs per period</p>
+                  </div>
+                </div>
+                <div
+                  class="plan-option"
+                  :class="{ selected: subscriptionForm.plan === 'monthly' }"
+                  @click="subscriptionForm.plan = 'monthly'"
+                >
+                  <div class="plan-icon monthly">
+                    <ion-icon :icon="diamondOutline"></ion-icon>
+                  </div>
+                  <div class="plan-info">
+                    <h5>Monthly Premium</h5>
+                    <p>Unlimited PDFs for 1 month</p>
+                  </div>
+                </div>
+                <div
+                  class="plan-option"
+                  :class="{ selected: subscriptionForm.plan === 'yearly' }"
+                  @click="subscriptionForm.plan = 'yearly'"
+                >
+                  <div class="plan-icon yearly">
+                    <ion-icon :icon="diamondOutline"></ion-icon>
+                  </div>
+                  <div class="plan-info">
+                    <h5>Yearly Premium</h5>
+                    <p>Unlimited PDFs for 1 year</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration (for premium plans) -->
+            <div v-if="subscriptionForm.plan !== 'free'" class="duration-section">
+              <h4>Subscription Duration</h4>
+              <div class="date-inputs">
+                <div class="date-input">
+                  <label>Start Date</label>
+                  <input type="date" v-model="subscriptionForm.startDate" class="custom-date-input" />
+                </div>
+                <div class="date-input">
+                  <label>End Date</label>
+                  <input type="date" v-model="subscriptionForm.endDate" class="custom-date-input" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Notes -->
+            <div class="notes-section">
+              <h4>Admin Notes (Optional)</h4>
+              <textarea
+                v-model="subscriptionForm.notes"
+                placeholder="Add notes about this subscription change..."
+                class="notes-textarea"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <ion-button
+              expand="block"
+              @click="handleSetSubscription"
+              :disabled="isSettingSubscription"
+              class="submit-btn"
+            >
+              <ion-spinner v-if="isSettingSubscription" name="crescent"></ion-spinner>
+              <ion-icon v-else slot="start" :icon="saveOutline"></ion-icon>
+              <span v-if="!isSettingSubscription">Update Subscription</span>
+            </ion-button>
+          </div>
+        </ion-content>
+      </ion-modal>
+
+      <!-- User Requests Modal -->
+      <ion-modal :is-open="isUserRequestsModalOpen" @didDismiss="closeUserRequestsModal" class="user-requests-modal">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Subscription Requests</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeUserRequestsModal">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding requests-modal-content">
+          <div class="requests-container">
+            <!-- User Header -->
+            <div class="requests-user-header">
+              <ion-icon :icon="personCircleOutline"></ion-icon>
+              <span>@{{ selectedUserForRequests?.username }}</span>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="isLoadingRequests" class="loading-requests">
+              <ion-spinner name="crescent"></ion-spinner>
+              <p>Loading requests...</p>
+            </div>
+
+            <!-- Requests List -->
+            <div v-else-if="userRequests.length > 0" class="requests-list">
+              <div v-for="request in userRequests" :key="request.id" class="request-card" :class="request.status">
+                <div class="request-header">
+                  <div class="request-plan">
+                    <ion-icon :icon="diamondOutline"></ion-icon>
+                    <span>{{ request.requestedPlan === 'yearly' ? 'Yearly Premium' : 'Monthly Premium' }}</span>
+                  </div>
+                  <span class="request-status" :class="request.status">
+                    {{ request.status === 'pending' ? 'Pending' : request.status === 'approved' ? 'Approved' : 'Rejected' }}
+                  </span>
+                </div>
+                <div class="request-details">
+                  <div class="request-detail">
+                    <ion-icon :icon="calendarOutline"></ion-icon>
+                    <span>Requested: {{ formatRequestDate(request.createdAt) }}</span>
+                  </div>
+                  <div v-if="request.transactionId" class="request-detail">
+                    <ion-icon :icon="receiptOutline"></ion-icon>
+                    <span>Transaction: {{ request.transactionId }}</span>
+                  </div>
+                  <div v-if="request.reviewedAt" class="request-detail">
+                    <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+                    <span>Reviewed: {{ formatRequestDate(request.reviewedAt) }}</span>
+                  </div>
+                  <div v-if="request.adminNotes" class="request-notes">
+                    <ion-icon :icon="chatboxOutline"></ion-icon>
+                    <span>{{ request.adminNotes }}</span>
+                  </div>
+                </div>
+                <div v-if="request.paymentScreenshotUrl" class="request-screenshot">
+                  <button class="view-screenshot-btn" @click="viewScreenshot(request.paymentScreenshotUrl)">
+                    <ion-icon :icon="imageOutline"></ion-icon>
+                    View Payment Screenshot
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Requests -->
+            <div v-else class="no-requests">
+              <div class="no-requests-icon">
+                <ion-icon :icon="receiptOutline"></ion-icon>
+              </div>
+              <h4>No Requests Found</h4>
+              <p>This user hasn't submitted any subscription requests</p>
+            </div>
+          </div>
+        </ion-content>
+      </ion-modal>
+
+      <!-- Screenshot Preview Modal -->
+      <ion-modal :is-open="isScreenshotModalOpen" @didDismiss="closeScreenshotModal" class="screenshot-modal">
+        <ion-header>
+          <ion-toolbar class="gradient-toolbar">
+            <ion-title>Payment Screenshot</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="closeScreenshotModal">
+                <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="screenshot-content">
+          <div class="screenshot-container">
+            <img :src="currentScreenshotUrl" alt="Payment Screenshot" />
+          </div>
+        </ion-content>
+      </ion-modal>
     </ion-content>
   </ion-page>
 </template>
@@ -352,8 +656,16 @@ import {
   logOutOutline,
   timeOutline,
   refreshOutline,
+  diamondOutline,
+  receiptOutline,
+  calendarOutline,
+  documentTextOutline,
+  checkmarkCircleOutline,
+  chatboxOutline,
+  imageOutline,
 } from 'ionicons/icons';
 import type { UserData } from '~/stores/user';
+import { doc, updateDoc, Timestamp, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 definePageMeta({
   middleware: 'admin',
@@ -382,6 +694,29 @@ const selectedUserForSessions = ref<UserData | null>(null);
 const userSessions = ref<any[]>([]);
 const isLoadingSessions = ref(false);
 
+// Subscription related state
+const isSubscriptionHistoryModalOpen = ref(false);
+const isSetSubscriptionModalOpen = ref(false);
+const selectedUserForSubscription = ref<UserData | null>(null);
+const subscriptionHistory = ref<any[]>([]);
+const isSettingSubscription = ref(false);
+const subscriptionForm = ref({
+  plan: 'free' as 'free' | 'monthly' | 'yearly',
+  startDate: '',
+  endDate: '',
+  notes: '',
+});
+
+// User requests state
+const isUserRequestsModalOpen = ref(false);
+const selectedUserForRequests = ref<UserData | null>(null);
+const userRequests = ref<any[]>([]);
+const isLoadingRequests = ref(false);
+
+// Screenshot modal
+const isScreenshotModalOpen = ref(false);
+const currentScreenshotUrl = ref('');
+
 const formData = ref({
   username: '',
   password: '',
@@ -389,6 +724,7 @@ const formData = ref({
   isActive: true,
   businessName: '',
   phoneNumber: '',
+  email: '',
 });
 
 const loadUsers = async () => {
@@ -425,6 +761,7 @@ const openCreateModal = () => {
     isActive: true,
     businessName: '',
     phoneNumber: '',
+    email: '',
   };
   formError.value = '';
   isModalOpen.value = true;
@@ -443,6 +780,7 @@ const openEditModal = (user: UserData) => {
     isActive: user.isActive,
     businessName: user.businessName || '',
     phoneNumber: user.phoneNumber || '',
+    email: user.email || '',
   };
   formError.value = '';
   isModalOpen.value = true;
@@ -460,6 +798,7 @@ const closeModal = () => {
     isActive: true,
     businessName: '',
     phoneNumber: '',
+    email: '',
   };
 };
 
@@ -476,6 +815,7 @@ const handleSubmit = async () => {
         isActive: formData.value.isActive,
         businessName: formData.value.businessName,
         phoneNumber: formData.value.phoneNumber,
+        email: formData.value.email,
       });
 
       if (result.success) {
@@ -629,6 +969,260 @@ const formatLastActive = (date: Date) => {
 
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
+
+// Subscription Helper Functions
+const getSubscriptionLabel = (user: UserData | null) => {
+  if (!user?.subscription) return 'Free';
+  const plan = user.subscription.plan;
+  if (plan === 'yearly') return 'Yearly Premium';
+  if (plan === 'monthly') return 'Monthly Premium';
+  return 'Free';
+};
+
+const getSubscriptionColor = (user: UserData | null) => {
+  if (!user?.subscription) return 'medium';
+  const plan = user.subscription.plan;
+  const status = user.subscription.status;
+  if (status === 'expired') return 'danger';
+  if (plan === 'yearly' || plan === 'monthly') return 'warning';
+  return 'medium';
+};
+
+// View Subscription History
+const viewSubscriptionHistory = (user: UserData) => {
+  selectedUserForSubscription.value = user;
+  subscriptionHistory.value = user.subscriptionHistory || [];
+  isSubscriptionHistoryModalOpen.value = true;
+};
+
+const closeSubscriptionHistoryModal = () => {
+  isSubscriptionHistoryModalOpen.value = false;
+  selectedUserForSubscription.value = null;
+  subscriptionHistory.value = [];
+};
+
+// Computed history that includes current subscription if no history exists
+const computedHistory = computed(() => {
+  const history = subscriptionHistory.value || [];
+  const user = selectedUserForSubscription.value;
+
+  // If there's existing history, format and return it
+  if (history.length > 0) {
+    return history.map((entry: any) => ({
+      ...entry,
+      title: entry.action === 'upgraded' ? 'Plan Upgraded' :
+             entry.action === 'downgraded' ? 'Plan Downgraded' :
+             entry.action === 'expired' ? 'Subscription Expired' :
+             entry.action === 'renewed' ? 'Subscription Renewed' : 'Plan Changed',
+    })).reverse(); // Show newest first
+  }
+
+  // If no history but has a subscription, create an initial entry
+  if (user?.subscription && user.subscription.plan !== 'free') {
+    return [{
+      action: 'upgraded',
+      title: 'Subscription Started',
+      description: `${getSubscriptionLabel(user)} plan activated`,
+      date: user.subscription.startDate || null,
+      notes: null,
+    }];
+  }
+
+  return [];
+});
+
+const openSetSubscriptionFromHistory = () => {
+  const user = selectedUserForSubscription.value;
+  closeSubscriptionHistoryModal();
+  if (user) {
+    // Small delay to allow modal to close
+    setTimeout(() => {
+      openSetSubscriptionModal(user);
+    }, 300);
+  }
+};
+
+// Set Subscription
+const { $db } = useNuxtApp();
+
+const openSetSubscriptionModal = (user: UserData) => {
+  selectedUserForSubscription.value = user;
+
+  // Set current plan in form
+  const currentPlan = user.subscription?.plan || 'free';
+  subscriptionForm.value.plan = currentPlan;
+
+  // Set dates
+  const today = new Date();
+  subscriptionForm.value.startDate = today.toISOString().split('T')[0];
+
+  // Calculate end date based on plan
+  const endDate = new Date(today);
+  if (currentPlan === 'monthly') {
+    endDate.setMonth(endDate.getMonth() + 1);
+  } else if (currentPlan === 'yearly') {
+    endDate.setFullYear(endDate.getFullYear() + 1);
+  }
+  subscriptionForm.value.endDate = endDate.toISOString().split('T')[0];
+  subscriptionForm.value.notes = '';
+
+  isSetSubscriptionModalOpen.value = true;
+};
+
+const closeSetSubscriptionModal = () => {
+  isSetSubscriptionModalOpen.value = false;
+  selectedUserForSubscription.value = null;
+};
+
+// Update end date when plan changes
+watch(() => subscriptionForm.value.plan, (newPlan) => {
+  if (subscriptionForm.value.startDate) {
+    const startDate = new Date(subscriptionForm.value.startDate);
+    const endDate = new Date(startDate);
+
+    if (newPlan === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (newPlan === 'yearly') {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    subscriptionForm.value.endDate = endDate.toISOString().split('T')[0];
+  }
+});
+
+const handleSetSubscription = async () => {
+  if (!selectedUserForSubscription.value) return;
+
+  isSettingSubscription.value = true;
+
+  try {
+    const userRef = doc($db, 'users', selectedUserForSubscription.value.uid);
+
+    // Prepare subscription data
+    const subscriptionData: any = {
+      plan: subscriptionForm.value.plan,
+      status: subscriptionForm.value.plan === 'free' ? 'active' : 'active',
+      startDate: subscriptionForm.value.plan !== 'free' ? Timestamp.fromDate(new Date(subscriptionForm.value.startDate)) : null,
+      endDate: subscriptionForm.value.plan !== 'free' ? Timestamp.fromDate(new Date(subscriptionForm.value.endDate)) : null,
+    };
+
+    // Create history entry
+    const historyEntry = {
+      action: subscriptionForm.value.plan === 'free' ? 'downgraded' : 'upgraded',
+      description: `Plan changed to ${getSubscriptionLabel({ subscription: subscriptionData } as any)} by admin`,
+      date: Timestamp.now(),
+      notes: subscriptionForm.value.notes || null,
+      adminId: userStore.user?.uid,
+    };
+
+    // Get current history
+    const currentHistory = selectedUserForSubscription.value.subscriptionHistory || [];
+
+    await updateDoc(userRef, {
+      subscription: subscriptionData,
+      subscriptionHistory: [...currentHistory, historyEntry],
+      updatedAt: Timestamp.now(),
+    });
+
+    showToast('Subscription updated successfully!', 'success', 3000);
+    closeSetSubscriptionModal();
+
+    // Refresh users list
+    await usersStore.refreshUsers();
+  } catch (error: any) {
+    console.error('Error updating subscription:', error);
+    showToast(error.message || 'Failed to update subscription', 'error', 3000);
+  } finally {
+    isSettingSubscription.value = false;
+  }
+};
+
+const formatSubscriptionDate = (date: any) => {
+  if (!date) return 'N/A';
+  const d = date.toDate ? date.toDate() : new Date(date);
+  return d.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const formatHistoryDate = (date: any) => {
+  if (!date) return '';
+  const d = date.toDate ? date.toDate() : new Date(date);
+  return d.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+// View user's subscription requests
+const viewUserRequests = async (user: UserData) => {
+  selectedUserForRequests.value = user;
+  isUserRequestsModalOpen.value = true;
+  isLoadingRequests.value = true;
+
+  try {
+    const q = query(
+      collection($db, 'premiumRequests'),
+      where('userId', '==', user.uid)
+    );
+    const snapshot = await getDocs(q);
+
+    const requests: any[] = [];
+    snapshot.forEach((doc) => {
+      requests.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    // Sort by createdAt descending (newest first)
+    requests.sort((a, b) => {
+      const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt);
+      const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    userRequests.value = requests;
+  } catch (error) {
+    console.error('Error fetching user requests:', error);
+    showToast('Failed to load requests', 'error', 2000);
+  } finally {
+    isLoadingRequests.value = false;
+  }
+};
+
+const closeUserRequestsModal = () => {
+  isUserRequestsModalOpen.value = false;
+  selectedUserForRequests.value = null;
+  userRequests.value = [];
+};
+
+const formatRequestDate = (date: any) => {
+  if (!date) return 'N/A';
+  const d = date.toDate ? date.toDate() : new Date(date);
+  return d.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const viewScreenshot = (url: string) => {
+  currentScreenshotUrl.value = url;
+  isScreenshotModalOpen.value = true;
+};
+
+const closeScreenshotModal = () => {
+  isScreenshotModalOpen.value = false;
+  currentScreenshotUrl.value = '';
 };
 
 onMounted(() => {
@@ -1090,5 +1684,774 @@ onMounted(() => {
   .session-time {
     align-self: flex-start;
   }
+}
+
+/* Subscription Chip */
+.subscription-chip ion-icon {
+  color: inherit;
+}
+
+/* Subscription History Modal */
+.subscription-history-modal {
+  --width: 90%;
+  --max-width: 500px;
+  --height: 90%;
+  --border-radius: 16px;
+}
+
+.subscription-modal-content {
+  --background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
+}
+
+.subscription-history-container {
+  max-width: 100%;
+  padding-bottom: 20px;
+}
+
+/* User Info Header */
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar ion-icon {
+  font-size: 40px;
+  color: white;
+}
+
+.user-name-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plan-badge.warning {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%);
+  color: #333;
+}
+
+.plan-badge.medium {
+  background: rgba(255, 255, 255, 0.9);
+  color: #666;
+}
+
+.plan-badge.danger {
+  background: #eb445a;
+  color: white;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon.plan {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.pdf {
+  background: linear-gradient(135deg, #2dd36f 0%, #1aa251 100%);
+}
+
+.stat-icon.start {
+  background: linear-gradient(135deg, #3dc2ff 0%, #0ca7e6 100%);
+}
+
+.stat-icon.end {
+  background: linear-gradient(135deg, #ffc409 0%, #e6a800 100%);
+}
+
+.stat-icon ion-icon {
+  font-size: 22px;
+  color: white;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Timeline History */
+.history-timeline-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.history-timeline-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.history-timeline-section h4 ion-icon {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #667eea 0%, #e0e0e0 100%);
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #667eea;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.timeline-item.upgraded .timeline-dot {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%);
+  box-shadow: 0 2px 6px rgba(255, 212, 0, 0.4);
+}
+
+.timeline-item.downgraded .timeline-dot {
+  background: #999;
+}
+
+.timeline-item.expired .timeline-dot {
+  background: #eb445a;
+}
+
+.timeline-content {
+  background: #f8f9fa;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border-left: 3px solid #667eea;
+}
+
+.timeline-item.upgraded .timeline-content {
+  border-left-color: #ffd700;
+}
+
+.timeline-item.downgraded .timeline-content {
+  border-left-color: #999;
+}
+
+.timeline-item.expired .timeline-content {
+  border-left-color: #eb445a;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.timeline-action {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.timeline-description {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.timeline-notes {
+  margin: 8px 0 0 0;
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+}
+
+.no-history-modern {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.no-history-icon {
+  width: 60px;
+  height: 60px;
+  background: #f0f0f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.no-history-icon ion-icon {
+  font-size: 28px;
+  color: #bbb;
+}
+
+.no-history-modern p {
+  margin: 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.action-btn ion-icon {
+  font-size: 20px;
+}
+
+/* User Requests Modal */
+.user-requests-modal {
+  --width: 90%;
+  --max-width: 550px;
+  --height: 85%;
+  --border-radius: 16px;
+}
+
+.requests-modal-content {
+  --background: #f8f9fa;
+}
+
+.requests-container {
+  padding-bottom: 20px;
+}
+
+.requests-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.requests-user-header ion-icon {
+  font-size: 32px;
+}
+
+.requests-user-header span {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.loading-requests {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-requests p {
+  margin-top: 12px;
+  color: #666;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #ffc409;
+}
+
+.request-card.approved {
+  border-left-color: #2dd36f;
+}
+
+.request-card.rejected {
+  border-left-color: #eb445a;
+}
+
+.request-card.pending {
+  border-left-color: #ffc409;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.request-plan {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #333;
+}
+
+.request-plan ion-icon {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.request-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.request-status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.request-status.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.request-status.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.request-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.request-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.request-detail ion-icon {
+  font-size: 16px;
+  color: #888;
+}
+
+.request-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  background: #f8f9fa;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.request-notes ion-icon {
+  font-size: 16px;
+  color: #667eea;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.request-screenshot {
+  margin-top: 4px;
+}
+
+.view-screenshot-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid #667eea;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.view-screenshot-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+.view-screenshot-btn ion-icon {
+  font-size: 18px;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-requests-icon {
+  width: 80px;
+  height: 80px;
+  background: #f0f0f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.no-requests-icon ion-icon {
+  font-size: 36px;
+  color: #bbb;
+}
+
+.no-requests h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.no-requests p {
+  margin: 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Screenshot Modal */
+.screenshot-modal {
+  --width: 95%;
+  --max-width: 800px;
+  --height: 90%;
+  --border-radius: 12px;
+}
+
+.screenshot-content {
+  --background: #000;
+}
+
+.screenshot-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.screenshot-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Set Subscription Modal */
+.set-subscription-modal {
+  --width: 90%;
+  --max-width: 550px;
+  --height: 85%;
+  --border-radius: 12px;
+}
+
+.set-subscription-modal ion-content {
+  --background: #f8f9fa;
+}
+
+.set-subscription-container {
+  padding: 8px;
+}
+
+.current-plan-info {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: #666;
+}
+
+.current-plan-info strong {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.current-plan-info strong.warning {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%);
+  color: #333;
+}
+
+.current-plan-info strong.medium {
+  background: #f0f0f0;
+  color: #666;
+}
+
+/* Plan Selection */
+.plan-selection h4,
+.duration-section h4,
+.notes-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.plan-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.plan-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-option:hover {
+  border-color: #667eea;
+}
+
+.plan-option.selected {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.plan-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.plan-icon.free {
+  background: #f0f0f0;
+}
+
+.plan-icon.monthly {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.plan-icon.yearly {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%);
+}
+
+.plan-icon ion-icon {
+  font-size: 24px;
+  color: white;
+}
+
+.plan-icon.free ion-icon {
+  color: #666;
+}
+
+.plan-info h5 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.plan-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Duration Section */
+.duration-section {
+  margin-bottom: 20px;
+}
+
+.date-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.date-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-input label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.custom-date-input {
+  padding: 12px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.custom-date-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Notes Section */
+.notes-section {
+  margin-bottom: 20px;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.notes-textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.submit-btn {
+  --border-radius: 12px;
+  height: 52px;
+  font-weight: 600;
 }
 </style>

@@ -3,50 +3,65 @@
     <ion-content class="ion-padding">
       <!-- Hidden PDF Section (Plain HTML for PDF generation) -->
       <div id="pdfSection" style="display: none;">
-        <div class="pdf-header">
-          <h2>{{ businessName }}</h2>
-          <p>{{ phoneNumbers }}</p>
+        <!-- Full Page Background Watermark for Free Users -->
+        <div v-if="!isPremium" class="pdf-watermark-bg">
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
+          <div class="watermark-text">{{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }} &nbsp; {{ watermarkTextValue }}</div>
         </div>
 
-        <div class="pdf-info-box">
-          <table class="pdf-info-table">
-            <tbody>
-              <tr>
-                <td style="width: 45%;"><strong>Name:</strong> <span>{{ userData.name }}</span></td>
-                <td style="width: 25%;"><strong>Date:</strong> <span>{{ userData.date }}</span></td>
-                <td style="width: 30%;"><strong>People:</strong> <span>{{ userData.noOfPeople }}</span></td>
-              </tr>
-              <tr>
-                
-                <td><strong>Phone:</strong> <span>{{ userData.phone }}</span></td>
-                <td><strong>Shift:</strong> <span>{{ userData.shift }}</span></td>
-                <td><strong>Price:</strong> <span>{{ userData.price }}</span></td>
-              </tr>
-
-              <tr>
-                <td colspan="3"><strong>Address:</strong> <span>{{ userData.address }}</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Table Decoration -->
-        <div v-if="selectedTableFromStorage" class="pdf-decoration">
-          <h4>Dish Table Decoration</h4>
-          <div class="pdf-decoration-chip">
-            {{ selectedTableFromStorage.name }}
+        <div class="pdf-content-wrapper">
+          <div class="pdf-header" :style="{ borderBottomColor: effectiveBranding.headerColor }">
+            <img v-if="effectiveBranding.logo" :src="effectiveBranding.logo" class="pdf-logo" alt="Logo" />
+            <h2 :style="{ color: effectiveBranding.headerColor }">{{ businessName }}</h2>
+            <p v-if="effectiveBranding.tagline" class="pdf-tagline">{{ effectiveBranding.tagline }}</p>
+            <p v-if="effectiveBranding.showPhone !== false">{{ phoneNumbers }}</p>
+            <p v-if="effectiveBranding.showAddress && effectiveBranding.address" class="pdf-address">{{ effectiveBranding.address }}</p>
           </div>
-        </div>
 
-        <!-- Selected Items by Category -->
-        <div v-for="category in selectedDataFromStorage" :key="category.name" class="pdf-category">
-          <div class="pdf-category-name">
-            {{ category.name }}
+          <div class="pdf-info-box">
+            <table class="pdf-info-table">
+              <tbody>
+                <tr>
+                  <td style="width: 45%;"><strong>Name:</strong> <span>{{ userData.name }}</span></td>
+                  <td style="width: 25%;"><strong>Date:</strong> <span>{{ userData.date }}</span></td>
+                  <td style="width: 30%;"><strong>People:</strong> <span>{{ userData.noOfPeople }}</span></td>
+                </tr>
+                <tr>
+
+                  <td><strong>Phone:</strong> <span>{{ userData.phone }}</span></td>
+                  <td><strong>Shift:</strong> <span>{{ userData.shift }}</span></td>
+                  <td><strong>Price:</strong> <span>{{ userData.price }}</span></td>
+                </tr>
+
+                <tr>
+                  <td colspan="3"><strong>Address:</strong> <span>{{ userData.address }}</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="pdf-items">
-            <span v-for="item in category.items" :key="item.name" class="pdf-item">
-              {{ item.name }}
-            </span>
+
+          <!-- Table Decoration -->
+          <div v-if="selectedTableFromStorage" class="pdf-decoration">
+            <h4>Dish Table Decoration</h4>
+            <div class="pdf-decoration-chip" :style="{ background: effectiveBranding.accentColor }">
+              {{ selectedTableFromStorage.name }}
+            </div>
+          </div>
+
+          <!-- Selected Items by Category -->
+          <div v-for="category in selectedDataFromStorage" :key="category.name" class="pdf-category">
+            <div class="pdf-category-name" :style="{ color: effectiveBranding.accentColor, borderColor: effectiveBranding.accentColor }">
+              {{ category.name }}
+            </div>
+            <div class="pdf-items">
+              <span v-for="item in category.items" :key="item.name" class="pdf-item">
+                {{ item.name }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -149,6 +164,16 @@
               <p>Download the complete report</p>
             </div>
           </button>
+
+          <button class="action-card whatsapp-card" @click="shareViaWhatsApp">
+            <div class="action-icon">
+              <ion-icon :icon="logoWhatsapp"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Share on WhatsApp</h3>
+              <p>Send report to customer</p>
+            </div>
+          </button>
         </div>
 
         <!-- View Mode Action Buttons -->
@@ -160,6 +185,16 @@
             <div class="action-content">
               <h3>Generate PDF</h3>
               <p>Download the complete report</p>
+            </div>
+          </button>
+
+          <button class="action-card whatsapp-card" @click="shareViaWhatsApp">
+            <div class="action-icon">
+              <ion-icon :icon="logoWhatsapp"></ion-icon>
+            </div>
+            <div class="action-content">
+              <h3>Share on WhatsApp</h3>
+              <p>Send report to customer</p>
             </div>
           </button>
 
@@ -302,6 +337,7 @@ import {
   folderOutline,
   fastFoodOutline,
   saveOutline,
+  logoWhatsapp,
 } from 'ionicons/icons';
 import { uuid } from 'vue-uuid';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -312,8 +348,16 @@ const NAMESPACE = '65f9af5d-f23f-4065-ac85-da725569fdcd';
 const { businessName, phoneNumbers } = useSettings();
 const { showToast } = useToast();
 const { saveReport } = useSavedReports();
+const { canGeneratePdf, getRemainingPdfs, incrementPdfCount, isPremium } = useSubscription();
+const { shareFullReport } = useWhatsApp();
+const customersStore = useCustomersStore();
+const { effectiveBranding } = usePdfBranding();
 const userStore = useUserStore();
 const reportStore = useReportStore();
+const appSettingsStore = useAppSettingsStore();
+
+// Dynamic watermark text from settings
+const watermarkTextValue = computed(() => appSettingsStore.watermarkText || 'CaterHub');
 const route = useRoute();
 const router = useRouter();
 const isLoading = ref(false);
@@ -335,9 +379,11 @@ const userData = computed(() =>
 
 const newItemFormData = ref([{ id: uuid.v4(), name: null, items: [] }]);
 
-onMounted(() => {
+onMounted(async () => {
   // Load from localStorage into store on mount
   reportStore.loadFromLocalStorage();
+  // Fetch app settings for dynamic watermark text
+  await appSettingsStore.fetchSettings();
 });
 
 // Watch for route changes and clear view mode data when leaving view mode
@@ -354,6 +400,21 @@ const getPDF = async () => {
       setTimeout(() => {
         navigateTo('/event-details');
       }, 500);
+      return;
+    }
+
+    // Check PDF generation limit for free users
+    const canGenerate = await canGeneratePdf();
+    if (!canGenerate) {
+      const remaining = await getRemainingPdfs();
+      showToast(
+        `PDF limit reached! You have used all ${remaining === 0 ? 'your' : remaining} free PDFs. Upgrade to Premium for unlimited PDFs.`,
+        'warning',
+        5000
+      );
+      setTimeout(() => {
+        navigateTo('/subscription');
+      }, 2000);
       return;
     }
 
@@ -467,6 +528,9 @@ const getPDF = async () => {
         showToast('PDF Downloaded Successfully!', 'success', 3000);
       }
 
+      // Increment PDF count for free users
+      await incrementPdfCount();
+
       isLoading.value = false;
       isChipClosable.value = true;
 
@@ -488,6 +552,29 @@ const getPDF = async () => {
     // Show error message
     showToast('PDF Download Failed. Please try again.', 'error', 3000);
   }
+};
+
+const shareViaWhatsApp = () => {
+  if (!Object.values(userData.value).every((value) => value)) {
+    showToast('Please fill in event details first', 'warning', 2000);
+    setTimeout(() => {
+      navigateTo('/event-details');
+    }, 500);
+    return;
+  }
+
+  if (!userData.value.phone) {
+    showToast('Customer phone number is required for WhatsApp sharing', 'warning', 2000);
+    return;
+  }
+
+  shareFullReport(
+    userData.value.phone,
+    userData.value as any,
+    selectedDataFromStorage.value || []
+  );
+
+  showToast('Opening WhatsApp...', 'success', 1500);
 };
 
 const handleSaveReport = async () => {
@@ -519,6 +606,16 @@ const handleSaveReport = async () => {
 
     if (result.success) {
       showToast('Report saved successfully!', 'success', 2000);
+
+      // Increment customer order count if a customer was selected
+      const customerId = (userData.value as any)?.customerId;
+      if (customerId) {
+        try {
+          await customersStore.incrementOrderCount(customerId);
+        } catch (error) {
+          console.error('Failed to increment customer order count:', error);
+        }
+      }
     } else {
       showToast(result.error || 'Failed to save report', 'error', 2000);
     }
@@ -633,6 +730,13 @@ const editCategoryItems = (category: any) => {
   padding-bottom: 15px;
 }
 
+#pdfSection .pdf-logo {
+  max-width: 200px;
+  max-height: 80px;
+  margin-bottom: 10px;
+  object-fit: contain;
+}
+
 #pdfSection .pdf-header h2 {
   margin: 0;
   font-size: 28px;
@@ -644,6 +748,19 @@ const editCategoryItems = (category: any) => {
   margin: 8px 0 0 0;
   font-size: 14px;
   color: #555;
+}
+
+#pdfSection .pdf-tagline {
+  font-style: italic;
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+#pdfSection .pdf-address {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #666;
 }
 
 #pdfSection .pdf-info-box {
@@ -700,14 +817,14 @@ const editCategoryItems = (category: any) => {
 #pdfSection .pdf-category-name {
   background-color: transparent;
   background: transparent;
-  color: #2dd36f;
+  color: #667eea;
   padding: 5px 10px;
   border-radius: 20px;
   display: inline-block;
   margin-bottom: 5px;
   font-size: 16px;
   font-weight: bold;
-  border: 2px solid #2dd36f;
+  border: 2px solid #667eea;
 }
 
 #pdfSection .pdf-items {
@@ -732,6 +849,48 @@ const editCategoryItems = (category: any) => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc(100% - 8px);
+}
+
+/* Full Page Background Watermark for Free Users */
+#pdfSection {
+  position: relative;
+  min-height: 100%;
+}
+
+#pdfSection .pdf-watermark-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#pdfSection .pdf-watermark-bg .watermark-text {
+  font-size: 48px;
+  font-weight: 800;
+  color: rgba(102, 126, 234, 0.1);
+  white-space: nowrap;
+  transform: rotate(-30deg);
+  user-select: none;
+  letter-spacing: 15px;
+  margin: 40px 0;
+  text-align: center;
+  width: 200%;
+  margin-left: -50%;
+}
+
+#pdfSection .pdf-content-wrapper {
+  position: relative;
+  z-index: 1;
 }
 </style>
 
@@ -841,6 +1000,10 @@ const editCategoryItems = (category: any) => {
   background: linear-gradient(135deg, #3880ff 0%, #1a5cff 100%);
 }
 
+.whatsapp-card::before {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
 .action-icon {
   width: 64px;
   height: 64px;
@@ -871,6 +1034,11 @@ const editCategoryItems = (category: any) => {
 .load-report-card .action-icon {
   background: linear-gradient(135deg, #3880ff 0%, #1a5cff 100%);
   box-shadow: 0 4px 12px rgba(56, 128, 255, 0.3);
+}
+
+.whatsapp-card .action-icon {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 
 .action-icon ion-icon {

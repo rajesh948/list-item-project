@@ -111,10 +111,15 @@ export const useUsersStore = defineStore('users', {
           fetchedUsers.push({
             uid: doc.id,
             username: data.userName || data.username || '',
+            email: data.email || '',
             role: data.role || 'user',
             isActive: data.isActive !== undefined ? data.isActive : true,
             businessName: data.businessName || '',
             phoneNumber: data.phoneNumber || '',
+            // Subscription related fields
+            subscription: data.subscription || null,
+            subscriptionHistory: data.subscriptionHistory || [],
+            pdfUsage: data.pdfUsage || { count: 0, periodStart: null },
           });
         });
 

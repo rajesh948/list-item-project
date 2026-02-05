@@ -22,6 +22,11 @@
 
           <!-- For Regular Users: Show toggle button and menu items -->
           <template v-else>
+            <!-- Subscription Button - Always Visible -->
+            <ion-button @click="onGoto('/subscription')" class="subscription-btn">
+              <ion-icon slot="icon-only" :icon="diamondOutline"></ion-icon>
+            </ion-button>
+
             <!-- Toggle Button -->
             <ion-button @click="toggleHeaderMenu">
               <ion-icon
@@ -49,12 +54,27 @@
               </ion-button>
             </transition>
             <transition name="slide-fade">
-              <ion-button v-if="isHeaderMenuOpen" @click="onToggleDialog" class="menu-item" style="transition-delay: 0.25s">
+              <ion-button v-if="isHeaderMenuOpen" @click="onGoto('/calendar')" class="menu-item" style="transition-delay: 0.25s">
+                <ion-icon slot="icon-only" :icon="calendarOutline"></ion-icon>
+              </ion-button>
+            </transition>
+            <transition name="slide-fade">
+              <ion-button v-if="isHeaderMenuOpen" @click="onGoto('/customers')" class="menu-item" style="transition-delay: 0.3s">
+                <ion-icon slot="icon-only" :icon="peopleOutline"></ion-icon>
+              </ion-button>
+            </transition>
+            <transition name="slide-fade">
+              <ion-button v-if="isHeaderMenuOpen" @click="onGoto('/profile')" class="menu-item" style="transition-delay: 0.35s">
+                <ion-icon slot="icon-only" :icon="personCircleOutline"></ion-icon>
+              </ion-button>
+            </transition>
+            <transition name="slide-fade">
+              <ion-button v-if="isHeaderMenuOpen" @click="onToggleDialog" class="menu-item" style="transition-delay: 0.4s">
                 <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
               </ion-button>
             </transition>
             <transition name="slide-fade">
-              <ion-button v-if="isHeaderMenuOpen" @click="handleLogout" class="menu-item" style="transition-delay: 0.3s">
+              <ion-button v-if="isHeaderMenuOpen" @click="handleLogout" class="menu-item" style="transition-delay: 0.45s">
                 <ion-icon slot="icon-only" :icon="logOutOutline"></ion-icon>
               </ion-button>
             </transition>
@@ -142,6 +162,44 @@
             <ion-label class="category-label">User Management</ion-label>
             <ion-icon
               v-if="route.path === '/admin/users'"
+              :icon="chevronForwardOutline"
+              slot="end"
+              class="category-arrow"
+            ></ion-icon>
+          </ion-item>
+
+          <ion-item
+            button
+            @click="navigateToAdmin('/admin/requests')"
+            class="category-item admin-menu-item"
+            :class="{
+              'ion-activated': route.path === '/admin/requests',
+              'selected-category': route.path === '/admin/requests'
+            }"
+          >
+            <ion-icon :icon="diamondOutline" slot="start" class="admin-icon"></ion-icon>
+            <ion-label class="category-label">Premium Requests</ion-label>
+            <ion-icon
+              v-if="route.path === '/admin/requests'"
+              :icon="chevronForwardOutline"
+              slot="end"
+              class="category-arrow"
+            ></ion-icon>
+          </ion-item>
+
+          <ion-item
+            button
+            @click="navigateToAdmin('/admin/settings')"
+            class="category-item admin-menu-item"
+            :class="{
+              'ion-activated': route.path === '/admin/settings',
+              'selected-category': route.path === '/admin/settings'
+            }"
+          >
+            <ion-icon :icon="settingsOutline" slot="start" class="admin-icon"></ion-icon>
+            <ion-label class="category-label">App Settings</ion-label>
+            <ion-icon
+              v-if="route.path === '/admin/settings'"
               :icon="chevronForwardOutline"
               slot="end"
               class="category-arrow"
@@ -242,6 +300,10 @@ import {
   fastFoodOutline,
   peopleOutline,
   bookmarkOutline,
+  diamondOutline,
+  personCircleOutline,
+  calendarOutline,
+  settingsOutline,
 } from 'ionicons/icons';
 
 // Props
@@ -543,6 +605,10 @@ ion-menu ion-content::part(scroll)::-webkit-scrollbar {
 
 .menu-item {
   display: inline-block;
+}
+
+.subscription-btn ion-icon {
+  color: #ffd700;
 }
 
 /* Reset Modal Styling */

@@ -56,8 +56,9 @@ onMounted(async () => {
   }, 5000);
 });
 
-// Show header only when not on login page
-const showHeader = computed(() => route.path !== '/login');
+// Show header only when not on auth pages
+const authPages = ['/login', '/register', '/forgot-password', '/verify-email'];
+const showHeader = computed(() => !authPages.includes(route.path));
 
 // Handle Android hardware back button
 if (process.client) {

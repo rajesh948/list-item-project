@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 export default defineNuxtPlugin(() => {
   // Firebase configuration for Catering App
@@ -20,12 +21,14 @@ export default defineNuxtPlugin(() => {
   // Initialize Firebase services
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
   return {
     provide: {
       firebase: app,
       auth,
       db,
+      storage,
     },
   };
 });

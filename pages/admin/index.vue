@@ -58,6 +58,27 @@
               <p>Create, edit, and manage user accounts</p>
             </ion-card-content>
           </ion-card>
+
+          <ion-card class="admin-card" button @click="navigateTo('/admin/requests')">
+            <ion-card-content>
+              <div class="card-icon">
+                <ion-icon :icon="cardOutline"></ion-icon>
+                <span v-if="pendingRequestsCount > 0" class="badge">{{ pendingRequestsCount }}</span>
+              </div>
+              <h3>Premium Requests</h3>
+              <p>Review and approve subscription requests</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="admin-card" button @click="navigateTo('/admin/settings')">
+            <ion-card-content>
+              <div class="card-icon">
+                <ion-icon :icon="settingsOutline"></ion-icon>
+              </div>
+              <h3>App Settings</h3>
+              <p>Configure PDF limits and pricing</p>
+            </ion-card-content>
+          </ion-card>
         </div>
 
         <!-- Database Initialization Section -->
@@ -104,6 +125,8 @@ import {
   fastFoodOutline,
   alertCircleOutline,
   cloudDownloadOutline,
+  cardOutline,
+  settingsOutline,
 } from 'ionicons/icons';
 import { initializeCategories } from '~/scripts/initCategories';
 
@@ -113,12 +136,14 @@ definePageMeta({
 
 const categoriesStore = useCategoriesStore();
 const usersStore = useUsersStore();
+const premiumRequestsStore = usePremiumRequestsStore();
 const { showToast } = useToast();
 
 // Calculate statistics
 const totalCategories = computed(() => categoriesStore.totalCategories);
 const totalItems = computed(() => categoriesStore.totalItems);
 const totalUsers = computed(() => usersStore.totalUsers);
+const pendingRequestsCount = computed(() => premiumRequestsStore.pendingCount);
 
 const isInitializing = ref(false);
 
@@ -128,6 +153,7 @@ onMounted(async () => {
     await Promise.all([
       categoriesStore.fetchCategories(),
       usersStore.fetchUsers(),
+      premiumRequestsStore.fetchRequests('pending'),
     ]);
   } catch (error) {
     // Error handling
@@ -224,6 +250,26 @@ const initializeDatabase = async () => {
   font-size: 48px;
   color: #3880ff;
   margin-bottom: 16px;
+  position: relative;
+  display: inline-block;
+}
+
+.card-icon .badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: #eb445a;
+  color: white;
+  border-radius: 12px;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 6px;
+  box-shadow: 0 2px 6px rgba(235, 68, 90, 0.4);
 }
 
 .admin-card h3 {

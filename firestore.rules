@@ -79,5 +79,50 @@ service cloud.firestore {
       allow delete: if isAuthenticated() &&
                        (isAdmin() || resource.data.userId == request.auth.uid);
     }
+
+    // App Settings collection rules
+    match /appSettings/{docId} {
+      // Allow read for all authenticated users
+      allow read: if isAuthenticated();
+
+      // Allow write only for admins
+      allow write: if isAdmin();
+    }
+
+    // Premium Requests collection rules
+    match /premiumRequests/{requestId} {
+      // Allow read if admin or own request
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update only for admins (to approve/reject)
+      allow update: if isAdmin();
+
+      // Allow delete only for admins
+      allow delete: if isAdmin();
+    }
+
+    // Customers collection rules (Premium feature)
+    match /customers/{customerId} {
+      // Allow read if authenticated and either admin or own customer
+      allow read: if isAuthenticated() &&
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow create if authenticated and userId matches auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update if owner or admin
+      allow update: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Allow delete if owner or admin
+      allow delete: if isAuthenticated() &&
+                       (isAdmin() || resource.data.userId == request.auth.uid);
+    }
   }
 }

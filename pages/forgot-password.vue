@@ -1,8 +1,8 @@
 <template>
   <ion-page>
-    <ion-content class="login-page">
-      <div class="login-container">
-        <div class="login-card">
+    <ion-content class="forgot-page">
+      <div class="forgot-container">
+        <div class="forgot-card">
           <!-- Logo Section -->
           <div class="logo-section">
             <div class="app-logo">
@@ -12,45 +12,55 @@
             <p class="app-tagline">Professional Catering Management Platform</p>
           </div>
 
-          <!-- Login Form -->
-          <div class="form-container">
-            <h2 class="form-title">Welcome Back</h2>
-            <p class="form-subtitle">Sign in to your account</p>
+          <!-- Success Message -->
+          <div v-if="resetSuccess" class="form-container">
+            <div class="success-container">
+              <div class="success-icon-wrapper">
+                <ion-icon :icon="mailOutline" class="success-icon"></ion-icon>
+              </div>
+              <h2 class="success-title">Check Your Email</h2>
+              <p class="success-message">
+                We've sent a password reset link to <strong>{{ sentToEmail }}</strong>.
+                Click the link in the email to reset your password.
+              </p>
+              <p class="success-note">
+                Don't see the email? Check your spam folder or wait a few minutes.
+              </p>
+              <div class="action-buttons">
+                <button @click="resetForm" class="action-btn secondary">
+                  <ion-icon :icon="refreshOutline"></ion-icon>
+                  Try Another Email
+                </button>
+                <NuxtLink to="/login" class="action-btn">
+                  <ion-icon :icon="arrowBackOutline"></ion-icon>
+                  Back to Login
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
 
-            <form @submit.prevent="handleLogin" class="login-form">
+          <!-- Reset Password Form -->
+          <div v-else class="form-container">
+            <h2 class="form-title">Forgot Password?</h2>
+            <p class="form-subtitle">Enter your email to reset your password</p>
+
+            <form @submit.prevent="handleReset" class="reset-form">
               <div class="input-group">
                 <label class="input-label">Email or Username</label>
                 <div class="input-wrapper">
-                  <ion-icon :icon="personCircleOutline" class="input-icon"></ion-icon>
+                  <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
                   <input
-                    v-model="username"
+                    v-model="email"
                     type="text"
                     class="form-input"
                     placeholder="Enter your email or username"
                     required
-                    autocomplete="username"
+                    autocomplete="email"
                   />
                 </div>
-              </div>
-
-              <div class="input-group">
-                <label class="input-label">Password</label>
-                <div class="input-wrapper">
-                  <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-                  <input
-                    v-model="password"
-                    :type="showPassword ? 'text' : 'password'"
-                    class="form-input"
-                    placeholder="Enter your password"
-                    required
-                    autocomplete="current-password"
-                  />
-                  <ion-icon
-                    :icon="showPassword ? eyeOffOutline : eyeOutline"
-                    @click="showPassword = !showPassword"
-                    class="password-toggle-icon"
-                  ></ion-icon>
-                </div>
+                <p class="input-hint">
+                  For username accounts, we'll send to your registered email.
+                </p>
               </div>
 
               <div v-if="errorMessage" class="error-message">
@@ -58,23 +68,20 @@
                 <span>{{ errorMessage }}</span>
               </div>
 
-              <div v-if="needsVerification" class="verification-link">
-                <NuxtLink :to="`/verify-email?email=${encodeURIComponent(username)}`" class="link">Resend Verification Email</NuxtLink>
-              </div>
-
               <button
                 type="submit"
-                class="login-btn"
-                :disabled="isLoading || !username || !password"
+                class="reset-btn"
+                :disabled="isLoading || !email"
               >
                 <ion-spinner v-if="isLoading" name="crescent" color="light"></ion-spinner>
-                <span v-else>Sign In</span>
+                <span v-else>Send Reset Link</span>
               </button>
             </form>
 
             <div class="form-footer">
-              <div class="forgot-password">
-                <NuxtLink to="/forgot-password" class="link">Forgot Password?</NuxtLink>
+              <div class="login-link">
+                Remember your password?
+                <NuxtLink to="/login" class="link">Sign In</NuxtLink>
               </div>
               <div class="register-link">
                 Don't have an account?
@@ -85,7 +92,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="login-footer">
+        <div class="forgot-footer">
           <p>&copy; 2024 CaterHub. All rights reserved.</p>
         </div>
       </div>
@@ -101,55 +108,51 @@ import {
   IonSpinner,
 } from '@ionic/vue';
 import {
-  eyeOutline,
-  eyeOffOutline,
   alertCircleOutline,
-  informationCircleOutline,
   restaurantOutline,
-  personCircleOutline,
-  lockClosedOutline,
+  mailOutline,
+  arrowBackOutline,
+  refreshOutline,
 } from 'ionicons/icons';
 
-const { login, userRole, isAuthenticated } = useAuth();
+const { requestPasswordReset, isAuthenticated, userRole } = useAuth();
 
-const username = ref('');
-const password = ref('');
-const showPassword = ref(false);
+const email = ref('');
 const isLoading = ref(false);
 const errorMessage = ref('');
-const needsVerification = ref(false);
+const resetSuccess = ref(false);
+const sentToEmail = ref('');
 
-const handleLogin = async () => {
-  if (!username.value || !password.value) {
-    errorMessage.value = 'Please enter username and password';
+const handleReset = async () => {
+  if (!email.value) {
+    errorMessage.value = 'Please enter your email or username';
     return;
   }
 
   isLoading.value = true;
   errorMessage.value = '';
-  needsVerification.value = false;
 
-  const result = await login(username.value, password.value);
+  const result = await requestPasswordReset(email.value);
 
   if (result.success) {
-    // Redirect to the appropriate page
-
-    // Small delay to ensure Firebase Auth state is saved
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Use Nuxt navigation (SPA)
-    await navigateTo(result.redirectTo || '/');
+    sentToEmail.value = email.value.includes('@') ? email.value : `${email.value}@caterhub.app`;
+    resetSuccess.value = true;
   } else {
-    errorMessage.value = result.error || 'Login failed';
-    needsVerification.value = result.needsVerification || false;
-    isLoading.value = false;
+    errorMessage.value = result.error || 'Failed to send reset email';
   }
+
+  isLoading.value = false;
+};
+
+const resetForm = () => {
+  email.value = '';
+  resetSuccess.value = false;
+  errorMessage.value = '';
 };
 
 // Redirect if already logged in
 onMounted(async () => {
   if (process.client) {
-    // Wait a bit for auth to initialize
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (isAuthenticated.value) {
@@ -164,11 +167,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.login-page {
+.forgot-page {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.login-container {
+.forgot-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -177,7 +180,7 @@ onMounted(async () => {
   padding: 20px;
 }
 
-.login-card {
+.forgot-card {
   width: 100%;
   max-width: 450px;
   background: white;
@@ -189,15 +192,15 @@ onMounted(async () => {
 /* Logo Section */
 .logo-section {
   text-align: center;
-  padding: 40px 30px 30px 30px;
+  padding: 30px 30px 20px 30px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
 .app-logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px auto;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 12px auto;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
@@ -207,19 +210,19 @@ onMounted(async () => {
 }
 
 .logo-icon {
-  font-size: 40px;
+  font-size: 36px;
   color: white;
 }
 
 .app-name {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   letter-spacing: -0.5px;
 }
 
 .app-tagline {
-  font-size: 14px;
+  font-size: 13px;
   margin: 0;
   opacity: 0.9;
   font-weight: 300;
@@ -243,7 +246,7 @@ onMounted(async () => {
   margin: 0 0 30px 0;
 }
 
-.login-form {
+.reset-form {
   margin-bottom: 24px;
 }
 
@@ -292,17 +295,10 @@ onMounted(async () => {
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-.password-toggle-icon {
-  position: absolute;
-  right: 16px;
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.password-toggle-icon:hover {
-  color: #667eea;
+.input-hint {
+  font-size: 12px;
+  color: #888;
+  margin: 8px 0 0 0;
 }
 
 .error-message {
@@ -323,12 +319,7 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
-.verification-link {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.login-btn {
+.reset-btn {
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -342,16 +333,16 @@ onMounted(async () => {
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.login-btn:hover:not(:disabled) {
+.reset-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
-.login-btn:active:not(:disabled) {
+.reset-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.login-btn:disabled {
+.reset-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -359,18 +350,18 @@ onMounted(async () => {
 .form-footer {
   padding-top: 20px;
   border-top: 1px solid #e0e0e0;
+  text-align: center;
 }
 
-.forgot-password {
-  text-align: center;
-  margin-bottom: 16px;
+.login-link,
+.register-link {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
 }
 
 .register-link {
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .link {
@@ -385,33 +376,88 @@ onMounted(async () => {
   text-decoration: underline;
 }
 
-.help-text {
+/* Success Container */
+.success-container {
+  text-align: center;
+}
+
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px auto;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #666;
   justify-content: center;
 }
 
-.help-text ion-icon {
-  font-size: 16px;
-  color: #667eea;
+.success-icon {
+  font-size: 48px;
+  color: white;
 }
 
-.contact-link {
-  color: #667eea;
-  text-decoration: none;
+.success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.success-message {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.success-note {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 24px 0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.contact-link:hover {
-  color: #764ba2;
-  text-decoration: underline;
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
-.login-footer {
+.action-btn.secondary {
+  background: #f5f5f5;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.secondary:hover {
+  background: #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.forgot-footer {
   margin-top: 30px;
   text-align: center;
   color: white;
@@ -419,57 +465,59 @@ onMounted(async () => {
   opacity: 0.8;
 }
 
-.login-footer p {
+.forgot-footer p {
   margin: 0;
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .login-container {
+  .forgot-container {
     padding: 16px;
   }
 
-  .login-card {
+  .forgot-card {
     max-width: 100%;
   }
 
   .logo-section {
-    padding: 30px 20px 20px 20px;
+    padding: 24px 20px 16px 20px;
   }
 
   .app-logo {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
   }
 
   .logo-icon {
-    font-size: 36px;
+    font-size: 32px;
   }
 
   .app-name {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .app-tagline {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .form-container {
     padding: 30px 20px;
   }
 
-  .form-title {
+  .form-title,
+  .success-title {
     font-size: 22px;
   }
 }
 
-/* Dark mode support (optional) */
+/* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .login-card {
+  .forgot-card {
     background: #1a1a1a;
   }
 
-  .form-title {
+  .form-title,
+  .success-title {
     color: #ffffff;
   }
 
@@ -495,8 +543,27 @@ onMounted(async () => {
     border-top-color: #444;
   }
 
+  .login-link,
   .register-link {
     color: #999;
+  }
+
+  .success-message {
+    color: #bbb;
+  }
+
+  .success-note,
+  .input-hint {
+    color: #888;
+  }
+
+  .action-btn.secondary {
+    background: #333;
+    color: #fff;
+  }
+
+  .action-btn.secondary:hover {
+    background: #444;
   }
 }
 </style>
