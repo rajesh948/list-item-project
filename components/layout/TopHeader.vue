@@ -10,8 +10,21 @@
       <h1>{{ pageTitle }}</h1>
     </div>
 
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Update Notification Icon -->
+      <button
+        v-if="hasUpdateNotification"
+        class="action-btn update-btn"
+        @click="$emit('show-update')"
+        title="Update Available"
+      >
+        <ion-icon :icon="cloudDownloadOutline"></ion-icon>
+        <span class="update-badge"></span>
+      </button>
+
     <!-- Action Buttons (hidden for admin) -->
-    <div v-if="!isAdmin" class="header-actions">
+    <template v-if="!isAdmin">
       <!-- Premium Button -->
       <button
         class="action-btn premium-btn"
@@ -30,20 +43,23 @@
       >
         <ion-icon :icon="addOutline"></ion-icon>
       </button>
+    </template>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue';
-import { menuOutline, diamondOutline, addOutline } from 'ionicons/icons';
+import { menuOutline, diamondOutline, addOutline, cloudDownloadOutline } from 'ionicons/icons';
 
 defineProps<{
   isMobile?: boolean;
+  hasUpdateNotification?: boolean;
 }>();
 
 defineEmits<{
   (e: 'toggle-menu'): void;
+  (e: 'show-update'): void;
 }>();
 
 const route = useRoute();
@@ -178,6 +194,38 @@ const pageTitle = computed(() => {
 .create-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.update-btn {
+  background: #fff3e0;
+  color: #e65100;
+  position: relative;
+  animation: pulse-update 2s infinite;
+}
+
+.update-btn:hover {
+  background: #ffe0b2;
+  transform: scale(1.05);
+}
+
+.update-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: #f44336;
+  border-radius: 50%;
+  border: 2px solid #fff3e0;
+}
+
+@keyframes pulse-update {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(230, 81, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(230, 81, 0, 0);
+  }
 }
 
 @media (max-width: 767px) {

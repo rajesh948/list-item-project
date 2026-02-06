@@ -114,93 +114,128 @@
     </div>
 
     <!-- Add/Edit Items Modal -->
-    <ion-modal :is-open="showAddItemModal" @didDismiss="closeAddItemModal">
-      <ion-header>
-        <ion-toolbar class="gradient-toolbar">
-          <ion-title>{{ editingCategory ? 'Edit Category' : 'Add New Item' }}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="closeAddItemModal">
-              <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <div class="add-item-content">
-          <div class="add-item-header">
-            <ion-icon :icon="listOutline" class="add-item-icon"></ion-icon>
-            <h2>{{ editingCategory ? 'Edit Category Items' : 'Create New Category' }}</h2>
-            <p class="help-text">Add categories and their items to organize your menu</p>
+    <ion-modal :is-open="showAddItemModal" @didDismiss="closeAddItemModal" class="category-items-modal">
+      <div class="modal-wrapper">
+        <!-- Modal Header -->
+        <div class="modal-header-custom">
+          <div class="modal-header-content">
+            <div class="modal-icon-wrapper">
+              <ion-icon :icon="editingCategory ? createOutline : layersOutline"></ion-icon>
+            </div>
+            <div class="modal-title-section">
+              <h2>{{ editingCategory ? 'Edit Category Items' : 'Create New Category' }}</h2>
+              <p>{{ editingCategory ? 'Update items in this category' : 'Add categories and items to your menu' }}</p>
+            </div>
           </div>
+          <button class="modal-close-btn-custom" @click="closeAddItemModal">
+            <ion-icon :icon="closeOutline"></ion-icon>
+          </button>
+        </div>
 
-          <div class="categories-form">
-            <div v-for="(category, catIndex) in newItemFormData" :key="category.tempId" class="category-form-block">
-              <div class="category-form-header">
-                <ion-icon :icon="restaurantOutline" class="category-icon"></ion-icon>
-                <h3>Category {{ catIndex + 1 }}</h3>
+        <!-- Modal Body -->
+        <div class="modal-body-custom">
+          <div class="categories-form-modern">
+            <div
+              v-for="(category, catIndex) in newItemFormData"
+              :key="category.tempId"
+              class="category-card-form"
+            >
+              <!-- Category Header -->
+              <div class="category-card-header">
+                <div class="category-number">
+                  <span>{{ catIndex + 1 }}</span>
+                </div>
+                <div class="category-header-title">
+                  <span class="category-label-text">Category</span>
+                </div>
                 <button
                   v-if="!editingCategory && newItemFormData.length > 1"
-                  class="remove-category-btn"
+                  class="remove-category-btn-modern"
                   @click="removeCategory(catIndex)"
                 >
                   <ion-icon :icon="trashOutline"></ion-icon>
                 </button>
               </div>
 
-              <div class="form-group">
-                <label>Category Name</label>
-                <input
-                  v-model="category.name"
-                  type="text"
-                  class="form-input"
-                  placeholder="Enter category name"
-                  :disabled="editingCategory !== null"
-                />
+              <!-- Category Name Input -->
+              <div class="form-field-modern">
+                <div class="input-wrapper">
+                  <ion-icon :icon="folderOutline" class="input-icon"></ion-icon>
+                  <input
+                    v-model="category.name"
+                    type="text"
+                    class="modern-input"
+                    placeholder="Category name"
+                    :disabled="editingCategory !== null"
+                  />
+                </div>
               </div>
 
-              <div class="items-form-section">
-                <div class="items-form-header">
-                  <label>Items</label>
-                  <button class="add-item-inline-btn" @click="addItemToCategory(catIndex)">
+              <!-- Items Section -->
+              <div class="items-section-modern">
+                <div class="items-header-modern">
+                  <div class="items-label">
+                    <ion-icon :icon="listOutline"></ion-icon>
+                    <span>Items</span>
+                    <span class="items-count-badge">{{ category.items.filter(i => i.name.trim()).length }}</span>
+                  </div>
+                  <button class="add-item-btn-modern" @click="addItemToCategory(catIndex)">
                     <ion-icon :icon="addOutline"></ion-icon>
-                    Add Item
+                    <span>Add</span>
                   </button>
                 </div>
-                <div v-for="(item, itemIndex) in category.items" :key="item.tempId" class="item-input-row">
-                  <input
-                    v-model="item.name"
-                    type="text"
-                    class="form-input item-input"
-                    :placeholder="`Item ${itemIndex + 1}`"
-                  />
-                  <button
-                    v-if="category.items.length > 1"
-                    class="remove-item-btn"
-                    @click="removeItemFromForm(catIndex, itemIndex)"
+
+                <div class="items-list-modern">
+                  <div
+                    v-for="(item, itemIndex) in category.items"
+                    :key="item.tempId"
+                    class="item-row-modern"
                   >
-                    <ion-icon :icon="closeOutline"></ion-icon>
-                  </button>
+                    <div class="item-number">{{ itemIndex + 1 }}</div>
+                    <input
+                      v-model="item.name"
+                      type="text"
+                      class="item-input-modern"
+                      :placeholder="`Item name`"
+                      @keydown.enter="addItemToCategory(catIndex)"
+                    />
+                    <button
+                      v-if="category.items.length > 1"
+                      class="remove-item-btn-modern"
+                      @click="removeItemFromForm(catIndex, itemIndex)"
+                    >
+                      <ion-icon :icon="closeCircleOutline"></ion-icon>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="modal-actions">
-            <button
-              v-if="!editingCategory"
-              class="add-category-btn"
-              @click="addNewCategoryToForm"
-            >
+          <!-- Add Another Category Button -->
+          <button
+            v-if="!editingCategory"
+            class="add-another-category-btn"
+            @click="addNewCategoryToForm"
+          >
+            <div class="add-category-icon">
               <ion-icon :icon="addOutline"></ion-icon>
-              Add Another Category
-            </button>
-            <button class="save-items-btn" @click="saveNewItems">
-              <ion-icon :icon="checkmarkOutline"></ion-icon>
-              {{ editingCategory ? 'Update Items' : 'Add Items' }}
-            </button>
-          </div>
+            </div>
+            <span>Add Another Category</span>
+          </button>
         </div>
-      </ion-content>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-custom">
+          <button class="cancel-btn-modern" @click="closeAddItemModal">
+            Cancel
+          </button>
+          <button class="submit-btn-modern" @click="saveNewItems">
+            <ion-icon :icon="checkmarkOutline"></ion-icon>
+            <span>{{ editingCategory ? 'Update Items' : 'Add Items' }}</span>
+          </button>
+        </div>
+      </div>
     </ion-modal>
   </div>
 </template>
@@ -226,6 +261,9 @@ import {
   listOutline,
   restaurantOutline,
   trashOutline,
+  layersOutline,
+  folderOutline,
+  closeCircleOutline,
 } from 'ionicons/icons';
 
 interface CustomerData {
@@ -274,14 +312,29 @@ const emit = defineEmits<{
 // Local copy of selected items for editing
 const localSelectedItems = ref<SelectedCategory[]>([]);
 
+// Flag to prevent recursive updates
+const isUpdatingFromParent = ref(false);
+
 // Watch for changes from parent
 watch(() => props.selectedItems, (newVal) => {
-  localSelectedItems.value = JSON.parse(JSON.stringify(newVal));
+  // Only update if values are different (compare by JSON string)
+  const newValStr = JSON.stringify(newVal);
+  const localValStr = JSON.stringify(localSelectedItems.value);
+  if (newValStr !== localValStr) {
+    isUpdatingFromParent.value = true;
+    localSelectedItems.value = JSON.parse(newValStr);
+    // Reset flag after the current tick
+    nextTick(() => {
+      isUpdatingFromParent.value = false;
+    });
+  }
 }, { immediate: true, deep: true });
 
-// Sync changes back to parent
+// Sync changes back to parent (only when changes originate from this component)
 watch(localSelectedItems, (newVal) => {
-  emit('update:selectedItems', newVal);
+  if (!isUpdatingFromParent.value) {
+    emit('update:selectedItems', JSON.parse(JSON.stringify(newVal)));
+  }
 }, { deep: true });
 
 const reportNameLocal = computed({
@@ -727,236 +780,404 @@ onMounted(() => {
 }
 
 /* Modal Styles */
-.gradient-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --color: white;
-}
-
-.add-item-content {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.add-item-header {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.add-item-icon {
-  font-size: 48px;
-  color: #667eea;
-  margin-bottom: 12px;
-}
-
-.add-item-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.add-item-header .help-text {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.categories-form {
+.modal-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.category-form-block {
+  height: 100%;
   background: #f8f9fa;
-  border-radius: 12px;
-  padding: 16px;
 }
 
-.category-form-header {
+.modal-header-custom {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px;
+  background: white;
   border-bottom: 1px solid #e8e8e8;
 }
 
-.category-icon {
+.modal-header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.modal-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-icon-wrapper ion-icon {
   font-size: 24px;
   color: #667eea;
 }
 
-.category-form-header h3 {
-  flex: 1;
+.modal-title-section h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.modal-title-section p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.modal-close-btn-custom {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.modal-close-btn-custom:hover {
+  background: #e8e8e8;
+}
+
+.modal-close-btn-custom ion-icon {
+  font-size: 20px;
+  color: #666;
+}
+
+.modal-body-custom {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.categories-form-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.category-card-form {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.category-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.category-number {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-number span {
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.category-header-title {
+  flex: 1;
+}
+
+.category-label-text {
+  font-size: 0.9rem;
   font-weight: 600;
   color: #333;
 }
 
-.remove-category-btn {
+.remove-category-btn-modern {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: #ffebee;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
   transition: all 0.2s;
 }
 
-.remove-category-btn ion-icon {
+.remove-category-btn-modern:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.remove-category-btn-modern ion-icon {
   font-size: 18px;
-  color: #d32f2f;
+  color: #ef4444;
 }
 
-.remove-category-btn:hover {
-  background: #ffcdd2;
+.form-field-modern {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.form-group {
-  margin-bottom: 16px;
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.form-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 6px;
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 20px;
+  color: #888;
+  pointer-events: none;
 }
 
-.form-input {
+.modern-input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 14px 14px 46px;
   border: 2px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.95rem;
+  color: #333;
+  background: #fafafa;
   transition: all 0.2s;
-  background: white;
 }
 
-.form-input:focus {
+.modern-input:focus {
   outline: none;
   border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-input:disabled {
-  background: #f5f5f5;
-  color: #666;
+.modern-input:disabled {
+  background: #f0f0f0;
+  color: #888;
 }
 
-.items-form-section {
-  margin-top: 16px;
+.modern-input::placeholder {
+  color: #aaa;
 }
 
-.items-form-header {
+.items-section-modern {
+  padding: 16px;
+}
+
+.items-header-modern {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.items-form-header label {
-  font-size: 0.85rem;
+.items-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.items-label ion-icon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.items-label span {
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
+  color: #333;
 }
 
-.add-item-inline-btn {
+.items-count-badge {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.add-item-btn-modern {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
-  background: transparent;
-  border: 2px solid #667eea;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
   border-radius: 8px;
-  color: #667eea;
+  color: white;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.add-item-inline-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
+.add-item-btn-modern:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.add-item-inline-btn ion-icon {
+.add-item-btn-modern ion-icon {
   font-size: 16px;
 }
 
-.item-input-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.item-input {
-  flex: 1;
-}
-
-.remove-item-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.remove-item-btn ion-icon {
-  font-size: 18px;
-  color: #999;
-}
-
-.remove-item-btn:hover {
-  background: #ffebee;
-}
-
-.remove-item-btn:hover ion-icon {
-  color: #d32f2f;
-}
-
-.modal-actions {
+.items-list-modern {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
 }
 
-.add-category-btn {
+.item-row-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-number {
+  width: 24px;
+  height: 24px;
+  background: #f0f0f0;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px;
-  background: white;
-  border: 2px dashed #667eea;
-  border-radius: 12px;
-  color: #667eea;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.item-input-modern {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #333;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.item-input-modern:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+}
+
+.item-input-modern::placeholder {
+  color: #aaa;
+}
+
+.remove-item-btn-modern {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.remove-item-btn-modern ion-icon {
+  font-size: 22px;
+  color: #ccc;
+  transition: color 0.2s;
+}
+
+.remove-item-btn-modern:hover ion-icon {
+  color: #ef4444;
+}
+
+.add-another-category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  background: white;
+  border: 2px dashed #d0d0d0;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.add-category-btn:hover {
-  background: rgba(102, 126, 234, 0.05);
+.add-another-category-btn:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.02);
 }
 
-.add-category-btn ion-icon {
-  font-size: 20px;
+.add-category-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.save-items-btn {
+.add-category-icon ion-icon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.add-another-category-btn span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.modal-footer-custom {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #e8e8e8;
+}
+
+.cancel-btn-modern {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid #e8e8e8;
+  background: white;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn-modern:hover {
+  background: #f5f5f5;
+  border-color: #ddd;
+}
+
+.submit-btn-modern {
+  flex: 1.5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -973,13 +1194,13 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.save-items-btn:hover {
-  transform: translateY(-2px);
+.submit-btn-modern:hover {
+  transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
-.save-items-btn ion-icon {
-  font-size: 20px;
+.submit-btn-modern ion-icon {
+  font-size: 18px;
 }
 
 @media (max-width: 480px) {
@@ -994,6 +1215,108 @@ onMounted(() => {
   .item-tag {
     padding: 5px 10px;
     font-size: 0.8rem;
+  }
+
+  /* Modal Mobile Styles */
+  .modal-header-custom {
+    padding: 16px;
+  }
+
+  .modal-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .modal-icon-wrapper ion-icon {
+    font-size: 20px;
+  }
+
+  .modal-title-section h2 {
+    font-size: 1rem;
+  }
+
+  .modal-title-section p {
+    font-size: 0.8rem;
+  }
+
+  .modal-body-custom {
+    padding: 16px;
+  }
+
+  .category-card-header {
+    padding: 12px 14px;
+  }
+
+  .category-number {
+    width: 24px;
+    height: 24px;
+  }
+
+  .category-number span {
+    font-size: 0.75rem;
+  }
+
+  .form-field-modern {
+    padding: 14px;
+  }
+
+  .modern-input {
+    padding: 12px 12px 12px 42px;
+    font-size: 0.9rem;
+  }
+
+  .input-icon {
+    left: 12px;
+    font-size: 18px;
+  }
+
+  .items-section-modern {
+    padding: 14px;
+  }
+
+  .item-row-modern {
+    gap: 8px;
+  }
+
+  .item-input-modern {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .modal-footer-custom {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .cancel-btn-modern,
+  .submit-btn-modern {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+</style>
+
+<style>
+/* Global Modal Styles */
+.category-items-modal {
+  --width: 100%;
+  --max-width: 520px;
+  --height: 100%;
+  --max-height: 90vh;
+  --border-radius: 20px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.category-items-modal::part(content) {
+  margin: auto;
+}
+
+@media (max-width: 540px) {
+  .category-items-modal {
+    --max-width: 100%;
+    --max-height: 100%;
+    --border-radius: 0;
   }
 }
 </style>

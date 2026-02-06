@@ -1320,7 +1320,12 @@ onMounted(() => {
 
 .user-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.user-meta ion-chip {
+  margin: 0;
 }
 
 .user-actions {
@@ -1783,12 +1788,51 @@ onMounted(() => {
   .user-info {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 16px;
+  }
+
+  .user-details {
+    width: 100%;
+  }
+
+  .user-meta {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .user-meta ion-chip {
+    font-size: 12px;
+    height: 28px;
+    padding: 0 10px;
+  }
+
+  .user-meta ion-chip ion-label {
+    font-size: 11px;
+  }
+
+  .user-meta ion-chip ion-icon {
+    font-size: 14px;
   }
 
   .user-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+  }
+
+  .user-actions ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .action-button-with-badge ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
   }
 
   .sessions-header {

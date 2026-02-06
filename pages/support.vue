@@ -16,7 +16,7 @@
           <ion-icon :icon="helpCircleOutline"></ion-icon>
           FAQ
         </button>
-        <a href="mailto:support@caterhub.app" class="action-btn">
+        <a href="mailto:caterhub.team@gmail.com" class="action-btn">
           <ion-icon :icon="mailOutline"></ion-icon>
           Email Us
         </a>

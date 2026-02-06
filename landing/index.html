@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaterHub - Catering Management App</title>
+  <meta name="description" content="Professional catering management app. Create reports, manage customers, track events, and grow your catering business.">
+  <meta name="theme-color" content="#667eea">
+  <link rel="icon" type="image/png" href="icon-192.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="CaterHub - Catering Management App">
+  <meta property="og:description" content="Professional catering management app for your business">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://caterhub.web.app">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmOELURBKmQ0fMBuAMT4uROqunNexcFOg",
+      authDomain: "catering-app-e0a17.firebaseapp.com",
+      projectId: "catering-app-e0a17",
+      storageBucket: "catering-app-e0a17.firebasestorage.app",
+      messagingSenderId: "4179994158",
+      appId: "1:4179994158:web:caterhub"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Format release notes as bullet points
+    function formatReleaseNotes(notes) {
+      if (!notes) return '';
+      const lines = notes.split('\n').filter(line => line.trim());
+      if (lines.length === 0) return notes;
+      if (lines.length === 1) return notes;
+      return '<ul class="release-notes-list">' +
+        lines.map(line => `<li>${line.replace(/^[•\-\*]\s*/, '')}</li>`).join('') +
+        '</ul>';
+    }
+
+    // Load versions from Firestore
+    async function loadVersions() {
+      try {
+        const versionDoc = await getDoc(doc(db, 'appConfig', 'version'));
+
+        if (versionDoc.exists()) {
+          const data = versionDoc.data();
+          const versions = data.versions || [];
+          const latestVersion = data.latestVersion || '1.0.0';
+
+          // Update hero badge
+          document.getElementById('version-badge').textContent = `Version ${latestVersion} Available`;
+
+          // Find latest version info
+          const latest = versions.find(v => v.isLatest) || versions[0];
+
+          if (latest) {
+            // Update download button
+            document.getElementById('download-btn').href = latest.downloadUrl;
+            document.getElementById('download-version').textContent = `Version ${latest.version}`;
+
+            // Update size - add MB if not already present
+            if (latest.size) {
+              let size = latest.size;
+              if (!size.toLowerCase().includes('mb') && !size.toLowerCase().includes('gb')) {
+                size = size + ' MB';
+              }
+              document.getElementById('download-size').textContent = size;
+            }
+
+            // Show release notes if available (convert to bullet points)
+            if (latest.releaseNotes) {
+              const notesHtml = formatReleaseNotes(latest.releaseNotes);
+              document.getElementById('release-notes').innerHTML = notesHtml;
+              document.getElementById('release-notes-section').style.display = 'block';
+            }
+          }
+
+          // Build version history - show all versions with showOnLanding: true (or undefined)
+          let visibleVersions = versions.filter(v => v.showOnLanding !== false);
+
+          if (visibleVersions.length > 0) {
+            const versionListEl = document.getElementById('version-list');
+            versionListEl.innerHTML = '';
+
+            visibleVersions.forEach((ver, index) => {
+              const releaseDate = ver.releaseDate?.toDate ? ver.releaseDate.toDate() : new Date(ver.releaseDate);
+              const dateStr = releaseDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+              const notesHtml = formatReleaseNotes(ver.releaseNotes);
+
+              // Format size - add MB if not already present
+              let sizeDisplay = ver.size || '';
+              if (sizeDisplay && !sizeDisplay.toLowerCase().includes('mb') && !sizeDisplay.toLowerCase().includes('gb')) {
+                sizeDisplay = sizeDisplay + ' MB';
+              }
+
+              versionListEl.innerHTML += `
+                <div class="version-item ${ver.isLatest ? 'is-latest' : ''}" data-version="${ver.version}">
+                  <div class="version-item-header" onclick="toggleVersionExpand('${ver.version}')">
+                    <div class="version-item-left">
+                      <span class="version-expand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </span>
+                      <span class="version-item-number">v${ver.version}</span>
+                      ${ver.isLatest ? '<span class="version-item-badge">Latest</span>' : ''}
+                    </div>
+                    <div class="version-item-right">
+                      <span class="version-item-date">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        ${dateStr}
+                      </span>
+                      ${sizeDisplay ? `<span class="version-item-size">${sizeDisplay}</span>` : ''}
+                      <a href="${ver.downloadUrl}" class="version-item-download" onclick="event.stopPropagation()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                  <div class="version-item-body">
+                    <div class="version-item-notes">${notesHtml || '<span class="no-notes">No release notes available</span>'}</div>
+                  </div>
+                </div>
+              `;
+            });
+
+            document.getElementById('version-history').style.display = 'block';
+          } else {
+            document.getElementById('version-history').style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.log('Using default version info');
+      }
+    }
+
+    // Load versions when page loads
+    loadVersions();
+
+    // Toggle version expand/collapse
+    window.toggleVersionExpand = function(version) {
+      const item = document.querySelector(`.version-item[data-version="${version}"]`);
+      if (item) {
+        item.classList.toggle('is-expanded');
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --secondary: #764ba2;
+      --success: #10b981;
+      --dark: #1a1a2e;
+      --gray: #64748b;
+      --light: #f8fafc;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 80px 0;
+    }
+
+    .hero-text {
+      color: white;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hero-title {
+      font-size: 56px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      opacity: 0.9;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .hero-image {
+      display: flex;
+      justify-content: center;
+      perspective: 1000px;
+    }
+
+    .phone-mockup {
+      width: 280px;
+      height: 580px;
+      background: linear-gradient(145deg, #2d2d2d 0%, #1a1a1a 100%);
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 50px 100px rgba(0,0,0,0.4);
+      transform: rotateY(-10deg) rotateX(5deg);
+      transition: transform 0.5s ease;
+    }
+
+    .phone-mockup:hover {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .phone-logo {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .phone-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .phone-subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* Stats Section */
+    .stats {
+      background: white;
+      padding: 40px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-item h3 {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-item p {
+      color: var(--gray);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 100px 0;
+      background: white;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 60px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--gray);
+      font-size: 18px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .feature-card {
+      background: var(--light);
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .feature-card:hover {
+      background: white;
+      border-color: #e2e8f0;
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    .feature-card p {
+      color: var(--gray);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* Download Section */
+    .download {
+      background: linear-gradient(135deg, var(--dark) 0%, #16213e 100%);
+      padding: 100px 0;
+      text-align: center;
+      color: white;
+    }
+
+    .download .section-title {
+      color: white;
+    }
+
+    .download .section-desc {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 40px;
+    }
+
+    .download-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 500px;
+      margin: 0 auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .download-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .download-icon svg {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+
+    .download-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 20px 40px;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .download-info {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+    }
+
+    .download-info span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Release Notes */
+    .release-notes-section {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .release-notes-section h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .release-notes-section p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+    }
+
+    .release-notes-list {
+      margin: 0;
+      padding-left: 20px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .release-notes-list li {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    /* Install Steps */
+    .install-steps {
+      margin-top: 40px;
+      text-align: left;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .install-steps h4 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .steps-list {
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .steps-list li {
+      counter-increment: step;
+      padding: 8px 0;
+      padding-left: 36px;
+      position: relative;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+    }
+
+    .steps-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Version History Section */
+    .version-history {
+      display: none;
+      margin-top: 80px;
+      text-align: left;
+    }
+
+    .version-history-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .version-history-header h3 {
+      font-size: 24px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .version-history-header p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .version-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .version-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .version-item:hover {
+      border-color: rgba(102, 126, 234, 0.3);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .version-item.is-latest {
+      border-color: rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    }
+
+    .version-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      gap: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .version-item-header:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .version-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .version-expand-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .version-expand-icon svg {
+      width: 16px;
+      height: 16px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .version-item.is-expanded .version-expand-icon {
+      transform: rotate(180deg);
+    }
+
+    .version-item.is-expanded .version-expand-icon svg {
+      color: var(--primary);
+    }
+
+    .version-item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .version-item-number {
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+    }
+
+    .version-item-badge {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .version-item-date {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .version-item-date svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
+    }
+
+    .version-item-size {
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .version-item-body {
+      display: none;
+      padding: 0 20px 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin-top: 0;
+      overflow: hidden;
+    }
+
+    .version-item.is-expanded .version-item-body {
+      display: block;
+      padding-top: 12px;
+    }
+
+    .version-item-notes {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+    }
+
+    .version-item-notes ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .version-item-notes li {
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .version-item-notes li:last-child {
+      margin-bottom: 0;
+    }
+
+    .no-notes {
+      color: rgba(255,255,255,0.4);
+      font-style: italic;
+    }
+
+    .version-item-download {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 8px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .version-item-download:hover {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-color: transparent;
+      color: white;
+    }
+
+    .version-item-download svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.6);
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer p {
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+      }
+
+      .hero-title {
+        font-size: 42px;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .hero-image {
+        order: -1;
+      }
+
+      .phone-mockup {
+        width: 240px;
+        height: 500px;
+        transform: none;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        min-height: auto;
+        padding: 60px 0;
+      }
+
+      .hero-title {
+        font-size: 32px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .btn {
+        padding: 14px 24px;
+        font-size: 15px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .phone-mockup {
+        width: 200px;
+        height: 420px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat-item h3 {
+        font-size: 28px;
+      }
+
+      .download-card {
+        padding: 32px 24px;
+      }
+
+      .download-info {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .version-item-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .version-item-right {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .version-item-download {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span id="version-badge">Version 1.0.0 Available</span>
+          </div>
+          <h1 class="hero-title">Manage Your Catering Business Like a Pro</h1>
+          <p class="hero-subtitle">Create professional reports, manage customers, track events, and grow your catering business with the all-in-one CaterHub app.</p>
+          <div class="hero-buttons">
+            <a href="#download" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download APK
+            </a>
+            <a href="#features" class="btn btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Learn More
+            </a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="phone-mockup">
+            <div class="phone-screen">
+              <div class="phone-logo">C</div>
+              <h2 class="phone-title">CaterHub</h2>
+              <p class="phone-subtitle">Catering Made Easy</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <h3>100+</h3>
+          <p>Menu Items</p>
+        </div>
+        <div class="stat-item">
+          <h3>PDF</h3>
+          <p>Report Export</p>
+        </div>
+        <div class="stat-item">
+          <h3>Free</h3>
+          <p>To Download</p>
+        </div>
+        <div class="stat-item">
+          <h3>24/7</h3>
+          <p>Access Anywhere</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Features</span>
+        <h2 class="section-title">Everything You Need to Succeed</h2>
+        <p class="section-desc">Powerful tools designed specifically for catering businesses</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3>Professional Reports</h3>
+          <p>Create beautiful, detailed catering reports with itemized lists, quantities, and pricing.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3>Customer Management</h3>
+          <p>Keep track of all your customers, their preferences, and contact information in one place.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3>Event Calendar</h3>
+          <p>Never miss an event with our built-in calendar and smart reminder notifications.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </div>
+          <h3>Easy Sharing</h3>
+          <p>Share reports instantly via WhatsApp, email, or generate professional PDF documents.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+            </svg>
+          </div>
+          <h3>Templates</h3>
+          <p>Save time with reusable templates for your most common catering packages and menus.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3>Secure & Private</h3>
+          <p>Your data is encrypted and stored securely. Only you have access to your business information.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section class="download" id="download">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" style="color: rgba(255,255,255,0.8);">Download</span>
+        <h2 class="section-title">Get CaterHub Now</h2>
+        <p class="section-desc">Download the app and start managing your catering business today</p>
+      </div>
+      <div class="download-card">
+        <div class="download-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <a id="download-btn" href="https://drive.google.com/uc?export=download&id=1UurJZfYP9HMTFFqp04W4H-lUTMUq51-n" class="btn download-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download for Android
+        </a>
+        <div class="download-info">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="download-version">Version 1.0.0</span>
+          </span>
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z" />
+            </svg>
+            <span id="download-size">~6 MB</span>
+          </span>
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Android 6.0+
+          </span>
+        </div>
+
+        <!-- Release Notes (dynamically shown) -->
+        <div id="release-notes-section" class="release-notes-section">
+          <h4>What's New</h4>
+          <p id="release-notes"></p>
+        </div>
+
+        <div class="install-steps">
+          <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Installation Steps
+          </h4>
+          <ol class="steps-list">
+            <li>Download the APK file</li>
+            <li>Open the downloaded file</li>
+            <li>Allow "Install from unknown sources" if prompted</li>
+            <li>Tap Install and wait for completion</li>
+            <li>Open CaterHub and enjoy!</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Version History (dynamically shown) -->
+      <div id="version-history" class="version-history">
+        <div class="version-history-header">
+          <h3>All Versions</h3>
+          <p>Download previous versions of CaterHub</p>
+        </div>
+        <div id="version-list" class="version-list">
+          <!-- Versions will be loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="mailto:caterhub.team@gmail.com">Contact Support</a>
+      </div>
+      <p>&copy; 2026 CaterHub. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

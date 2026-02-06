@@ -4,7 +4,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    mode: 'system' as ThemeMode,
+    mode: 'light' as ThemeMode, // Default to light mode
     systemPrefersDark: false,
   }),
 
@@ -41,10 +41,13 @@ export const useThemeStore = defineStore('theme', {
           }
         });
 
-        // Load saved preference
+        // Load saved preference, default to light mode if not set
         const saved = localStorage.getItem('theme-mode') as ThemeMode | null;
         if (saved && ['light', 'dark', 'system'].includes(saved)) {
           this.mode = saved;
+        } else {
+          // Default to light mode for new users
+          this.mode = 'light';
         }
 
         this.applyTheme();

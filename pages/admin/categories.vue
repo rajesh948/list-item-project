@@ -55,38 +55,54 @@
     <!-- Add/Edit Category Modal -->
     <ion-modal :is-open="isModalOpen" @didDismiss="closeModal" class="category-modal">
       <div class="modal-container">
-        <div class="modal-header">
-          <h2>{{ isEditMode ? 'Edit Category' : 'Add New Category' }}</h2>
-          <button class="modal-close-btn" @click="closeModal">
+        <!-- Modern Header -->
+        <div class="modal-header-modern">
+          <div class="header-content">
+            <div class="header-icon-wrapper">
+              <ion-icon :icon="isEditMode ? createOutline : folderOutline"></ion-icon>
+            </div>
+            <div class="header-text">
+              <h2>{{ isEditMode ? 'Edit Category' : 'Add New Category' }}</h2>
+              <p>{{ isEditMode ? 'Update the category name' : 'Create a new category for your menu' }}</p>
+            </div>
+          </div>
+          <button class="close-btn-modern" @click="closeModal">
             <ion-icon :icon="closeOutline"></ion-icon>
           </button>
         </div>
 
-        <div class="modal-body">
-          <div class="form-field">
-            <label class="field-label">
-              <ion-icon :icon="folderOutline"></ion-icon>
-              Category Name
-            </label>
-            <input
-              v-model="categoryForm.name"
-              type="text"
-              class="field-input"
-              placeholder="Enter category name"
-            />
+        <!-- Modern Body -->
+        <div class="modal-body-modern">
+          <div class="form-card">
+            <div class="input-group">
+              <div class="input-label">
+                <ion-icon :icon="textOutline"></ion-icon>
+                <span>Category Name</span>
+              </div>
+              <div class="input-wrapper">
+                <input
+                  v-model="categoryForm.name"
+                  type="text"
+                  class="modern-input"
+                  placeholder="Enter category name"
+                  @keydown.enter="saveCategory"
+                />
+              </div>
+            </div>
           </div>
 
-          <div v-if="errorMessage" class="error-alert">
+          <div v-if="errorMessage" class="error-alert-modern">
             <ion-icon :icon="alertCircleOutline"></ion-icon>
             <span>{{ errorMessage }}</span>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="cancel-btn" @click="closeModal">Cancel</button>
-          <button class="submit-btn" @click="saveCategory">
+        <!-- Modern Footer -->
+        <div class="modal-footer-modern">
+          <button class="cancel-btn-modern" @click="closeModal">Cancel</button>
+          <button class="submit-btn-modern" @click="saveCategory">
             <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-            {{ isEditMode ? 'Update Category' : 'Add Category' }}
+            {{ isEditMode ? 'Update' : 'Add Category' }}
           </button>
         </div>
       </div>
@@ -139,6 +155,7 @@ import {
   folderOutline,
   alertCircleOutline,
   checkmarkCircleOutline,
+  textOutline,
 } from 'ionicons/icons';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '~/firebase';
@@ -473,136 +490,186 @@ const deleteCategory = async () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: white;
+  background: #f8f9fa;
 }
 
-.modal-header {
+/* Modern Modal Header */
+.modal-header-modern {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.header-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border-radius: 14px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.modal-header h2 {
+.header-icon-wrapper ion-icon {
+  font-size: 24px;
+  color: #667eea;
+}
+
+.header-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.header-text p {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  color: #888;
 }
 
-.modal-close-btn {
+.close-btn-modern {
   width: 36px;
   height: 36px;
   border: none;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  color: white;
+  background: #f5f5f5;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+.close-btn-modern:hover {
+  background: #e8e8e8;
 }
 
-.modal-close-btn ion-icon {
+.close-btn-modern ion-icon {
   font-size: 20px;
+  color: #666;
 }
 
-.modal-body {
+/* Modern Modal Body */
+.modal-body-modern {
   flex: 1;
-  padding: 24px;
+  padding: 20px;
   overflow-y: auto;
 }
 
-.form-field {
-  margin-bottom: 20px;
+.form-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  padding: 20px;
 }
 
-.field-label {
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 10px;
 }
 
-.field-label ion-icon {
+.input-label ion-icon {
   font-size: 18px;
   color: #667eea;
 }
 
-.field-input {
+.input-label span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.modern-input {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid #e8e8e8;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 0.95rem;
   color: #333;
   background: #fafafa;
   transition: all 0.2s;
   outline: none;
 }
 
-.field-input:focus {
+.modern-input:focus {
   border-color: #667eea;
   background: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.field-input::placeholder {
-  color: #999;
+.modern-input::placeholder {
+  color: #aaa;
 }
 
-.error-alert {
+.error-alert-modern {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff5f5;
-  border: 1px solid #feb2b2;
-  color: #c53030;
+  margin-top: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
 }
 
-.error-alert ion-icon {
+.error-alert-modern ion-icon {
   font-size: 20px;
   flex-shrink: 0;
 }
 
-.modal-footer {
+/* Modern Modal Footer */
+.modal-footer-modern {
   display: flex;
   gap: 12px;
-  padding: 16px 24px 24px;
-  border-top: 1px solid #f0f0f0;
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #e8e8e8;
 }
 
-.modal-footer .cancel-btn {
+.cancel-btn-modern {
   flex: 1;
   padding: 14px;
   border: 2px solid #e8e8e8;
   background: white;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #666;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.modal-footer .cancel-btn:hover {
+.cancel-btn-modern:hover {
   background: #f5f5f5;
   border-color: #ddd;
 }
 
-.modal-footer .submit-btn {
+.submit-btn-modern {
   flex: 1.5;
   display: flex;
   align-items: center;
@@ -613,18 +680,19 @@ const deleteCategory = async () => {
   border: none;
   border-radius: 12px;
   color: white;
-  font-size: 15px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.modal-footer .submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+.submit-btn-modern:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
-.modal-footer .submit-btn ion-icon {
+.submit-btn-modern ion-icon {
   font-size: 18px;
 }
 
@@ -780,19 +848,66 @@ const deleteCategory = async () => {
   .action-btn ion-icon {
     font-size: 16px;
   }
+
+  /* Modal Mobile Styles */
+  .modal-header-modern {
+    padding: 16px;
+  }
+
+  .header-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .header-icon-wrapper ion-icon {
+    font-size: 20px;
+  }
+
+  .header-text h2 {
+    font-size: 1rem;
+  }
+
+  .header-text p {
+    font-size: 0.8rem;
+  }
+
+  .modal-body-modern {
+    padding: 16px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  .modern-input {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  .modal-footer-modern {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .cancel-btn-modern,
+  .submit-btn-modern {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
 }
 </style>
 
 <style>
 /* Non-scoped styles for modal */
 .category-modal {
-  --width: 90%;
+  --width: 100%;
   --max-width: 450px;
   --height: auto;
-  --min-height: 300px;
+  --min-height: 320px;
   --max-height: 90vh;
-  --border-radius: 16px;
-  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  --border-radius: 20px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .category-modal::part(content) {
@@ -800,15 +915,25 @@ const deleteCategory = async () => {
 }
 
 .delete-modal {
-  --width: 90%;
+  --width: 100%;
   --max-width: 420px;
   --height: auto;
   --min-height: 340px;
-  --border-radius: 16px;
-  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  --max-height: 90vh;
+  --border-radius: 20px;
+  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .delete-modal::part(content) {
   margin: auto;
+}
+
+@media (max-width: 540px) {
+  .category-modal,
+  .delete-modal {
+    --max-width: 100%;
+    --max-height: 100%;
+    --border-radius: 0;
+  }
 }
 </style>

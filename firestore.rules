@@ -155,6 +155,15 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // App Config collection rules (PUBLIC - for app update check)
+    match /appConfig/{docId} {
+      // Allow read for ANYONE (no authentication required - needed for update check)
+      allow read: if true;
+
+      // Allow write only for admins
+      allow write: if isAdmin();
+    }
+
     // Report Templates collection rules (Premium feature)
     match /templates/{templateId} {
       // Allow read if authenticated and either admin or own template

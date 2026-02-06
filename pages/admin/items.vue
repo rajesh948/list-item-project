@@ -130,16 +130,52 @@
               <ion-icon :icon="folderOutline"></ion-icon>
               {{ isEditMode ? 'Change Category' : 'Select Category' }}
             </label>
-            <div class="select-wrapper">
-              <select v-model="itemForm.categoryId" class="field-select">
-                <option value="">Choose a category</option>
-                <option v-for="category in data" :key="category.id" :value="category.id">
-                  {{ category.name }}
-                </option>
-              </select>
-              <ion-icon :icon="chevronDownOutline" class="select-arrow"></ion-icon>
+            <div class="custom-select-wrapper" @click="toggleModalDropdown">
+              <div class="custom-select-display" :class="{ 'has-value': itemForm.categoryId }">
+                <span v-if="itemForm.categoryId">{{ getSelectedCategoryNameForForm }}</span>
+                <span v-else class="placeholder">Choose a category</span>
+                <ion-icon :icon="chevronDownOutline" class="select-arrow" :class="{ rotated: isModalDropdownOpen }"></ion-icon>
+              </div>
+
+              <!-- Custom Dropdown -->
+              <div v-if="isModalDropdownOpen" class="custom-select-dropdown">
+                <div class="dropdown-search">
+                  <ion-icon :icon="searchOutline" class="dropdown-search-icon"></ion-icon>
+                  <input
+                    v-model="categorySearchQuery"
+                    type="text"
+                    class="dropdown-search-input"
+                    placeholder="Search categories..."
+                    @click.stop
+                  />
+                </div>
+                <div class="dropdown-options">
+                  <div
+                    v-for="category in filteredCategoriesForDropdown"
+                    :key="category.id"
+                    class="dropdown-option"
+                    :class="{ selected: itemForm.categoryId === category.id }"
+                    @click.stop="selectCategory(category)"
+                  >
+                    <div class="option-icon">
+                      <ion-icon :icon="folderOutline"></ion-icon>
+                    </div>
+                    <div class="option-content">
+                      <span class="option-name">{{ category.name }}</span>
+                      <span class="option-count">{{ category.items?.length || 0 }} items</span>
+                    </div>
+                    <ion-icon v-if="itemForm.categoryId === category.id" :icon="checkmarkOutline" class="option-check"></ion-icon>
+                  </div>
+                  <div v-if="filteredCategoriesForDropdown.length === 0" class="dropdown-empty">
+                    No categories found
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Dropdown Overlay for Modal -->
+          <div v-if="isModalDropdownOpen" class="modal-dropdown-overlay" @click="isModalDropdownOpen = false"></div>
 
           <div v-if="errorMessage" class="error-alert">
             <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -214,6 +250,7 @@ import {
   chevronDownOutline,
   searchOutline,
   closeCircleOutline,
+  checkmarkOutline,
 } from 'ionicons/icons';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '~/firebase';
@@ -234,6 +271,8 @@ const selectedCategoryFilter = ref('all');
 const searchQuery = ref('');
 const itemToDelete = ref<any>(null);
 const isCategoryDropdownOpen = ref(false);
+const isModalDropdownOpen = ref(false);
+const categorySearchQuery = ref('');
 
 const itemForm = ref({
   id: null as number | null,
@@ -296,6 +335,32 @@ const selectCategoryOption = (value: string) => {
   isCategoryDropdownOpen.value = false;
 };
 
+// Modal dropdown functions
+const getSelectedCategoryNameForForm = computed(() => {
+  if (!itemForm.value.categoryId) return '';
+  const category = data.value.find((c: any) => c.id === itemForm.value.categoryId);
+  return category?.name || '';
+});
+
+const filteredCategoriesForDropdown = computed(() => {
+  if (!categorySearchQuery.value.trim()) return data.value;
+  const query = categorySearchQuery.value.toLowerCase().trim();
+  return data.value.filter((c: any) => c.name.toLowerCase().includes(query));
+});
+
+const toggleModalDropdown = () => {
+  isModalDropdownOpen.value = !isModalDropdownOpen.value;
+  if (isModalDropdownOpen.value) {
+    categorySearchQuery.value = '';
+  }
+};
+
+const selectCategory = (category: any) => {
+  itemForm.value.categoryId = category.id;
+  isModalDropdownOpen.value = false;
+  categorySearchQuery.value = '';
+};
+
 const openAddItemModal = () => {
   isEditMode.value = false;
   itemForm.value = { id: null, categoryId: null, name: '', image: null };
@@ -317,6 +382,8 @@ const editItem = (item: any) => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  isModalDropdownOpen.value = false;
+  categorySearchQuery.value = '';
   itemForm.value = { id: null, categoryId: null, name: '', image: null };
   errorMessage.value = '';
 };
@@ -948,39 +1015,184 @@ const deleteItem = async () => {
   color: #999;
 }
 
-.select-wrapper {
+/* Custom Select Dropdown */
+.custom-select-wrapper {
   position: relative;
 }
 
-.field-select {
+.custom-select-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: 14px 44px 14px 16px;
+  padding: 14px 16px;
   border: 2px solid #e8e8e8;
   border-radius: 12px;
   font-size: 15px;
   color: #333;
   background: #fafafa;
   transition: all 0.2s;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
   cursor: pointer;
 }
 
-.field-select:focus {
+.custom-select-display:hover {
   border-color: #667eea;
-  background: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.select-arrow {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+.custom-select-display.has-value {
+  background: white;
+}
+
+.custom-select-display .placeholder {
+  color: #999;
+}
+
+.custom-select-display .select-arrow {
   font-size: 18px;
   color: #888;
-  pointer-events: none;
+  transition: transform 0.2s;
+}
+
+.custom-select-display .select-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.dropdown-search {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.dropdown-search-icon {
+  font-size: 18px;
+  color: #888;
+  margin-right: 10px;
+}
+
+.dropdown-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+}
+
+.dropdown-search-input::placeholder {
+  color: #aaa;
+}
+
+.dropdown-options {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-option:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-option.selected {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.option-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.option-icon ion-icon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.option-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.option-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.option-count {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.option-check {
+  font-size: 20px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.dropdown-empty {
+  padding: 24px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Modal Dropdown Overlay */
+.modal-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+/* Dropdown Scrollbar */
+.dropdown-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-options::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.dropdown-options::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
 }
 
 .error-alert {
